@@ -31,5 +31,21 @@ public class Room(LocalizedText name, LocalizedText description, int weight)
 
     public virtual void OpenDoor(string name, string key) { }
 
-    public virtual void BreakThing(string name, string weapon) { }
+    public virtual void BreakThing(string name, string weapon)
+    {
+        if (Get(name) is not Hidden hidden)
+        {
+            Output(Localizer.Msg("NotBreakable"));
+            return;
+        }
+        if (!hidden.TryBreak(weapon))
+        {
+            Output(Localizer.Msg("Useless"));
+            return;
+        }
+        Output(Localizer.Msg("Crash"));
+        var idx = Children.IndexOf(hidden);
+        Children.RemoveAt(idx);
+        Children.Insert(idx, hidden.HiddenChild);
+    }
 }
