@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Fortaleza/Fortaleza.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Fortaleza.Tests/Fortaleza.Tests.csproj" />
+  </Folder>
+</Solution>
