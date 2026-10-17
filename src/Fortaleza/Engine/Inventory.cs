@@ -13,22 +13,17 @@ public class Inventory()
 
     public override void Describe()
     {
-        if (IsEmpty)
-        {
-            Output(Localizer.Msg("BagEmpty"));
-            return;
-        }
-        Output(Localizer.Msg("BagContains"));
         foreach (var child in Children)
-            Output($"  {child.Name.Get()} ({child.Weight})");
+            Output($"{child.Name.Get()} ({child.Weight})");
+
+        if (IsEmpty) return;
 
         var remaining = LWeight - Heaviness;
         if (remaining == 0)
             Output(Localizer.Msg("CannotCarryMore"));
-        else if (remaining <= 5)
+        else if (remaining == 1)
             Output(Localizer.Msg("AlmostFull"));
         else
-            Output(Localizer.Msg("CouldCarryMore") + remaining
-                + (remaining == 1 ? Localizer.Msg("BagUnit") : Localizer.Msg("BagUnits")));
+            Output(Localizer.Msg("CouldCarryMore") + remaining + Localizer.Msg("MoreBags"));
     }
 }

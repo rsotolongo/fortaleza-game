@@ -5,7 +5,7 @@ namespace Fortaleza.Engine;
 public class Hidden(
     LocalizedText name, LocalizedText description,
     string breakerName, Thing hiddenChild)
-    : Thing(name, description, 0)
+    : Thing(name, description, Inventory.LWeight + 1)
 {
     public string BreakerName { get; } = breakerName;
     public Thing HiddenChild { get; } = hiddenChild;

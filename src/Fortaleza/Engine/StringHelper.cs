@@ -20,4 +20,24 @@ public static class StringHelper
         }
         return new string(chars).ToUpperInvariant();
     }
+
+    public static bool ContainsAllWords(string name, string query)
+    {
+        var nameWords = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var queryWords = query.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var match = 0;
+        var i = 0;
+        while (match < queryWords.Length && i < nameWords.Length)
+        {
+            var j = 0;
+            while (match < queryWords.Length && j < queryWords.Length)
+            {
+                if (nameWords[i] == queryWords[j])
+                    match++;
+                j++;
+            }
+            i++;
+        }
+        return queryWords.Length > 0 && match >= queryWords.Length;
+    }
 }

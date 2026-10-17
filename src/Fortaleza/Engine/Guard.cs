@@ -5,7 +5,7 @@ namespace Fortaleza.Engine;
 public class Guard(
     LocalizedText name, LocalizedText description,
     LocalizedText confession, string lethalWeapon)
-    : LivingThing(name, description, 0)
+    : LivingThing(name, description, Inventory.LWeight + 1)
 {
     public LocalizedText Confession { get; } = confession;
     public string LethalWeapon { get; } = lethalWeapon;

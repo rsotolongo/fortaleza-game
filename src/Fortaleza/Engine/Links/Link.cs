@@ -5,12 +5,14 @@ namespace Fortaleza.Engine.Links;
 public class Link(
     LocalizedText name, LocalizedText description,
     LocalizedText passComment, string key, Room destination)
-    : Thing(name, description, 0)
+    : Thing(name, description, Inventory.LWeight + 1)
 {
+    public const string OpenDoor = "\0\0\0";
+
     public Room Destination { get; } = destination;
-    public string Key { get; } = key;
+    public string Key { get; } = key == OpenDoor ? "" : key;
     public LocalizedText PassComment { get; } = passComment;
-    public bool IsOpen { get; protected set; } = string.IsNullOrEmpty(key);
+    public bool IsOpen { get; protected set; } = key == OpenDoor;
 
     public virtual bool TryOpen(string key)
     {

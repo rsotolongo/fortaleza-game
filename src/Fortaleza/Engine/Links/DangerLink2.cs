@@ -12,10 +12,7 @@ public class DangerLink2(
 
     public override void Pass(Inventory bag)
     {
-        var normalized = StringHelper.Normalize(ForbiddenItem);
-        var hasForbidden = bag.Children.Any(
-            t => StringHelper.Normalize(t.Name.Es) == normalized
-              || StringHelper.Normalize(t.Name.En) == normalized);
+        var hasForbidden = bag.Get(ForbiddenItem) is not null;
 
         if (hasForbidden)
         {

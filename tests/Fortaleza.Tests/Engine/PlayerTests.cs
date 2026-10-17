@@ -158,7 +158,7 @@ public class PlayerTests
     public void Walk_DangerLinkWithoutTalisman_KillsPlayer()
     {
         var (player, room) = SetupPlayerInRoom();
-        room.Children.Add(new DangerLink(new("Traquea", "Trachea"), new("", ""), new("", ""), "",
+        room.Children.Add(new DangerLink(new("Traquea", "Trachea"), new("", ""), new("", ""), Link.OpenDoor,
             "Talismán de aire", MakeRoom(), () => player.Die("")));
 
         player.Walk("Traquea");

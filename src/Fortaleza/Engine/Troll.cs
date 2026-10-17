@@ -5,7 +5,7 @@ namespace Fortaleza.Engine;
 public class Troll(
     LocalizedText name, LocalizedText description, string likeness,
     LocalizedText hiData, LocalizedText loData)
-    : LivingThing(name, description, 0)
+    : LivingThing(name, description, 100)
 {
     public string Likeness { get; } = likeness;
     public LocalizedText HiData { get; } = hiData;

@@ -12,10 +12,7 @@ public class DangerLink(
 
     public override void Pass(Inventory bag)
     {
-        var normalized = StringHelper.Normalize(TalismanName);
-        var hasTalisman = bag.Children.Any(
-            t => StringHelper.Normalize(t.Name.Es) == normalized
-              || StringHelper.Normalize(t.Name.En) == normalized);
+        var hasTalisman = bag.Get(TalismanName) is not null;
 
         if (hasTalisman)
             Output(PassComment.Get());

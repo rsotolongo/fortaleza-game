@@ -225,6 +225,12 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
     public void Inventory()
     {
         if (Dead) return;
+        if (Bag.IsEmpty)
+        {
+            Output(Localizer.Msg("BagEmpty"));
+            return;
+        }
+        Output(Localizer.Msg("BagContains"));
         Bag.Describe();
     }
 

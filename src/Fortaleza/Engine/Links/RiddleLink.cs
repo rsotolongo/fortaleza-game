@@ -20,19 +20,14 @@ public class RiddleLink : Link
 
     public override bool TryOpen(string key)
     {
-        if (string.IsNullOrEmpty(key))
-        {
-            Output(Localizer.Msg("SolveRiddle") + " " + Riddle.Get());
-            Output(Localizer.Msg("SolveRiddleHint"));
-            return false;
-        }
         if (StringHelper.Normalize(key) == StringHelper.Normalize(Answer))
         {
             IsOpen = true;
             Output(Localizer.Msg("RiddleSolved"));
             return true;
         }
-        Output(Localizer.Msg("WrongAnswer"));
+        Output(Localizer.Msg(key == "" ? "SolveRiddle" : "WrongAnswer"));
+        Output(Riddle.Get());
         return false;
     }
 

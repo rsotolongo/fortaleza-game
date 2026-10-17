@@ -46,7 +46,7 @@ public class LinkTests
     public void Link_GetDest_ReturnsRoomWhenOpen()
     {
         var dest = MakeRoom();
-        var link = new Link(new("Puerta", "Door"), new("", ""), new("", ""), "", dest);
+        var link = new Link(new("Puerta", "Door"), new("", ""), new("", ""), Link.OpenDoor, dest);
         Assert.Same(dest, link.GetDest());
     }
 

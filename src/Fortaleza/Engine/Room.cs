@@ -10,10 +10,13 @@ public class Room(LocalizedText name, LocalizedText description, int weight)
 
     public Thing? Get(string name)
     {
-        var normalized = StringHelper.Normalize(name);
+        var query = StringHelper.Normalize(name);
         return Children.FirstOrDefault(
-            t => StringHelper.Normalize(t.Name.Es) == normalized
-              || StringHelper.Normalize(t.Name.En) == normalized);
+                t => StringHelper.Normalize(t.Name.Es) == query
+                  || StringHelper.Normalize(t.Name.En) == query)
+            ?? Children.FirstOrDefault(
+                t => StringHelper.ContainsAllWords(StringHelper.Normalize(t.Name.Es), query)
+                  || StringHelper.ContainsAllWords(StringHelper.Normalize(t.Name.En), query));
     }
 
     public Thing? Take(string name)
