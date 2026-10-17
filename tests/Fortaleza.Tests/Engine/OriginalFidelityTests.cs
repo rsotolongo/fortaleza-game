@@ -102,7 +102,7 @@ public class OriginalFidelityTests
         Console.SetOut(writer);
         try { action(); }
         finally { Console.SetOut(original); }
-        return writer.ToString();
+        return writer.ToString().Replace(Environment.NewLine, " ");
     }
 
     [Theory]

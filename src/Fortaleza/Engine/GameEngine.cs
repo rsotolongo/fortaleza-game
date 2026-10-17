@@ -114,7 +114,7 @@ public abstract class GameEngine(Room startRoom)
     public void ShowPercent()
     {
         var percent = _rooms.Count == 0 ? 0 : Player.VisitCount * 100 / _rooms.Count;
-        Player.Output(percent + Localizer.Msg("PercentVisited"));
+        Player.Output(Localizer.Msg("Advanced") + percent + "%");
     }
 
     protected virtual string? ReadLine() => Console.ReadLine();

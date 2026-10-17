@@ -35,36 +35,69 @@ public class Room(LocalizedText name, LocalizedText description, int weight)
 
     public virtual void OpenDoor(string name, string key)
     {
-        if (Get(name) is not Link link)
+        var thing = Get(name);
+        if (thing is null)
+        {
+            Output(name != ""
+                ? Localizer.Msg("CantDo") + " " + Localizer.Msg("ThereIsNo") + name + Localizer.Msg("InTheRoom")
+                : Localizer.Msg("Complete"));
+            return;
+        }
+        if (thing is not Link link)
         {
             Output(Localizer.Msg("CantDo"));
             return;
         }
-        if (!string.IsNullOrEmpty(key))
-            Output(Localizer.Msg("MagicWords") + " " + key);
+        if (link.IsOpen)
+        {
+            Output(Localizer.Msg("AlreadyOpen"));
+            return;
+        }
         if (link.TryOpen(key))
+        {
+            if (link.Destination.GetType() == typeof(Room))
+            {
+                var twin = link.Destination.Get(name);
+                if (twin is null)
+                    Output(Localizer.Msg("DoorWarning"));
+                else if (twin is Link twinLink)
+                    twinLink.TryOpen(key);
+            }
             Output(Localizer.Msg("Ok"));
-        else if (string.IsNullOrEmpty(key))
-            Output(Localizer.Msg("NeedPassword"));
-        else
-            Output(key + Localizer.Msg("WrongPassword"));
+        }
+        else if (link is not RiddleLink)
+        {
+            Output(Localizer.Msg("TryOpenFail"));
+            Output(key == ""
+                ? Localizer.Msg("NeedPassword")
+                : "\"" + key + "\"" + Localizer.Msg("WrongPassword"));
+        }
     }
 
     public virtual void BreakThing(string name, string weapon)
     {
-        if (Get(name) is not Hidden hidden)
+        var thing = Get(name);
+        if (thing is null)
+        {
+            Output(name != ""
+                ? Localizer.Msg("CantDo") + " " + Localizer.Msg("ThereIsNo") + name + Localizer.Msg("InTheRoom")
+                : Localizer.Msg("Complete"));
+            return;
+        }
+        if (thing is not Hidden hidden)
         {
             Output(Localizer.Msg("NotBreakable"));
             return;
         }
         if (!hidden.TryBreak(weapon))
         {
-            Output(Localizer.Msg("Useless"));
+            Output(Localizer.Msg("CantBreak"));
             return;
         }
-        Output(Localizer.Msg("Crash"));
         var idx = Children.IndexOf(hidden);
         Children.RemoveAt(idx);
         Children.Insert(idx, hidden.HiddenChild);
+        Output(Localizer.Msg("Crash"));
+        Output(Localizer.Msg("Surprise"));
     }
 }

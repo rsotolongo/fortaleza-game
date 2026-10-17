@@ -11,5 +11,7 @@ public class Hidden(
     public Thing HiddenChild { get; } = hiddenChild;
 
     public bool TryBreak(string weaponName) =>
-        StringHelper.Normalize(weaponName) == StringHelper.Normalize(BreakerName);
+        BreakerName == ""
+        || StringHelper.ContainsAllWords(
+            StringHelper.Normalize(BreakerName), StringHelper.Normalize(weaponName));
 }

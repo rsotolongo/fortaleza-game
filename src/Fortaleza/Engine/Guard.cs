@@ -12,27 +12,37 @@ public class Guard(
 
     public override bool Die(string weapon)
     {
-        if (string.IsNullOrEmpty(weapon)
-            || StringHelper.Normalize(weapon) != StringHelper.Normalize(LethalWeapon))
+        if (StringHelper.ContainsAllWords(
+                StringHelper.Normalize(LethalWeapon), StringHelper.Normalize(weapon)))
+        {
+            Output(Confession.Get());
+            base.Die(weapon);
+        }
+        else
         {
             Output(Localizer.Msg("Useless"));
-            return false;
         }
-        Output(Confession.Get());
-        Dead = true;
-        return true;
+        return Dead;
     }
 }
 
 public class Daughter(
     LocalizedText name, LocalizedText description,
-    LocalizedText confession, string weapon)
+    LocalizedText confession, string weapon, Action killPlayer)
     : Guard(name, description, confession, weapon)
 {
-    public override bool Die(string _)
+    public override bool Die(string weapon)
     {
-        Dead = true;
-        Output(Confession.Get());
-        return true;
+        if (StringHelper.Normalize(weapon) == StringHelper.Normalize(LethalWeapon))
+        {
+            Output(Confession.Get());
+            Dead = true;
+        }
+        else
+        {
+            Output(Localizer.Msg("DaughterFail"));
+            killPlayer();
+        }
+        return Dead;
     }
 }

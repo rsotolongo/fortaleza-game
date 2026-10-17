@@ -122,6 +122,11 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
     public void OpenDoor(string door, string key)
     {
         if (Dead) return;
+        if (key != "")
+        {
+            Output(Localizer.Msg("MagicWords"));
+            Output(key + "!!!");
+        }
         CurrentRoom.OpenDoor(door, key);
     }
 

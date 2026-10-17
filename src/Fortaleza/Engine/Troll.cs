@@ -16,14 +16,13 @@ public class Troll(
 
     public override void Accept(Item gift)
     {
-        if (StringHelper.Normalize(gift.Name.Es) == StringHelper.Normalize(Likeness))
-        {
-            Happy = true;
-            Output(Localizer.Msg("VeryThanks"));
-        }
-        else
-        {
-            Output(Localizer.Msg("CoolThanks"));
-        }
+        Happy = StringHelper.Normalize(gift.Name.Es) == StringHelper.Normalize(Likeness);
+        Output(Localizer.Msg(Happy ? "VeryThanks" : "CoolThanks"));
+    }
+
+    public override bool Die(string weapon)
+    {
+        Output(Localizer.Msg("Ahhhh"));
+        return base.Die(weapon);
     }
 }
