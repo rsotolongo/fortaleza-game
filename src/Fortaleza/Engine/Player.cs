@@ -86,7 +86,11 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
 
     public void LeaveAll()
     {
-        if (Dead) return;
+        if (Bag.IsEmpty)
+        {
+            Output(Localizer.Msg("BagEmpty"));
+            return;
+        }
         CurrentRoom.Children.AddRange(Bag.Children);
         Bag.Children.Clear();
         Output(Localizer.Msg("DropAll"));
@@ -213,14 +217,25 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
     {
         if (Bag.Get("Balanza") is null)
         {
-            Output(Localizer.Msg("CantDo"));
+            Output(Localizer.Msg("NoScale"));
             return;
         }
         var thing = Bag.Get(what) ?? CurrentRoom.Get(what);
-        if (thing is not Item item || item.Weight > Engine.Inventory.LWeight
-            || StringHelper.Normalize(item.Name.Es) == "balanza")
+        if (thing is null)
         {
-            Output(Localizer.Msg("CantDo"));
+            Output(what == ""
+                ? Localizer.Msg("Complete")
+                : Localizer.Msg("WeighThereIsNo") + what + Localizer.Msg("WeighNotHere"));
+            return;
+        }
+        if (thing is not Item item || item.Weight > Engine.Inventory.LWeight)
+        {
+            Output(Localizer.Msg("WeighCrazy"));
+            return;
+        }
+        if (StringHelper.Normalize(item.Name.Es) == "BALANZA")
+        {
+            Output(Localizer.Msg("WeighSelf"));
             return;
         }
         Output(Localizer.Msg("YouWeigh") + item.Weight

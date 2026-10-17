@@ -5,8 +5,12 @@ namespace Fortaleza.Engine;
 
 public abstract class GameEngine(Room startRoom)
 {
+    public const string DefaultTrackFile = "TRAVEL.TRK";
+
     private readonly List<Room> _rooms = [];
     private readonly List<string> _track = [];
+    private string _wishBack = "";
+    private bool _executing;
     private bool _quit;
 
     public Player Player { get; } = new(startRoom);
@@ -24,28 +28,32 @@ public abstract class GameEngine(Room startRoom)
 
     public void AskPlayer()
     {
+        Player.Output("");
         Player.Output(Localizer.Msg("WhatToDo"));
         var line = ReadLine();
         if (line is null)
             _quit = true;
-        Wish = line ?? "";
+        SetWish(line ?? "");
     }
-
-    public void ClearWish() => Wish = "";
 
     public void ProcessCommand(string input)
     {
-        Wish = input;
+        SetWish(input);
         ProcessWish();
     }
 
     public void ProcessWish()
     {
         var cmd = CommandParser.Parse(Wish);
+        var relevant = true;
         switch (cmd.Type)
         {
-            case CommandType.Go: Player.Walk(cmd.Arg1); break;
+            case CommandType.Go:
+                OpenSilently(cmd.Arg1);
+                Player.Walk(cmd.Arg1);
+                break;
             case CommandType.Take: Player.Take(cmd.Arg1); break;
+            case CommandType.TakeAll: Player.Output(Localizer.Msg("TakeOneAtATime")); break;
             case CommandType.Leave: Player.LeaveItem(cmd.Arg1); break;
             case CommandType.LeaveAll: Player.LeaveAll(); break;
             case CommandType.Open: Player.OpenDoor(cmd.Arg1, cmd.Arg2); break;
@@ -54,24 +62,48 @@ public abstract class GameEngine(Room startRoom)
             case CommandType.See: Player.See(cmd.Arg1); break;
             case CommandType.Break: Player.Break(cmd.Arg1, cmd.Arg2); break;
             case CommandType.Ask: Player.Ask(cmd.Arg1); break;
-            case CommandType.Inventory: Player.Inventory(); break;
             case CommandType.Give: Player.Give(cmd.Arg1, cmd.Arg2); break;
-            case CommandType.Quit: _quit = true; break;
-            case CommandType.Save: SaveTrackInteractive(); break;
-            case CommandType.Exec: LoadTrackInteractive(); break;
-            case CommandType.Percent: ShowPercent(); break;
-            case CommandType.Weigh: Player.Weigh(cmd.Arg1); break;
-            case CommandType.Clear: Console.Clear(); break;
-            default: Player.Output(Localizer.Msg("DontUnderstand")); break;
+            case CommandType.Piss: Player.Output(Localizer.Msg("Piss")); break;
+            case CommandType.Clear: Player.Output(Localizer.Msg("Cls")); break;
+            case CommandType.Inventory:
+                Player.Inventory();
+                relevant = false;
+                break;
+            case CommandType.Quit:
+                Player.Die("");
+                relevant = false;
+                break;
+            case CommandType.Weigh:
+                Player.Weigh(cmd.Arg1);
+                relevant = false;
+                break;
+            case CommandType.Exec:
+                LoadTrackInteractive();
+                relevant = false;
+                break;
+            case CommandType.Save:
+                SaveTrackInteractive();
+                relevant = false;
+                break;
+            case CommandType.Percent:
+                ShowPercent();
+                relevant = false;
+                break;
+            default:
+                if (Wish.Trim() != "")
+                    Player.Output(Localizer.Msg("DontUnderstand"));
+                relevant = false;
+                break;
         }
 
-        if (IsTracked(cmd.Type))
-            _track.Add(Wish.Trim());
+        if (relevant && _wishBack != "" && !_executing)
+            _track.Add(_wishBack);
     }
 
     public void SaveTrack(string path)
     {
-        if (_track.Count == 0)
+        if (path == "") return;
+        if (_track.Count <= 1)
         {
             Player.Output(Localizer.Msg("NothingToSave"));
             return;
@@ -80,63 +112,90 @@ public abstract class GameEngine(Room startRoom)
         {
             File.WriteAllLines(path, _track);
         }
-        catch (IOException)
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
             Player.Output(Localizer.Msg("SaveError"));
         }
     }
 
-    public bool LoadTrack(string path)
+    public bool LoadTrack(string path, bool verbose = true)
     {
-        if (!File.Exists(path))
-        {
-            Player.Output(Localizer.Msg("FileNotFound"));
-            return false;
-        }
         var wasVisible = Thing.Visible;
-        Thing.Visible = false;
+        Player.Output(Localizer.Msg("ExecRunning"));
+        if (!verbose)
+            Thing.Visible = false;
         try
         {
-            foreach (var line in File.ReadLines(path))
+            if (path == "") return false;
+            if (!File.Exists(path))
             {
-                if (IsOver) break;
-                if (line.Trim() != "")
-                    ProcessCommand(line);
+                Thing.Visible = true;
+                Player.Output(Localizer.Msg("FileNotFound"));
+                return false;
             }
+
+            var lines = File.ReadLines(path).Where(l => l != "").ToList();
+            _track.Clear();
+            _track.AddRange(lines);
+            _executing = true;
+            foreach (var line in lines)
+            {
+                Player.Output("");
+                Player.Output(" " + line);
+                ProcessCommand(line);
+                if (CheckGoal() || IsOver) break;
+            }
+            return true;
         }
         finally
         {
+            _executing = false;
             Thing.Visible = wasVisible;
         }
-        return true;
     }
 
     public void ShowPercent()
     {
-        var percent = _rooms.Count == 0 ? 0 : Player.VisitCount * 100 / _rooms.Count;
+        var reachable = _rooms.Count - 1;
+        var percent = reachable <= 0
+            ? 0
+            : (int)Math.Round((double)Player.VisitCount / reachable * 100, MidpointRounding.AwayFromZero);
         Player.Output(Localizer.Msg("Advanced") + percent + "%");
     }
 
     protected virtual string? ReadLine() => Console.ReadLine();
 
+    private void SetWish(string input)
+    {
+        Wish = input;
+        if (input != "")
+            _wishBack = input;
+    }
+
+    private void OpenSilently(string door)
+    {
+        var wasVisible = Thing.Visible;
+        Thing.Visible = false;
+        try
+        {
+            Player.OpenDoor(door, "");
+        }
+        finally
+        {
+            Thing.Visible = wasVisible;
+        }
+    }
+
     private void SaveTrackInteractive()
     {
         Player.Output(Localizer.Msg("EnterFileName"));
-        var path = ReadLine();
-        if (!string.IsNullOrWhiteSpace(path))
-            SaveTrack(path.Trim());
+        var path = (ReadLine() ?? "").Trim();
+        SaveTrack(path == "" ? DefaultTrackFile : path);
     }
 
     private void LoadTrackInteractive()
     {
         Player.Output(Localizer.Msg("EnterFileName"));
-        var path = ReadLine();
-        if (!string.IsNullOrWhiteSpace(path))
-            LoadTrack(path.Trim());
+        LoadTrack((ReadLine() ?? "").Trim());
     }
-
-    private static bool IsTracked(CommandType type) => type is not (
-        CommandType.Look or CommandType.See or CommandType.Inventory or CommandType.Ask
-        or CommandType.Percent or CommandType.Save or CommandType.Exec or CommandType.Quit
-        or CommandType.Clear or CommandType.Unknown);
 }
