@@ -6,6 +6,7 @@ public class RiddleLink : Link
 {
     public LocalizedText Riddle { get; }
     public string Answer { get; }
+    public string AltAnswer { get; init; } = "";
 
     public RiddleLink(
         LocalizedText name, LocalizedText description,
@@ -20,7 +21,9 @@ public class RiddleLink : Link
 
     public override bool TryOpen(string key)
     {
-        if (StringHelper.Normalize(key) == StringHelper.Normalize(Answer))
+        var typed = StringHelper.Normalize(key);
+        if (typed == StringHelper.Normalize(Answer)
+            || (AltAnswer != "" && typed == StringHelper.Normalize(AltAnswer)))
         {
             IsOpen = true;
             Output(Localizer.Msg("RiddleSolved"));

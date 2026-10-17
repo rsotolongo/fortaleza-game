@@ -1,3 +1,5 @@
+using Fortaleza.Localization;
+
 namespace Fortaleza.Engine;
 
 public static class StringHelper
@@ -20,6 +22,12 @@ public static class StringHelper
         }
         return new string(chars).ToUpperInvariant();
     }
+
+    public static bool ContainsAllWords(LocalizedText name, string query) =>
+        ContainsAllWords(Normalize(name.Es), query) || ContainsAllWords(Normalize(name.En), query);
+
+    public static bool EqualsName(LocalizedText name, string typed) =>
+        Normalize(name.Es) == Normalize(typed) || Normalize(name.En) == Normalize(typed);
 
     public static bool ContainsAllWords(string name, string query)
     {

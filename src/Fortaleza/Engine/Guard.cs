@@ -4,16 +4,15 @@ namespace Fortaleza.Engine;
 
 public class Guard(
     LocalizedText name, LocalizedText description,
-    LocalizedText confession, string lethalWeapon)
+    LocalizedText confession, LocalizedText lethalWeapon)
     : LivingThing(name, description, Inventory.LWeight + 1)
 {
     public LocalizedText Confession { get; } = confession;
-    public string LethalWeapon { get; } = lethalWeapon;
+    public LocalizedText LethalWeapon { get; } = lethalWeapon;
 
     public override bool Die(string weapon)
     {
-        if (StringHelper.ContainsAllWords(
-                StringHelper.Normalize(LethalWeapon), StringHelper.Normalize(weapon)))
+        if (StringHelper.ContainsAllWords(LethalWeapon, StringHelper.Normalize(weapon)))
         {
             Output(Confession.Get());
             base.Die(weapon);
@@ -28,12 +27,12 @@ public class Guard(
 
 public class Daughter(
     LocalizedText name, LocalizedText description,
-    LocalizedText confession, string weapon, Action killPlayer)
+    LocalizedText confession, LocalizedText weapon, Action killPlayer)
     : Guard(name, description, confession, weapon)
 {
     public override bool Die(string weapon)
     {
-        if (StringHelper.Normalize(weapon) == StringHelper.Normalize(LethalWeapon))
+        if (StringHelper.EqualsName(LethalWeapon, weapon))
         {
             Output(Confession.Get());
             Dead = true;

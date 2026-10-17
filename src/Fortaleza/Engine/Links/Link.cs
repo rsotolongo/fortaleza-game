@@ -13,11 +13,14 @@ public class Link(
     public string Key { get; } = key == OpenDoor ? "" : key;
     public LocalizedText PassComment { get; } = passComment;
     public bool IsOpen { get; protected set; } = key == OpenDoor;
+    public string AltKey { get; init; } = "";
 
     public virtual bool TryOpen(string key)
     {
+        var typed = StringHelper.Normalize(key);
         IsOpen = string.IsNullOrEmpty(Key)
-            || StringHelper.Normalize(key) == StringHelper.Normalize(Key);
+            || typed == StringHelper.Normalize(Key)
+            || (AltKey != "" && typed == StringHelper.Normalize(AltKey));
         return IsOpen;
     }
 

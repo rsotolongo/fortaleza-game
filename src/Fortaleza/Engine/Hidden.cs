@@ -4,14 +4,13 @@ namespace Fortaleza.Engine;
 
 public class Hidden(
     LocalizedText name, LocalizedText description,
-    string breakerName, Thing hiddenChild)
+    LocalizedText breakerName, Thing hiddenChild)
     : Thing(name, description, Inventory.LWeight + 1)
 {
-    public string BreakerName { get; } = breakerName;
+    public LocalizedText BreakerName { get; } = breakerName;
     public Thing HiddenChild { get; } = hiddenChild;
 
     public bool TryBreak(string weaponName) =>
-        BreakerName == ""
-        || StringHelper.ContainsAllWords(
-            StringHelper.Normalize(BreakerName), StringHelper.Normalize(weaponName));
+        BreakerName.Es == ""
+        || StringHelper.ContainsAllWords(BreakerName, StringHelper.Normalize(weaponName));
 }
