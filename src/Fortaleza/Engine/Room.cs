@@ -1,3 +1,4 @@
+using Fortaleza.Engine.Links;
 using Fortaleza.Localization;
 
 namespace Fortaleza.Engine;
@@ -29,7 +30,22 @@ public class Room(LocalizedText name, LocalizedText description, int weight)
             Output(child.Name.Get());
     }
 
-    public virtual void OpenDoor(string name, string key) { }
+    public virtual void OpenDoor(string name, string key)
+    {
+        if (Get(name) is not Link link)
+        {
+            Output(Localizer.Msg("CantDo"));
+            return;
+        }
+        if (!string.IsNullOrEmpty(key))
+            Output(Localizer.Msg("MagicWords") + " " + key);
+        if (link.TryOpen(key))
+            Output(Localizer.Msg("Ok"));
+        else if (string.IsNullOrEmpty(key))
+            Output(Localizer.Msg("NeedPassword"));
+        else
+            Output(key + Localizer.Msg("WrongPassword"));
+    }
 
     public virtual void BreakThing(string name, string weapon)
     {
