@@ -4,7 +4,8 @@ const MAX_ENTRIES = 400
 export function loadSession() {
   try {
     const raw = localStorage.getItem(KEY)
-    return raw ? JSON.parse(raw) : null
+    const parsed = raw ? JSON.parse(raw) : null
+    return Array.isArray(parsed?.track) ? parsed : null
   } catch {
     return null
   }

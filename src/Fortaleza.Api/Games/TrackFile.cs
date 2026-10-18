@@ -1,14 +1,12 @@
-using System.Globalization;
 using System.Text;
-using Fortaleza.Parser;
 
 namespace Fortaleza.Api.Games;
 
 public static class TrackFile
 {
     public const int MaxBytes = 64 * 1024;
-    public const int MaxLines = 2000;
-    public const int MaxLineLength = 255;
+    public const int MaxLines = 1000;
+    public const int MaxLineLength = 200;
 
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 
@@ -16,42 +14,26 @@ public static class TrackFile
 
     public static bool TryParse(byte[] bytes, out IReadOnlyList<string> commands, out string error)
     {
-        commands = [];
-        error = "";
-
         var lines = Decode(bytes)
             .Split(['\r', '\n', '\x1a'], StringSplitOptions.RemoveEmptyEntries)
             .Select(line => line.Trim())
             .Where(line => line != "")
             .ToList();
 
-        if (lines.Count == 0)
-            error = "The track file is empty.";
-        else if (lines.Count > MaxLines)
-            error = $"The track file has more than {MaxLines} commands.";
-        else if (lines.Any(line => line.Length > MaxLineLength))
-            error = $"A command is longer than {MaxLineLength} characters.";
-        else if (lines.Any(line => !GameSession.IsPlayable(line)))
-            error = "The track file contains commands that are not allowed.";
-        else
-            commands = lines;
-
+        commands = lines;
+        error = Validate(lines);
         return error == "";
     }
 
-    public static byte[] Encode(IEnumerable<string> commands)
+    public static string Validate(IReadOnlyList<string> commands)
     {
-        var text = string.Concat(commands.Select(command => StripAccents(command) + "\r\n"));
-        return Encoding.ASCII.GetBytes(text);
-    }
-
-    public static string StripAccents(string text)
-    {
-        var builder = new StringBuilder(text.Length);
-        foreach (var c in text.Normalize(NormalizationForm.FormD))
-            if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
-                builder.Append(c);
-        return builder.ToString().Normalize(NormalizationForm.FormC);
+        if (commands.Count > MaxLines)
+            return $"The track has more than {MaxLines} commands.";
+        if (commands.Any(line => line.Length > MaxLineLength || line.Any(char.IsControl)))
+            return $"A command is longer than {MaxLineLength} characters or has control characters.";
+        if (commands.Any(line => !GameRunner.IsPlayable(line)))
+            return "The track contains commands that are not allowed.";
+        return "";
     }
 
     private static string Decode(byte[] bytes)

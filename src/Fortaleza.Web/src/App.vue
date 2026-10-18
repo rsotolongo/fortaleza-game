@@ -28,7 +28,12 @@ function persist() {
 }
 
 function apply(response, echo) {
-  session.value = { id: response.id, game: response.game, language: response.language, status: response.status }
+  session.value = {
+    game: response.game,
+    language: response.language,
+    status: response.status,
+    track: response.track
+  }
   if (echo) entries.value.push({ kind: 'input', text: echo })
   entries.value.push(...toEntries(response.output, texts[response.language].markers))
   persist()
@@ -46,24 +51,10 @@ async function guarded(action) {
   try {
     await action()
   } catch (error) {
-    const language = gameLanguage.value
-    if (error.status === 404) {
-      toast(texts[language].expired)
-      reset()
-    } else if (error.status === 409) {
-      toast(texts[language].nothingToSave)
-    } else {
-      toast(error.message || texts[language].error)
-    }
+    toast(error.message || texts[gameLanguage.value].error)
   } finally {
     busy.value = false
   }
-}
-
-function newGame() {
-  const id = session.value?.id
-  if (id) api.endGame(id).catch(() => {})
-  reset()
 }
 
 const start = (game) =>
@@ -72,31 +63,37 @@ const start = (game) =>
     apply(await api.startGame(game, uiLanguage.value))
   })
 
-const resume = () =>
+function resume() {
+  const saved = stored.value
+  uiLanguage.value = saved.language
+  session.value = { game: saved.game, language: saved.language, status: saved.status, track: saved.track }
+  entries.value = saved.entries
+}
+
+const command = (text) =>
   guarded(async () => {
-    const saved = stored.value
-    const state = await api.getGame(saved.id)
-    uiLanguage.value = state.language
-    session.value = { id: state.id, game: state.game, language: state.language, status: state.status }
-    entries.value = saved.entries
+    const { game, language, track } = session.value
+    apply(await api.play(game, language, track, text), text)
   })
 
-const command = (text) => guarded(async () => apply(await api.sendCommand(session.value.id, text), text))
-
-const save = () =>
-  guarded(async () => {
-    const { blob, fileName } = await api.downloadTrack(session.value.id)
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.download = fileName
-    link.click()
-    URL.revokeObjectURL(link.href)
-    toast(texts[gameLanguage.value].saved)
-  })
+function save() {
+  const track = session.value.track
+  if (!track.length) {
+    toast(texts[gameLanguage.value].nothingToSave)
+    return
+  }
+  const { game, language } = session.value
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(new Blob([api.trackText(track)], { type: "text/plain" }))
+  link.download = `FORT${game}_${language.toUpperCase()}.TRK`
+  link.click()
+  URL.revokeObjectURL(link.href)
+  toast(texts[gameLanguage.value].saved)
+}
 
 const load = (file) =>
   guarded(async () => {
-    const response = await api.uploadTrack(session.value.id, file)
+    const response = await api.loadTrack(session.value.game, session.value.language, file)
     entries.value = []
     apply(response)
     toast(texts[gameLanguage.value].loaded)
@@ -123,7 +120,7 @@ const load = (file) =>
     @command="command"
     @save="save"
     @load="load"
-    @new="newGame"
+    @new="reset"
   />
   <transition name="fade">
     <div v-if="notice" class="toast" role="status">{{ notice }}</div>

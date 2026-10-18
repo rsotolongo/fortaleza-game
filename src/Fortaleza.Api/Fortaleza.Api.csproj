@@ -6,7 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Fortaleza.Api</RootNamespace>
   </PropertyGroup>
+  <ItemGroup Condition="'$(ExcludeWwwroot)' == 'true'">
+    <Content Remove="wwwroot\**" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Fortaleza\Fortaleza.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Amazon.Lambda.AspNetCoreServer.Hosting" Version="2.2.1" />
   </ItemGroup>
 </Project>
