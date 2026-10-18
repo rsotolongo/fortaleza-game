@@ -201,7 +201,7 @@ public static class Fort2Builder
                 1));
         r[3].Children.Add(new Item(
                 new("Piedra de Roseta", "Rosetta Stone"),
-                new("Esta no es la piedra original. Tiene grabadas las siguientes palabras:\n\n\"Fuimos grandes una vez,   │   Fio rne n e,atsd absi\n antes de la Bestia        │   Umsgadsuavz ne el eta\"\n\nOjalá Champollión estuviera aquí.", "Esta no es la piedra original. Tiene grabadas las siguientes palabras:\n\n\"Fuimos grandes una vez,   │   Fio rne n e,atsd absi\n antes de la Bestia        │   Umsgadsuavz ne el eta\"\n\nOjalá Champollión estuviera aquí."),
+                new("Esta no es la piedra original. Tiene grabadas las siguientes palabras:\n\n\"Fuimos grandes una vez,   │   Fio rne n e,atsd absi\n antes de la Bestia        │   Umsgadsuavz ne el eta\"\n\nOjalá Champollión estuviera aquí.", "This is not the original stone. It has the following words engraved:\n\n\"We were great once,       │   W eegetoc,bfr h es\n before the Beast          │   Ewr ra ne eoeteBat\"\n\nIf only Champollion were here."),
                 5));
 
         r[4].Children.Add(new Link(
@@ -1060,7 +1060,7 @@ public static class Fort2Builder
                 new("Marmidosa", "Marmidosa"),
                 new Item(
                     new("Tablilla de Madera", "Wooden tablet"),
-                    new("Tiene las siguientes palabras grabadas:\n\n \"A acsd o oatssn\n  Oadaat lfnodllg\n  Oed aot nl rlaousa\n  Nocae lcat ehépds\n  Lail lgd ut léao\n  Suod qie nl iddd o oats\n  Seod ahj e ehcr ns uro\n  Edl ne aó efmr\"", "Tiene las siguientes palabras grabadas:\n\n \"A acsd o oatssn\n  Oadaat lfnodllg\n  Oed aot nl rlaousa\n  Nocae lcat ehépds\n  Lail lgd ut léao\n  Suod qie nl iddd o oats\n  Seod ahj e ehcr ns uro\n  Edl ne aó efmr\""),
+                    new("Tiene las siguientes palabras grabadas:\n\n \"A acsd o oatssn\n  Oadaat lfnodllg\n  Oed aot nl rlaousa\n  Nocae lcat ehépds\n  Lail lgd ut léao\n  Suod qie nl iddd o oats\n  Seod ahj e ehcr ns uro\n  Edl ne aó efmr\"", "It has the following words engraved:\n\n \"H ak ftehrne r:\n  Imn oea h otmo h ae\n  Hrnsba nteopst hr\n  Oc ntegetro\n  H hsnrn ett h bn\n  Hedo cilsi h iyo h oats\n  Irro h ocrrsduhe nhrro\n  Edlmi h mkn om\""),
                     2)));
         r[44].Children.Add(new RiddleLink(
                 new("Puerta de Cristal", "Crystal door"),

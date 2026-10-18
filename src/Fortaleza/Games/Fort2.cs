@@ -12,8 +12,8 @@ public class Fort2(Room start) : GameEngine(start)
         + " \"Lsmra elshrne o:\n  Rs imnee od e ao\n  Bt ecrnee aoil pet\n  Atrh ne urod usee\n"
         + "  E nloeeiojnoa bn\n  Ecd eaulse acua elshrne\n  Epj el iadlhcieoe ucat\n  Pnuoe lslnd ua\"",
         "It has the following words engraved:\n\n"
-        + " \"Lsmra elshrne o:\n  Rs imnee od e ao\n  Bt ecrnee aoil pet\n  Atrh ne urod usee\n"
-        + "  E nloeeiojnoa bn\n  Ecd eaulse acua elshrne\n  Epj el iadlhcieoe ucat\n  Pnuoe lslnd ua\"");
+        + " \"Temrso h oatsae\n  Daodrs ttebto ftelk\n  Cao' oto h poiesoe\n  Trhi h us om\n"
+        + "  Tecoe ignx oteeoy\n  Sil fAhle ntect ftehrne\n  Mro ftesree' agtri e om\n  Pnuu ntesoigro\"");
 
     public static readonly IReadOnlyList<LocalizedText> Escape =
     [
