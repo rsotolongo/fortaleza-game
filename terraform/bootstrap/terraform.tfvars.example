@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars and adjust.
+
+github_repository = "rsotolongo/fortaleza-dotnet"
+# github_branch               = "master"
+# aws_region                  = "us-east-1"
+# create_github_oidc_provider = false   # set to false if the account already has the GitHub OIDC provider

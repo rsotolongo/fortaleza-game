@@ -136,6 +136,9 @@ the ending. The English tracks only apply to this port; the original has no Engl
 ./terraform/deploy.sh         # Linux, macOS, Git Bash
 ```
 
+Pushes and merges to `master` also deploy automatically through GitHub Actions (OIDC, no stored AWS keys); the
+one-time setup is in [terraform/README.md](terraform/README.md#automatic-deployment-github-actions).
+
 It builds the site, publishes the API for Lambda (arm64) and runs `terraform apply`. Inside the AWS free
 tier this costs about nothing. Custom domain, cost guards and state backend options are in
 [terraform/README.md](terraform/README.md).

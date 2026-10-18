@@ -47,6 +47,54 @@ Copy `terraform.tfvars.example` to `terraform.tfvars`:
 | `domain_name`, `certificate_arn` | Custom domain. The ACM certificate must be in `us-east-1`; then create a DNS CNAME to the `cloudfront_domain_name` output. |
 | `lambda_memory_mb` | 512 by default; more memory only shortens cold starts. |
 
+## Automatic deployment (GitHub Actions)
+
+`.github/workflows/deploy.yml` runs on every push or merge to `master`: it runs the tests, then builds and
+deploys with `deploy.sh`. `ci.yml` runs the tests and `terraform fmt` on pull requests and other branches.
+
+Authentication uses **GitHub OIDC**, so no AWS keys are stored in GitHub: the workflow assumes an IAM role that
+only trusts workflows running on the `master` branch of this repository. The Terraform state lives in
+a versioned, encrypted S3 bucket (runners are ephemeral); locking uses S3 itself, no DynamoDB.
+
+### One-time setup
+
+Run the bootstrap stack once from your machine, with admin-capable AWS credentials:
+
+```bash
+cd terraform/bootstrap
+cp terraform.tfvars.example terraform.tfvars   # set github_repository
+terraform init
+terraform apply
+```
+
+It creates the state bucket, the GitHub OIDC provider (set `create_github_oidc_provider = false` if your account
+already has one) and the deploy role. Then configure the repository with the `github_variables_commands` output:
+
+```bash
+gh variable set AWS_ROLE_ARN     --repo <owner>/<repo> --body "<deploy_role_arn>"
+gh variable set TF_STATE_BUCKET  --repo <owner>/<repo> --body "<state_bucket>"
+gh variable set AWS_REGION       --repo <owner>/<repo> --body "<region>"
+```
+
+Push to `master` (or run the **Deploy** workflow manually) and the site URL appears in the job summary.
+
+Notes:
+
+* The deploy role is deliberately narrow: it manages only the Lambda function, log group and site bucket named
+  `<project_name>-*`, CloudFront and Budgets, and for IAM only the single Lambda role `<project_name>-api`, to which it
+  can attach nothing except `AWSLambdaBasicExecutionRole`. An explicit deny keeps it from touching its own role, so
+  CI cannot grant itself more permissions. If an apply ends in `AccessDenied`, extend
+  `data.aws_iam_policy_document.deploy` in `bootstrap/main.tf` and re-apply the bootstrap from your machine.
+* Workflow actions are pinned to full commit SHAs; Dependabot (`.github/dependabot.yml`) opens weekly PRs to update them.
+* **Pick one place to deploy from.** CI uses the S3 state through a generated `backend_override.tf`
+  (git-ignored); running `deploy.ps1` locally uses local state, which does not know what CI created. To deploy
+  by hand against the same stack, copy that override file locally and run `terraform init -migrate-state`
+  first. Keep the bootstrap `terraform.tfstate` safe (or re-import) since it is local.
+* Terraform variables for CI (custom domain, budget alert, concurrency cap) have no `terraform.tfvars` on the runner:
+  set them as `TF_VAR_*` environment variables in `deploy.yml`, for example `TF_VAR_budget_email`.
+* For a manual approval before production, add `environment: production` to the `deploy` job and change the
+  role's trust condition `sub` to `repo:<owner>/<repo>:environment:production`.
+
 ## Custom domain
 
 No Terraform code changes are needed; the distribution already supports it through two variables:
