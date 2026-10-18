@@ -11,7 +11,13 @@ var languageKey = ReadChoice();
 Localizer.Current = languageKey == '2' ? Language.English : Language.Spanish;
 ClearScreen();
 
-var engine = Fort1Builder.Build();
+Console.WriteLine(Localizer.Msg("SelectGame"));
+Console.WriteLine("  1. La Fortaleza I");
+Console.WriteLine("  2. La Fortaleza II");
+var gameKey = ReadChoice();
+ClearScreen();
+
+GameEngine engine = gameKey == '2' ? Fort2Builder.Build() : Fort1Builder.Build();
 engine.Start();
 engine.Player.Output("");
 
@@ -26,11 +32,23 @@ while (!engine.CheckGoal() && !engine.IsOver)
 
 if (engine.CheckGoal())
 {
-    ClearScreen();
-    engine.Player.Output(Localizer.Msg("Victory1_Fort1"));
-    engine.Player.Output(Localizer.Msg("Victory2_Fort1"));
-    engine.Player.Output(Localizer.Msg("Victory3_Fort1"));
-    engine.Player.Output(Localizer.Msg("Victory4_Fort1"));
+    if (engine is Fort2)
+    {
+        ShowPage(Fort2.Escape);
+        ClearScreen();
+        ShowPage(Fort2.EpilogueFirstPage);
+        ReadChoice();
+        ClearScreen();
+        ShowPage(Fort2.EpilogueLastPage);
+    }
+    else
+    {
+        ClearScreen();
+        engine.Player.Output(Localizer.Msg("Victory1_Fort1"));
+        engine.Player.Output(Localizer.Msg("Victory2_Fort1"));
+        engine.Player.Output(Localizer.Msg("Victory3_Fort1"));
+        engine.Player.Output(Localizer.Msg("Victory4_Fort1"));
+    }
 }
 else
 {
@@ -47,6 +65,12 @@ if (char.ToUpperInvariant(ReadChoice()) is 'S' or 'Y')
 }
 
 static char ReadChoice() => Console.IsInputRedirected ? (char)Console.Read() : Console.ReadKey(true).KeyChar;
+
+void ShowPage(IReadOnlyList<LocalizedText> lines)
+{
+    foreach (var line in lines)
+        engine.Player.Output(line.Get());
+}
 
 static void ClearScreen()
 {

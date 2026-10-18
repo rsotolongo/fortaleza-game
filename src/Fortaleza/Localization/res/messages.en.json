@@ -86,5 +86,6 @@
   "WeighSelf": "You unsuccessfully try to place the scale on itself.",
   "WeighCrazy": "Have you gone mad? How do you expect to weigh that?",
   "WeighThereIsNo": "There is no \"",
-  "WeighNotHere": "\" in this place. Nor among your belongings either."
+  "WeighNotHere": "\" in this place. Nor among your belongings either.",
+  "SelectGame": "Select game:"
 }

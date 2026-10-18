@@ -96,7 +96,8 @@ public class Room(LocalizedText name, LocalizedText description, int weight)
         }
         var idx = Children.IndexOf(hidden);
         Children.RemoveAt(idx);
-        Children.Insert(idx, hidden.HiddenChild);
+        if (hidden.HiddenChild is not null)
+            Children.Insert(idx, hidden.HiddenChild);
         Output(Localizer.Msg("Crash"));
         Output(Localizer.Msg("Surprise"));
     }

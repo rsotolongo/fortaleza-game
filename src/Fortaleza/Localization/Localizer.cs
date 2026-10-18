@@ -21,10 +21,12 @@ public static class Localizer
         }
     }
 
-    public static string Msg(string key)
+    public static string Msg(string key) => Msg(key, _current);
+
+    public static string Msg(string key, Language language)
     {
         EnsureLoaded();
-        var dict = _current == Language.English ? _enMessages! : _esMessages!;
+        var dict = language == Language.English ? _enMessages! : _esMessages!;
         return dict.TryGetValue(key, out var val) ? val : $"[{key}]";
     }
 
