@@ -6,10 +6,13 @@
   Skip the interactive confirmation of terraform apply.
 .PARAMETER Destroy
   Tear the whole stack down instead of deploying.
+.PARAMETER SkipBuild
+  Reuse build/site and build/publish instead of rebuilding them.
 #>
 param(
   [switch]$AutoApprove,
-  [switch]$Destroy
+  [switch]$Destroy,
+  [switch]$SkipBuild
 )
 
 $ErrorActionPreference = 'Stop'
@@ -25,7 +28,7 @@ function Invoke-Step([string]$Title, [scriptblock]$Action) {
   if ($LASTEXITCODE -ne 0) { throw "$Title failed (exit code $LASTEXITCODE)" }
 }
 
-if (-not $Destroy) {
+if (-not $Destroy -and -not $SkipBuild) {
   if (Test-Path $build) { Remove-Item $build -Recurse -Force }
 
   Invoke-Step 'Install web dependencies' { npm ci --prefix (Join-Path $root 'src/Fortaleza.Web') }

@@ -3,23 +3,26 @@
 #   ./deploy.sh                 deploy (asks for confirmation)
 #   ./deploy.sh --auto-approve  deploy without confirmation
 #   ./deploy.sh --destroy       tear everything down
+#   ./deploy.sh --skip-build    reuse build/site and build/publish (CI builds them in a separate job)
 set -euo pipefail
 
 terraform_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(dirname "$terraform_dir")"
 build="$terraform_dir/build"
 destroy=false
+skip_build=false
 flags=()
 
 for arg in "$@"; do
   case "$arg" in
     --destroy) destroy=true ;;
+    --skip-build) skip_build=true ;;
     --auto-approve) flags+=(-auto-approve) ;;
     *) echo "Unknown option: $arg" >&2; exit 1 ;;
   esac
 done
 
-if [ "$destroy" = false ]; then
+if [ "$destroy" = false ] && [ "$skip_build" = false ]; then
   rm -rf "$build"
 
   echo "==> Install web dependencies"

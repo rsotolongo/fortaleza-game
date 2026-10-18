@@ -49,8 +49,10 @@ Copy `terraform.tfvars.example` to `terraform.tfvars`:
 
 ## Automatic deployment (GitHub Actions)
 
-`.github/workflows/deploy.yml` runs on every push or merge to `master`: it runs the tests, then builds and
-deploys with `deploy.sh`. `ci.yml` runs the tests and `terraform fmt` on pull requests and other branches.
+`.github/workflows/deploy.yml` runs on every push or merge to `master` in three jobs: **test**, then **build**
+(npm and NuGet run here, with no AWS credentials at all, and the site and Lambda package are uploaded as an artifact),
+then **deploy**, the only job that assumes the AWS role and which just runs Terraform on the pre-built artifact
+(`deploy.sh --skip-build`). `ci.yml` runs the tests and `terraform fmt` on pull requests and other branches.
 
 Authentication uses **GitHub OIDC**, so no AWS keys are stored in GitHub: the workflow assumes an IAM role that
 only trusts workflows running on the `master` branch of this repository. The Terraform state lives in

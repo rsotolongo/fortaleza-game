@@ -11,6 +11,37 @@ locals {
 
 resource "aws_s3_bucket" "state" {
   bucket_prefix = "${var.project_name}-tfstate-"
+
+  # Losing this bucket means losing track of the deployed stack.
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+data "aws_iam_policy_document" "state_tls_only" {
+  statement {
+    sid       = "DenyInsecureTransport"
+    effect    = "Deny"
+    actions   = ["s3:*"]
+    resources = [aws_s3_bucket.state.arn, "${aws_s3_bucket.state.arn}/*"]
+
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["false"]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "state" {
+  bucket     = aws_s3_bucket.state.id
+  policy     = data.aws_iam_policy_document.state_tls_only.json
+  depends_on = [aws_s3_bucket_public_access_block.state]
 }
 
 resource "aws_s3_bucket_versioning" "state" {
@@ -68,6 +99,7 @@ resource "aws_iam_role" "deploy" {
 }
 
 data "aws_iam_policy_document" "deploy" {
+  # DeleteObject is required: S3 native locking (use_lockfile) removes its .tflock object when a run ends.
   statement {
     sid       = "TerraformState"
     actions   = ["s3:ListBucket", "s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
@@ -144,6 +176,7 @@ data "aws_iam_policy_document" "deploy" {
     resources = ["arn:aws:s3:::${var.project_name}-site-*", "arn:aws:s3:::${var.project_name}-site-*/*"]
   }
 
+  # CloudFront create/list APIs do not support resource-level permissions, so this one needs "*".
   statement {
     sid       = "ManageCloudFront"
     actions   = ["cloudfront:*"]
@@ -151,9 +184,9 @@ data "aws_iam_policy_document" "deploy" {
   }
 
   statement {
-    sid       = "ManageBudgets"
-    actions   = ["budgets:*"]
-    resources = ["*"]
+    sid       = "ManageProjectBudget"
+    actions   = ["budgets:ViewBudget", "budgets:ModifyBudget"]
+    resources = ["arn:aws:budgets::${local.account_id}:budget/${var.project_name}-*"]
   }
 }
 
