@@ -135,21 +135,28 @@ public abstract class GameEngine(Room startRoom)
             }
 
             var lines = File.ReadLines(path).Where(l => l != "").ToList();
-            _track.Clear();
-            _track.AddRange(lines);
-            _executing = true;
-            foreach (var line in lines)
-            {
-                Player.Output("");
-                Player.Output(" " + line);
-                ProcessCommand(line);
-                if (CheckGoal() || IsOver) break;
-            }
+            Replay(lines);
             return true;
         }
         finally
         {
             _executing = false;
+            Thing.Visible = wasVisible;
+        }
+    }
+
+    public void ExecuteTrack(IEnumerable<string> commands, bool verbose = true)
+    {
+        var wasVisible = Thing.Visible;
+        Player.Output(Localizer.Msg("ExecRunning"));
+        if (!verbose)
+            Thing.Visible = false;
+        try
+        {
+            Replay(commands.Where(l => l != "").ToList());
+        }
+        finally
+        {
             Thing.Visible = wasVisible;
         }
     }
@@ -161,6 +168,27 @@ public abstract class GameEngine(Room startRoom)
             ? 0
             : (int)Math.Round((double)Player.VisitCount / reachable * 100, MidpointRounding.AwayFromZero);
         Player.Output(Localizer.Msg("Advanced") + percent + "%");
+    }
+
+    private void Replay(List<string> lines)
+    {
+        _track.Clear();
+        _track.AddRange(lines);
+        _executing = true;
+        try
+        {
+            foreach (var line in lines)
+            {
+                Player.Output("");
+                Player.Output(" " + line);
+                ProcessCommand(line);
+                if (CheckGoal() || IsOver) break;
+            }
+        }
+        finally
+        {
+            _executing = false;
+        }
     }
 
     protected virtual string? ReadLine() => Console.ReadLine();

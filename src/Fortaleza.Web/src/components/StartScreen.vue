@@ -1,0 +1,40 @@
+<script setup>
+import { texts } from '../i18n'
+
+defineProps({ language: String, resumable: Object, busy: Boolean })
+const emit = defineEmits(['start', 'resume', 'language'])
+</script>
+
+<template>
+  <main class="start">
+    <header class="hero">
+      <div class="crest" aria-hidden="true">🏰</div>
+      <h1>{{ texts[language].title }}</h1>
+      <p>{{ texts[language].subtitle }}</p>
+    </header>
+
+    <div class="lang" role="group" :aria-label="texts[language].language">
+      <button :class="{ on: language === 'es' }" @click="emit('language', 'es')">Español</button>
+      <button :class="{ on: language === 'en' }" @click="emit('language', 'en')">English</button>
+    </div>
+
+    <button v-if="resumable" class="card resume" :disabled="busy" @click="emit('resume')">
+      <strong>{{ texts[language].continue }}</strong>
+      <span>{{ resumable.game === 1 ? texts[language].game1 : texts[language].game2 }}</span>
+    </button>
+
+    <h2>{{ texts[language].chooseGame }}</h2>
+    <div class="cards">
+      <button class="card" :disabled="busy" @click="emit('start', 1)">
+        <span class="numeral">I</span>
+        <strong>{{ texts[language].game1 }}</strong>
+        <span>{{ texts[language].game1Sub }}</span>
+      </button>
+      <button class="card" :disabled="busy" @click="emit('start', 2)">
+        <span class="numeral">II</span>
+        <strong>{{ texts[language].game2 }}</strong>
+        <span>{{ texts[language].game2Sub }}</span>
+      </button>
+    </div>
+  </main>
+</template>

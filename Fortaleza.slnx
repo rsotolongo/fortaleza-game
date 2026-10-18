@@ -1,8 +1,10 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Fortaleza/Fortaleza.csproj" />
+    <Project Path="src/Fortaleza.Api/Fortaleza.Api.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Fortaleza.Tests/Fortaleza.Tests.csproj" />
+    <Project Path="tests/Fortaleza.Api.Tests/Fortaleza.Api.Tests.csproj" />
   </Folder>
 </Solution>

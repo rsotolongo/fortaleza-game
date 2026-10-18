@@ -7,21 +7,21 @@ public enum Language { Spanish, English }
 
 public static class Localizer
 {
-    private static Language _current = Language.Spanish;
+    private static readonly AsyncLocal<Language> _current = new();
     private static Dictionary<string, string>? _esMessages;
     private static Dictionary<string, string>? _enMessages;
 
     public static Language Current
     {
-        get => _current;
+        get => _current.Value;
         set
         {
-            _current = value;
+            _current.Value = value;
             EnsureLoaded();
         }
     }
 
-    public static string Msg(string key) => Msg(key, _current);
+    public static string Msg(string key) => Msg(key, _current.Value);
 
     public static string Msg(string key, Language language)
     {
