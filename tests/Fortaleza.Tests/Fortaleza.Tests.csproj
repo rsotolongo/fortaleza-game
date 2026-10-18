@@ -19,6 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="..\..\saves\*.TRK" Link="saves\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Fortaleza\Fortaleza.csproj" />
   </ItemGroup>
 
