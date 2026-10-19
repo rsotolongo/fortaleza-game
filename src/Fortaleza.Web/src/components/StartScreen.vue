@@ -2,7 +2,7 @@
 import { texts } from '../i18n'
 
 defineProps({ language: String, resumable: Object, busy: Boolean })
-const emit = defineEmits(['start', 'resume', 'language'])
+const emit = defineEmits(['start', 'resume', 'language', 'about'])
 </script>
 
 <template>
@@ -36,5 +36,9 @@ const emit = defineEmits(['start', 'resume', 'language'])
         <span>{{ texts[language].game2Sub }}</span>
       </button>
     </div>
+
+    <footer class="colophon">
+      <button class="link" @click="emit('about')">ⓘ {{ texts[language].about }}</button>
+    </footer>
   </main>
 </template>
