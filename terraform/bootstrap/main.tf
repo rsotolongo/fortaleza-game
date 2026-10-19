@@ -2,7 +2,6 @@ data "google_project" "current" {}
 
 locals {
   hosting_site_id = coalesce(var.hosting_site_id, var.project_id)
-  github_subject  = "repo:${var.github_repository}:ref:refs/heads/${var.github_branch}"
 
   services = [
     "artifactregistry.googleapis.com",
@@ -115,11 +114,14 @@ resource "google_iam_workload_identity_pool_provider" "github" {
   display_name                       = "GitHub OIDC"
 
   attribute_mapping = {
-    "google.subject"       = "assertion.sub"
-    "attribute.repository" = "assertion.repository"
-    "attribute.ref"        = "assertion.ref"
+    "google.subject"          = "assertion.sub"
+    "attribute.repository"    = "assertion.repository"
+    "attribute.repository_id" = "assertion.repository_id"
+    "attribute.ref"           = "assertion.ref"
   }
-  attribute_condition = "assertion.sub == '${local.github_subject}'"
+  # Matched on ids rather than the sub claim: its format changes when the repository opts into immutable
+  # subjects, and a renamed or re-created repository with the same name must not be able to deploy.
+  attribute_condition = "assertion.repository_id == '${var.github_repository_id}' && assertion.ref == 'refs/heads/${var.github_branch}'"
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
@@ -135,7 +137,7 @@ resource "google_service_account" "deploy" {
 resource "google_service_account_iam_member" "deploy_from_github" {
   service_account_id = google_service_account.deploy.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/subject/${local.github_subject}"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository_id/${var.github_repository_id}"
 }
 
 # The deploy account gets no IAM admin role anywhere, so CI cannot grant itself more permissions.

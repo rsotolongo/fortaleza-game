@@ -2,6 +2,7 @@
 
 project_id            = "fortaleza-game"
 github_repository     = "rsotolongo/fortaleza-dotnet"
+github_repository_id  = "1424824257"                  # gh api repos/<owner>/<repo> --jq .id
 # github_branch       = "master"
 # region              = "us-central1"
 # hosting_site_id     = ""                            # empty = the project id, served at <project id>.web.app
