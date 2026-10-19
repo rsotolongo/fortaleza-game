@@ -1,5 +1,7 @@
 # La Fortaleza
 
+**Version 1.0.0**
+
 A modern, bilingual (Spanish / English) port of **La Fortaleza**, the text adventure written in Turbo Pascal
 in the 1990s by [Miguel Cepero](https://twitter.com/miguelcepero) (Merchise Group). You explore a living fortress,
 solve riddles, trade objects with strange creatures and try to defeat the Beast (game I) or escape the
@@ -19,7 +21,7 @@ This repository contains:
 ## Architecture
 
 ```
-                         ┌──────────────────── Google Cloud ─────────────────────┐
+                         ┌──────────────────── Google Cloud ──────────────────────┐
                          │                                                        │
  Browser (Vue 3 app) ───►│ Firebase Hosting ─┬─ /*       ─► static files          │
                          │                   └─ /api/**  ─► Cloud Run             │
@@ -145,6 +147,6 @@ publishes the site to Firebase Hosting. Inside the free quotas this costs about 
 
 ## Credits and license
 
-La Fortaleza is © 1993–2013 Miguel Cepero, released under the GPLv3+ (see [original/COPYING](original/COPYING)).
+La Fortaleza is © Miguel Cepero, released under the GPLv3+ (see [original/COPYING](original/COPYING)).
 The Pascal sources in `original/` and `modern/` are his; the .NET port, web version and infrastructure in this
 repository are derived from them and are distributed under the same license.

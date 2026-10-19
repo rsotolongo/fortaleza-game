@@ -24,6 +24,15 @@ export const texts = {
     playAgain: 'Jugar de nuevo',
     objects: 'Toque un objeto para usarlo',
     starting: 'Entrando a la Fortaleza…',
+    about: 'Acerca',
+    version: 'Versión',
+    originalGame: 'Juego original',
+    port: 'Versión .NET y web',
+    license: 'Licencia',
+    licenseNote:
+      'Software libre: puede redistribuirlo y modificarlo según los términos de la Licencia Pública General de GNU, versión 3 o (a su elección) cualquier versión posterior. Se distribuye sin ninguna garantía.',
+    source: 'Código fuente',
+    close: 'Cerrar',
     verbs: [
       ['mirar', 'mirar'],
       ['inventario', 'inventario'],
@@ -64,6 +73,15 @@ export const texts = {
     playAgain: 'Play again',
     objects: 'Tap an object to use it',
     starting: 'Entering the Fortress…',
+    about: 'About',
+    version: 'Version',
+    originalGame: 'Original game',
+    port: '.NET port and web version',
+    license: 'License',
+    licenseNote:
+      'Free software: you can redistribute and modify it under the terms of the GNU General Public License, version 3 or (at your option) any later version. It comes with no warranty.',
+    source: 'Source code',
+    close: 'Close',
     verbs: [
       ['look', 'look'],
       ['inventory', 'inventory'],
