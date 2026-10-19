@@ -20,6 +20,11 @@ variable "github_repository" {
   type        = string
 }
 
+variable "github_repository_id" {
+  description = "Numeric id of github_repository: gh api repos/<owner>/<repo> --jq .id"
+  type        = string
+}
+
 variable "github_branch" {
   description = "Only workflows running on this branch can impersonate the deploy service account."
   type        = string
