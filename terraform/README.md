@@ -89,8 +89,9 @@ pre-built image, runs Terraform and publishes the site (`deploy.sh --skip-build`
 with `--ignore-scripts`, so no package install script runs next to the credentials.
 
 Authentication uses **Workload Identity Federation**, so no service account keys exist: the provider only accepts
-tokens whose subject is `repo:<owner>/<repo>:ref:refs/heads/master`. The Terraform state lives in a versioned GCS
-bucket; the `gcs` backend locks natively.
+tokens whose `repository_id` is the repository's numeric id and whose `ref` is `refs/heads/master`, so it works
+with or without immutable subject claims and a renamed or re-created repository cannot deploy. The Terraform state
+lives in a versioned GCS bucket; the `gcs` backend locks natively.
 
 After the bootstrap, configure the repository with the `github_variables_commands` output:
 
@@ -119,8 +120,8 @@ Notes:
   first. Keep the bootstrap `terraform.tfstate` safe (or re-import) since it is local.
 * Terraform variables for CI have no `terraform.tfvars` on the runner: set them as `TF_VAR_*` environment variables
   in `deploy.yml`, for example `TF_VAR_domain_name`.
-* For a manual approval before production, add `environment: production` to the `deploy` job and change
-  `github_subject` in `bootstrap/main.tf` to `repo:<owner>/<repo>:environment:production`.
+* For a manual approval before production, add `environment: production` to the `deploy` job and append
+  `&& assertion.environment == 'production'` to `attribute_condition` in `bootstrap/main.tf`.
 
 ## Custom domain
 
