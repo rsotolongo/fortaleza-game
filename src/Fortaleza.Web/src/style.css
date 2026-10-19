@@ -181,6 +181,118 @@ input:focus-visible {
   border-color: var(--accent);
 }
 
+.colophon {
+  margin-top: auto;
+  text-align: center;
+}
+
+button.link {
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+button.link:hover {
+  color: var(--accent);
+}
+
+/* ---------- about dialog ---------- */
+
+.about {
+  width: min(440px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 0.45);
+}
+
+.about::backdrop {
+  background: rgb(0 0 0 / 0.55);
+}
+
+.about-body {
+  padding: 24px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.about header {
+  text-align: center;
+}
+
+.about .crest {
+  font-size: 44px;
+}
+
+.about h2 {
+  margin: 6px 0 2px;
+  font-family: var(--narrative);
+  font-size: 1.6rem;
+}
+
+.about .version {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.about dl {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.about dt {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.about dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.about dd small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.about a {
+  color: var(--accent);
+}
+
+.about a.repo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.about a.repo svg {
+  flex: none;
+}
+
+.about form {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.about .primary {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
 /* ---------- game screen ---------- */
 
 .game {

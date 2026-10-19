@@ -1,10 +1,10 @@
 # Copy to terraform.tfvars and adjust.
 
-project_id        = "my-fortaleza-project"
-github_repository = "rsotolongo/fortaleza-dotnet"
+project_id            = "fortaleza-game"
+github_repository     = "rsotolongo/fortaleza-dotnet"
 # github_branch       = "master"
 # region              = "us-central1"
-# hosting_site_id     = ""          # empty = the project id, served at <project id>.web.app
-# create_hosting_site = false       # the site already exists (e.g. created from the Firebase console)
+# hosting_site_id     = ""                            # empty = the project id, served at <project id>.web.app
+# create_hosting_site = false                         # the site already exists (e.g. created from the Firebase console)
 # billing_account_id  = "XXXXXX-XXXXXX-XXXXXX"
 # budget_limit_usd    = 5

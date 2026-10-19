@@ -1,7 +1,7 @@
 # Copy to terraform.tfvars and adjust. project_id, region and image come from the deploy script
 # (GOOGLE_CLOUD_PROJECT, GOOGLE_CLOUD_REGION); everything here is optional.
 
-# max_instances   = 5             # cost guard
+# max_instances   = 5               # cost guard
 # memory          = "512Mi"
-# hosting_site_id = "my-site"     # when bootstrap used a site id other than the project id
-# domain_name     = "fortaleza.example.com"
+# hosting_site_id = "fotaleza-game" # when bootstrap used a site id other than the project id
+# domain_name     = ""
