@@ -1,16 +1,50 @@
-data "aws_caller_identity" "current" {}
+data "google_project" "current" {}
 
 locals {
-  account_id        = data.aws_caller_identity.current.account_id
-  github_oidc_url   = "https://token.actions.githubusercontent.com"
-  lambda_role_arn   = "arn:aws:iam::${local.account_id}:role/${var.project_name}-api"
-  oidc_provider_arn = var.create_github_oidc_provider ? aws_iam_openid_connect_provider.github[0].arn : "arn:aws:iam::${local.account_id}:oidc-provider/token.actions.githubusercontent.com"
+  hosting_site_id = coalesce(var.hosting_site_id, var.project_id)
+  github_subject  = "repo:${var.github_repository}:ref:refs/heads/${var.github_branch}"
+
+  services = [
+    "artifactregistry.googleapis.com",
+    "billingbudgets.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "firebase.googleapis.com",
+    "firebasehosting.googleapis.com",
+    "iam.googleapis.com",
+    "iamcredentials.googleapis.com",
+    "run.googleapis.com",
+    "serviceusage.googleapis.com",
+    "sts.googleapis.com",
+  ]
+}
+
+resource "google_project_service" "enabled" {
+  for_each = toset(local.services)
+
+  service            = each.value
+  disable_on_destroy = false
 }
 
 # ------------------------------------------------- Remote state for the main stack
 
-resource "aws_s3_bucket" "state" {
-  bucket_prefix = "${var.project_name}-tfstate-"
+resource "google_storage_bucket" "state" {
+  name                        = "${var.project_id}-${var.project_name}-tfstate"
+  location                    = var.region
+  uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    condition {
+      num_newer_versions = 10
+    }
+    action {
+      type = "Delete"
+    }
+  }
 
   # Losing this bucket means losing track of the deployed stack.
   lifecycle {
@@ -18,180 +52,151 @@ resource "aws_s3_bucket" "state" {
   }
 }
 
-data "aws_iam_policy_document" "state_tls_only" {
-  statement {
-    sid       = "DenyInsecureTransport"
-    effect    = "Deny"
-    actions   = ["s3:*"]
-    resources = [aws_s3_bucket.state.arn, "${aws_s3_bucket.state.arn}/*"]
+# --------------------------------------------------------- Images and hosting
 
-    principals {
-      type        = "*"
-      identifiers = ["*"]
+resource "google_artifact_registry_repository" "images" {
+  repository_id          = var.project_name
+  location               = var.region
+  format                 = "DOCKER"
+  cleanup_policy_dry_run = false
+
+  cleanup_policies {
+    id     = "keep-recent"
+    action = "KEEP"
+    most_recent_versions {
+      keep_count = 5
     }
+  }
 
+  cleanup_policies {
+    id     = "delete-old"
+    action = "DELETE"
     condition {
-      test     = "Bool"
-      variable = "aws:SecureTransport"
-      values   = ["false"]
+      older_than = "604800s"
     }
   }
+
+  depends_on = [google_project_service.enabled]
 }
 
-resource "aws_s3_bucket_policy" "state" {
-  bucket     = aws_s3_bucket.state.id
-  policy     = data.aws_iam_policy_document.state_tls_only.json
-  depends_on = [aws_s3_bucket_public_access_block.state]
+resource "google_firebase_project" "current" {
+  provider   = google-beta
+  project    = var.project_id
+  depends_on = [google_project_service.enabled]
 }
 
-resource "aws_s3_bucket_versioning" "state" {
-  bucket = aws_s3_bucket.state.id
+resource "google_firebase_hosting_site" "site" {
+  provider = google-beta
+  count    = var.create_hosting_site ? 1 : 0
 
-  versioning_configuration {
-    status = "Enabled"
-  }
+  project    = var.project_id
+  site_id    = local.hosting_site_id
+  depends_on = [google_firebase_project.current]
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
-  bucket = aws_s3_bucket.state.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
-}
-
-resource "aws_s3_bucket_public_access_block" "state" {
-  bucket                  = aws_s3_bucket.state.id
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
+# The Cloud Run service runs as this account. It has no roles: the API calls no Google APIs.
+resource "google_service_account" "api" {
+  account_id   = "${var.project_name}-api"
+  display_name = "Fortaleza API (Cloud Run runtime)"
+  depends_on   = [google_project_service.enabled]
 }
 
 # ------------------------------------------------------- GitHub Actions identity
 
-resource "aws_iam_openid_connect_provider" "github" {
-  count = var.create_github_oidc_provider ? 1 : 0
-
-  url            = local.github_oidc_url
-  client_id_list = ["sts.amazonaws.com"]
+resource "google_iam_workload_identity_pool" "github" {
+  workload_identity_pool_id = "${var.project_name}-github"
+  display_name              = "GitHub Actions"
+  depends_on                = [google_project_service.enabled]
 }
 
-resource "aws_iam_role" "deploy" {
-  name = "${var.project_name}-github-deploy"
+resource "google_iam_workload_identity_pool_provider" "github" {
+  workload_identity_pool_id          = google_iam_workload_identity_pool.github.workload_identity_pool_id
+  workload_identity_pool_provider_id = "github"
+  display_name                       = "GitHub OIDC"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect    = "Allow"
-      Action    = "sts:AssumeRoleWithWebIdentity"
-      Principal = { Federated = local.oidc_provider_arn }
-      Condition = {
-        StringEquals = {
-          "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-          "token.actions.githubusercontent.com:sub" = "repo:${var.github_repository}:ref:refs/heads/${var.github_branch}"
-        }
-      }
-    }]
-  })
+  attribute_mapping = {
+    "google.subject"       = "assertion.sub"
+    "attribute.repository" = "assertion.repository"
+    "attribute.ref"        = "assertion.ref"
+  }
+  attribute_condition = "assertion.sub == '${local.github_subject}'"
+
+  oidc {
+    issuer_uri = "https://token.actions.githubusercontent.com"
+  }
 }
 
-data "aws_iam_policy_document" "deploy" {
-  # DeleteObject is required: S3 native locking (use_lockfile) removes its .tflock object when a run ends.
-  statement {
-    sid       = "TerraformState"
-    actions   = ["s3:ListBucket", "s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
-    resources = [aws_s3_bucket.state.arn, "${aws_s3_bucket.state.arn}/*"]
+resource "google_service_account" "deploy" {
+  account_id   = "${var.project_name}-github-deploy"
+  display_name = "Fortaleza GitHub deploy"
+  depends_on   = [google_project_service.enabled]
+}
+
+resource "google_service_account_iam_member" "deploy_from_github" {
+  service_account_id = google_service_account.deploy.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/subject/${local.github_subject}"
+}
+
+# The deploy account gets no IAM admin role anywhere, so CI cannot grant itself more permissions.
+
+resource "google_storage_bucket_iam_member" "deploy_state" {
+  bucket = google_storage_bucket.state.name
+  role   = "roles/storage.objectAdmin"
+  member = google_service_account.deploy.member
+}
+
+resource "google_artifact_registry_repository_iam_member" "deploy_push" {
+  repository = google_artifact_registry_repository.images.name
+  location   = google_artifact_registry_repository.images.location
+  role       = "roles/artifactregistry.writer"
+  member     = google_service_account.deploy.member
+}
+
+resource "google_service_account_iam_member" "deploy_acts_as_runtime" {
+  service_account_id = google_service_account.api.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = google_service_account.deploy.member
+}
+
+# run.admin (not run.developer) because making the service public needs run.services.setIamPolicy.
+resource "google_project_iam_member" "deploy" {
+  for_each = toset([
+    "roles/run.admin",
+    "roles/firebasehosting.admin",
+    "roles/serviceusage.serviceUsageConsumer",
+  ])
+
+  project = var.project_id
+  role    = each.value
+  member  = google_service_account.deploy.member
+}
+
+# ------------------------------------------------------------------ Cost alert
+
+resource "google_billing_budget" "monthly" {
+  count = var.billing_account_id == "" ? 0 : 1
+
+  billing_account = var.billing_account_id
+  display_name    = "${var.project_name}-monthly"
+
+  budget_filter {
+    projects = ["projects/${data.google_project.current.number}"]
   }
 
-  # Only the Lambda execution role of the main stack (named <project>-api) can be managed. The deploy role
-  # itself is deliberately out of reach, otherwise CI could grant itself more permissions.
-  statement {
-    sid = "ManageLambdaRole"
-    actions = [
-      "iam:CreateRole", "iam:DeleteRole", "iam:GetRole", "iam:UpdateRole", "iam:UpdateAssumeRolePolicy",
-      "iam:TagRole", "iam:UntagRole", "iam:ListRoleTags", "iam:ListAttachedRolePolicies",
-      "iam:ListRolePolicies", "iam:ListInstanceProfilesForRole"
-    ]
-    resources = [local.lambda_role_arn]
-  }
-
-  statement {
-    sid       = "AttachOnlyBasicLambdaLogging"
-    actions   = ["iam:AttachRolePolicy", "iam:DetachRolePolicy"]
-    resources = [local.lambda_role_arn]
-
-    condition {
-      test     = "ArnEquals"
-      variable = "iam:PolicyARN"
-      values   = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
+  amount {
+    specified_amount {
+      currency_code = "USD"
+      units         = tostring(var.budget_limit_usd)
     }
   }
 
-  statement {
-    sid       = "PassLambdaRole"
-    actions   = ["iam:PassRole"]
-    resources = [local.lambda_role_arn]
-
-    condition {
-      test     = "StringEquals"
-      variable = "iam:PassedToService"
-      values   = ["lambda.amazonaws.com"]
+  dynamic "threshold_rules" {
+    for_each = [0.5, 0.8, 1.0]
+    content {
+      threshold_percent = threshold_rules.value
     }
   }
 
-  statement {
-    sid       = "NeverTouchTheDeployRole"
-    effect    = "Deny"
-    actions   = ["iam:*"]
-    resources = ["arn:aws:iam::${local.account_id}:role/${var.project_name}-github-deploy"]
-  }
-
-  statement {
-    sid       = "ManageLambda"
-    actions   = ["lambda:*"]
-    resources = ["arn:aws:lambda:*:${local.account_id}:function:${var.project_name}-*"]
-  }
-
-  statement {
-    sid = "ManageLogGroup"
-    actions = [
-      "logs:CreateLogGroup", "logs:DeleteLogGroup", "logs:PutRetentionPolicy", "logs:DeleteRetentionPolicy",
-      "logs:TagResource", "logs:UntagResource", "logs:ListTagsForResource", "logs:ListTagsLogGroup"
-    ]
-    resources = ["arn:aws:logs:*:${local.account_id}:log-group:/aws/lambda/${var.project_name}-*", "arn:aws:logs:*:${local.account_id}:log-group:/aws/lambda/${var.project_name}-*:*"]
-  }
-
-  statement {
-    sid       = "DescribeLogGroups"
-    actions   = ["logs:DescribeLogGroups"]
-    resources = ["*"]
-  }
-
-  statement {
-    sid       = "ManageSiteBucket"
-    actions   = ["s3:*"]
-    resources = ["arn:aws:s3:::${var.project_name}-site-*", "arn:aws:s3:::${var.project_name}-site-*/*"]
-  }
-
-  # CloudFront create/list APIs do not support resource-level permissions, so this one needs "*".
-  statement {
-    sid       = "ManageCloudFront"
-    actions   = ["cloudfront:*"]
-    resources = ["*"]
-  }
-
-  statement {
-    sid       = "ManageProjectBudget"
-    actions   = ["budgets:ViewBudget", "budgets:ModifyBudget"]
-    resources = ["arn:aws:budgets::${local.account_id}:budget/${var.project_name}-*"]
-  }
-}
-
-resource "aws_iam_role_policy" "deploy" {
-  name   = "deploy"
-  role   = aws_iam_role.deploy.id
-  policy = data.aws_iam_policy_document.deploy.json
+  depends_on = [google_project_service.enabled]
 }

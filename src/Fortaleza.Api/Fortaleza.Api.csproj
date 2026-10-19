@@ -12,7 +12,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Fortaleza\Fortaleza.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Amazon.Lambda.AspNetCoreServer.Hosting" Version="2.2.1" />
-  </ItemGroup>
 </Project>

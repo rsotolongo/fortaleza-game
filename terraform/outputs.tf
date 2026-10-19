@@ -1,21 +1,26 @@
 output "site_url" {
   description = "Where the game is served."
-  value       = "https://${local.custom_domain ? var.domain_name : aws_cloudfront_distribution.site.domain_name}"
+  value       = "https://${var.domain_name != "" ? var.domain_name : "${local.hosting_site_id}.web.app"}"
 }
 
-output "cloudfront_domain_name" {
-  description = "Point the CNAME of a custom domain here."
-  value       = aws_cloudfront_distribution.site.domain_name
+output "hosting_site_id" {
+  value = local.hosting_site_id
 }
 
-output "cloudfront_distribution_id" {
-  value = aws_cloudfront_distribution.site.id
+output "api_service" {
+  value = google_cloud_run_v2_service.api.name
 }
 
-output "lambda_function_name" {
-  value = aws_lambda_function.api.function_name
+output "api_region" {
+  value = google_cloud_run_v2_service.api.location
 }
 
-output "site_bucket" {
-  value = aws_s3_bucket.site.id
+output "api_url" {
+  description = "Direct URL of the Cloud Run service (the site reaches it through /api)."
+  value       = google_cloud_run_v2_service.api.uri
+}
+
+output "custom_domain_dns_records" {
+  description = "DNS records to create at your DNS provider for domain_name."
+  value       = var.domain_name == "" ? null : google_firebase_hosting_custom_domain.site[0].required_dns_updates
 }

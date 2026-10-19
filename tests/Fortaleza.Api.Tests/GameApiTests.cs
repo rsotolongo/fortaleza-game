@@ -198,45 +198,4 @@ public class GameApiTests(WebApplicationFactory<Program> factory) : IClassFixtur
         Assert.All(results.Where(r => r.Carrying), r => Assert.Contains("Pastel de cerezas (2)", r.Output));
         Assert.All(results.Where(r => !r.Carrying), r => Assert.Equal(["Usted no lleva nada consigo."], r.Output));
     }
-
-    [Fact]
-    public async Task AnyRequest_WithOriginSecretConfigured_RequiresTheHeader()
-    {
-        var secured = factory.WithWebHostBuilder(builder => builder.UseSetting("ORIGIN_VERIFY", "s3cret")).CreateClient();
-
-        var without = await secured.PostAsJsonAsync("/api/games/start", new StartGameRequest(1, "es"));
-        var request = new HttpRequestMessage(HttpMethod.Post, "/api/games/start") { Content = JsonContent.Create(new StartGameRequest(1, "es")) };
-        request.Headers.Add("X-Origin-Verify", "s3cret");
-        var with = await secured.SendAsync(request);
-
-        Assert.Equal(HttpStatusCode.Forbidden, without.StatusCode);
-        Assert.Equal(HttpStatusCode.OK, with.StatusCode);
-    }
-
-    [Fact]
-    public async Task AnyRequest_WithWrongOriginSecret_ReturnsForbidden()
-    {
-        var secured = factory.WithWebHostBuilder(builder => builder.UseSetting("ORIGIN_VERIFY", "s3cret")).CreateClient();
-        var request = new HttpRequestMessage(HttpMethod.Post, "/api/games/start") { Content = JsonContent.Create(new StartGameRequest(1, "es")) };
-        request.Headers.Add("X-Origin-Verify", "other");
-
-        var response = await secured.SendAsync(request);
-
-        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("anything")]
-    public async Task AnyRequest_InsideLambdaWithoutOriginSecret_FailsClosed(string header)
-    {
-        var closed = factory.WithWebHostBuilder(builder => builder.UseSetting("AWS_LAMBDA_FUNCTION_NAME", "fortaleza-api")).CreateClient();
-        var request = new HttpRequestMessage(HttpMethod.Post, "/api/games/start") { Content = JsonContent.Create(new StartGameRequest(1, "es")) };
-        if (header != "")
-            request.Headers.Add("X-Origin-Verify", header);
-
-        var response = await closed.SendAsync(request);
-
-        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-    }
 }

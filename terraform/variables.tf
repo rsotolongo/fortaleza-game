@@ -1,77 +1,51 @@
-variable "aws_region" {
-  description = "Region for the Lambda function, the S3 bucket and the logs."
+variable "project_id" {
+  description = "Google Cloud project that hosts everything (the one prepared by bootstrap/)."
   type        = string
-  default     = "us-east-1"
+}
+
+variable "region" {
+  description = "Region of the Cloud Run service. Tier 1 regions (us-central1, us-east1, europe-west1, ...) are the cheapest."
+  type        = string
+  default     = "us-central1"
 }
 
 variable "project_name" {
-  description = "Prefix used to name every resource."
+  description = "Prefix used to name every resource. Must match project_name of the bootstrap stack."
   type        = string
   default     = "fortaleza"
 }
 
-variable "publish_dir" {
-  description = "Folder with the published Fortaleza.Api (created by deploy.ps1 or deploy.sh)."
+variable "image" {
+  description = "Container image of Fortaleza.Api, pinned by digest (pushed by deploy.ps1 or deploy.sh)."
   type        = string
-  default     = "build/publish"
 }
 
-variable "site_dir" {
-  description = "Folder with the built Vue site (created by deploy.ps1 or deploy.sh)."
+variable "hosting_site_id" {
+  description = "Firebase Hosting site created by bootstrap/. Empty means the project id."
   type        = string
-  default     = "build/site"
+  default     = ""
 }
 
-variable "lambda_memory_mb" {
-  description = "Lambda memory. 512 MB is plenty; more memory only buys a faster cold start."
-  type        = number
-  default     = 512
+variable "memory" {
+  description = "Memory of each Cloud Run instance."
+  type        = string
+  default     = "512Mi"
 }
 
-variable "lambda_timeout_seconds" {
-  description = "Lambda timeout. A request replays at most 1000 commands, which takes milliseconds."
+variable "request_timeout_seconds" {
+  description = "Cloud Run request timeout. A request replays at most 1000 commands, which takes milliseconds."
   type        = number
   default     = 15
 }
 
-variable "reserved_concurrency" {
-  description = "Caps parallel Lambda executions to limit cost abuse. -1 means no cap. New AWS accounts often cannot reserve until their concurrency quota is raised."
+variable "max_instances" {
+  description = "Caps Cloud Run instances to limit cost abuse. Each instance serves up to 80 requests at once."
   type        = number
-  default     = -1
-}
-
-variable "log_retention_days" {
-  description = "How long CloudWatch keeps the Lambda logs."
-  type        = number
-  default     = 14
-}
-
-variable "price_class" {
-  description = "CloudFront price class. PriceClass_100 serves from North America and Europe and is the cheapest."
-  type        = string
-  default     = "PriceClass_100"
+  default     = 5
 }
 
 variable "domain_name" {
-  description = "Optional custom domain (for example fortaleza.example.com). Requires certificate_arn and a DNS CNAME to the CloudFront domain."
+  description = "Optional custom domain (for example fortaleza.example.com). Firebase provisions the certificate; create the DNS records from the custom_domain_dns_records output."
   type        = string
   default     = ""
-}
-
-variable "certificate_arn" {
-  description = "ARN of an ACM certificate for domain_name. It must be created in us-east-1."
-  type        = string
-  default     = ""
-}
-
-variable "budget_email" {
-  description = "Optional email that receives an alert when the monthly cost passes 80% of budget_limit_usd."
-  type        = string
-  default     = ""
-}
-
-variable "budget_limit_usd" {
-  description = "Monthly budget used by the optional cost alert."
-  type        = number
-  default     = 5
 }

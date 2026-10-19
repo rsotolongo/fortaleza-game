@@ -1,10 +1,7 @@
-# Copy to terraform.tfvars and adjust. Every value is optional.
+# Copy to terraform.tfvars and adjust. project_id, region and image come from the deploy script
+# (GOOGLE_CLOUD_PROJECT, GOOGLE_CLOUD_REGION); everything here is optional.
 
-# aws_region           = "us-east-1"
-# reserved_concurrency = 10      # cost guard; needs a raised Lambda quota on new accounts
-# budget_email         = "you@example.com"
-# budget_limit_usd     = 5
-
-# Custom domain (the certificate must live in us-east-1):
+# max_instances   = 5             # cost guard
+# memory          = "512Mi"
+# hosting_site_id = "my-site"     # when bootstrap used a site id other than the project id
 # domain_name     = "fortaleza.example.com"
-# certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/..."

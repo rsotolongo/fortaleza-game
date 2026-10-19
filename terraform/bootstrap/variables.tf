@@ -1,11 +1,16 @@
-variable "aws_region" {
-  description = "Region of the state bucket. Use the same region as the main stack."
+variable "project_id" {
+  description = "Existing Google Cloud project, linked to a billing account (Cloud Run needs the Blaze plan)."
   type        = string
-  default     = "us-east-1"
+}
+
+variable "region" {
+  description = "Region of the state bucket, the image repository and the Cloud Run service. Use the same one in the main stack."
+  type        = string
+  default     = "us-central1"
 }
 
 variable "project_name" {
-  description = "Must match project_name of the main stack: the deploy role may only manage resources named after it."
+  description = "Must match project_name of the main stack: the deploy identity may only use resources named after it."
   type        = string
   default     = "fortaleza"
 }
@@ -16,13 +21,31 @@ variable "github_repository" {
 }
 
 variable "github_branch" {
-  description = "Only workflows running on this branch can assume the deploy role."
+  description = "Only workflows running on this branch can impersonate the deploy service account."
   type        = string
   default     = "master"
 }
 
-variable "create_github_oidc_provider" {
-  description = "Set to false if the AWS account already has the token.actions.githubusercontent.com OIDC provider (only one is allowed per account)."
+variable "hosting_site_id" {
+  description = "Firebase Hosting site to create; it becomes <id>.web.app. Empty means the project id (the default site)."
+  type        = string
+  default     = ""
+}
+
+variable "create_hosting_site" {
+  description = "Set to false when the site already exists (for example the default site created from the Firebase console)."
   type        = bool
   default     = true
+}
+
+variable "billing_account_id" {
+  description = "Optional billing account (XXXXXX-XXXXXX-XXXXXX) for a monthly budget alert; billing admins get the emails."
+  type        = string
+  default     = ""
+}
+
+variable "budget_limit_usd" {
+  description = "Monthly budget used by the optional cost alert (alerts at 50%, 80% and 100%)."
+  type        = number
+  default     = 5
 }

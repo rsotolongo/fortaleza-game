@@ -1,21 +1,34 @@
 terraform {
-  required_version = ">= 1.10"
+  required_version = ">= 1.6"
 
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = ">= 6.19"
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 8.0"
+    }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 8.0"
     }
   }
 }
 
-provider "aws" {
-  region = var.aws_region
+# The Budgets and Firebase APIs reject end-user credentials without a quota project.
+provider "google" {
+  project               = var.project_id
+  region                = var.region
+  user_project_override = true
+  billing_project       = var.project_id
 
-  default_tags {
-    tags = {
-      Project   = var.project_name
-      ManagedBy = "terraform-bootstrap"
-    }
+  default_labels = {
+    project    = var.project_name
+    managed-by = "terraform-bootstrap"
   }
+}
+
+provider "google-beta" {
+  project               = var.project_id
+  region                = var.region
+  user_project_override = true
+  billing_project       = var.project_id
 }

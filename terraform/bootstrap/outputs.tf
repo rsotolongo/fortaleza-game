@@ -1,23 +1,30 @@
-output "deploy_role_arn" {
-  description = "Value for the AWS_ROLE_ARN repository variable."
-  value       = aws_iam_role.deploy.arn
+output "workload_identity_provider" {
+  description = "Value for the GCP_WORKLOAD_IDENTITY_PROVIDER repository variable."
+  value       = google_iam_workload_identity_pool_provider.github.name
+}
+
+output "deploy_service_account" {
+  description = "Value for the GCP_DEPLOY_SERVICE_ACCOUNT repository variable."
+  value       = google_service_account.deploy.email
 }
 
 output "state_bucket" {
   description = "Value for the TF_STATE_BUCKET repository variable."
-  value       = aws_s3_bucket.state.id
+  value       = google_storage_bucket.state.name
 }
 
-output "aws_region" {
-  description = "Value for the AWS_REGION repository variable."
-  value       = var.aws_region
+output "hosting_site_id" {
+  description = "Set hosting_site_id in the main stack if this is not the project id."
+  value       = local.hosting_site_id
 }
 
 output "github_variables_commands" {
   description = "Run these once to configure the repository."
   value       = <<-EOT
-    gh variable set AWS_ROLE_ARN --repo ${var.github_repository} --body "${aws_iam_role.deploy.arn}"
-    gh variable set TF_STATE_BUCKET --repo ${var.github_repository} --body "${aws_s3_bucket.state.id}"
-    gh variable set AWS_REGION --repo ${var.github_repository} --body "${var.aws_region}"
+    gh variable set GCP_PROJECT_ID --repo ${var.github_repository} --body "${var.project_id}"
+    gh variable set GCP_REGION --repo ${var.github_repository} --body "${var.region}"
+    gh variable set GCP_WORKLOAD_IDENTITY_PROVIDER --repo ${var.github_repository} --body "${google_iam_workload_identity_pool_provider.github.name}"
+    gh variable set GCP_DEPLOY_SERVICE_ACCOUNT --repo ${var.github_repository} --body "${google_service_account.deploy.email}"
+    gh variable set TF_STATE_BUCKET --repo ${var.github_repository} --body "${google_storage_bucket.state.name}"
   EOT
 }

@@ -9,7 +9,7 @@ This repository contains:
 
 * a faithful **.NET 10 port of the game engine** (console game, 50 + 55 rooms, ES/EN),
 * a **web version**: a stateless ASP.NET Core API plus a mobile-friendly Vue 3 app,
-* **Terraform** to run the web version on AWS (Lambda + S3 + CloudFront) for about $0,
+* **Terraform** to run the web version on Google Cloud (Cloud Run + Firebase Hosting) for about $0,
 * the **original Pascal sources**, a FreePascal-compatible copy and compiled executables used to verify that
   the port behaves like the original,
 * **minimal winning tracks** (`saves/`) for the four game variants.
@@ -19,13 +19,13 @@ This repository contains:
 ## Architecture
 
 ```
-                         ┌──────────────────────── AWS ────────────────────────┐
-                         │                                                      │
- Browser (Vue 3 app) ───►│ CloudFront ─┬─ /*      ─► S3 (private bucket)         │
-                         │             └─ /api/*  ─► Lambda Function URL        │
-                         │                          └─ Fortaleza.Api (.NET 10)  │
-                         │                              └─ Fortaleza (engine)   │
-                         └──────────────────────────────────────────────────────┘
+                         ┌──────────────────── Google Cloud ─────────────────────┐
+                         │                                                        │
+ Browser (Vue 3 app) ───►│ Firebase Hosting ─┬─ /*       ─► static files          │
+                         │                   └─ /api/**  ─► Cloud Run             │
+                         │                                  └─ Fortaleza.Api      │
+                         │                                     └─ Fortaleza       │
+                         └────────────────────────────────────────────────────────┘
 ```
 
 * **`Fortaleza`** is the game engine and the console front end. Rooms, items, creatures, links (doors,
@@ -36,16 +36,15 @@ This repository contains:
   player's *track* (the list of commands so far, the same data as a saved `.TRK` file), so every request
   carries the track, the API rebuilds the game by replaying it, runs the new command and returns the
   new output and the updated track. This makes every player isolated, needs no database or registration,
-  and lets it run on AWS Lambda where any instance can answer any request.
+  and lets it run on Cloud Run where any instance can answer any request.
 * **`Fortaleza.Web`** is the Vue 3 UI: terminal-like transcript, tappable verbs and objects, command history,
   save (downloads the track) and load (uploads a track), and resume after a reload. The track lives in the
   browser (`localStorage`).
 * The engine keeps its per-request settings (language, output sink, visibility) in `AsyncLocal`s, which is what
   lets many web players with different languages run concurrently without interfering.
-* **Security model:** behind CloudFront the API only answers requests carrying a secret header
-  (`X-Origin-Verify`) that CloudFront adds; it fails closed when running in Lambda without that secret.
-  The public `/api` path itself is, by design, callable by anyone who can reach the site. See
-  [terraform/README.md](terraform/README.md).
+* **Security model:** the API holds no state and no secrets, and the public `/api` path is, by design, callable
+  by anyone who can reach the site (Firebase Hosting calls Cloud Run anonymously, so its `run.app` URL is public
+  too). A cap on Cloud Run instances bounds what abuse can cost. See [terraform/README.md](terraform/README.md).
 
 ## Repository layout
 
@@ -55,9 +54,9 @@ This repository contains:
 | `src/Fortaleza.Api` | ASP.NET Core minimal API (`/api/games/start`, `play`, `load`), also hosts the built site locally. |
 | `src/Fortaleza.Web` | Vue 3 + Vite single-page app. |
 | `tests/Fortaleza.Tests` | Engine tests, including playing every minimal path from the start. |
-| `tests/Fortaleza.Api.Tests` | API tests: stateless replay, isolation under concurrency, track upload/limits, origin secret. |
+| `tests/Fortaleza.Api.Tests` | API tests: stateless replay, isolation under concurrency, track upload/limits. |
 | `saves/` | `FORT1_ES/EN.TRK`, `FORT2_ES/EN.TRK`: the shortest known winning track per game and language. |
-| `terraform/` | AWS infrastructure and deploy scripts. |
+| `terraform/` | Google Cloud infrastructure and deploy scripts. |
 | `original/` | The original Turbo Pascal sources by Miguel Cepero (GPLv3+). |
 | `modern/` | FreePascal-compatible copy of the Pascal sources. `build.bat` builds `FORT1.EXE` / `FORT2.EXE` from it. |
 | `games/` | Compiled FreePascal builds of the original Spanish games (Windows). |
@@ -67,7 +66,7 @@ This repository contains:
 
 * [.NET 10 SDK](https://dotnet.microsoft.com/download)
 * Node 20+ and npm (web version only)
-* Terraform >= 1.6 and AWS credentials (deployment only)
+* Terraform >= 1.6, Docker and the gcloud CLI (deployment only)
 * FreePascal `fpc` (only to rebuild the original executables with `build.bat`)
 
 ## Play it
@@ -129,18 +128,19 @@ The Spanish tracks in `saves/` are ASCII-only on purpose, so the original execut
 `games/FORT1.exe saves/FORT1_ES.TRK` (and `FORT2.exe` with `FORT2_ES.TRK`) executes the track at startup and reaches
 the ending. The English tracks only apply to this port; the original has no English version.
 
-## Deploy to AWS
+## Deploy to Google Cloud
 
-```powershell
-./terraform/deploy.ps1        # PowerShell 7
-./terraform/deploy.sh         # Linux, macOS, Git Bash
+After the one-time `terraform/bootstrap` stack ([terraform/README.md](terraform/README.md#one-time-setup)):
+
+```bash
+GOOGLE_CLOUD_PROJECT=my-project ./terraform/deploy.sh    # or deploy.ps1 in PowerShell 7
 ```
 
-Pushes and merges to `master` also deploy automatically through GitHub Actions (OIDC, no stored AWS keys); the
-one-time setup is in [terraform/README.md](terraform/README.md#automatic-deployment-github-actions).
+Pushes and merges to `master` also deploy automatically through GitHub Actions (Workload Identity Federation,
+no stored keys); the setup is in [terraform/README.md](terraform/README.md#automatic-deployment-github-actions).
 
-It builds the site, publishes the API for Lambda (arm64) and runs `terraform apply`. Inside the AWS free
-tier this costs about nothing. Custom domain, cost guards and state backend options are in
+It builds the site and the API container, pushes the image to Artifact Registry, runs `terraform apply` and
+publishes the site to Firebase Hosting. Inside the free quotas this costs about nothing. Custom domain, cost guards and state backend options are in
 [terraform/README.md](terraform/README.md).
 
 ## Credits and license

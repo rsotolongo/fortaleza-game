@@ -32,7 +32,7 @@ jobs:
           dotnet-version: 10.0.x
       - run: dotnet test Fortaleza.slnx --configuration Release
 
-  # Runs npm and NuGet install scripts, so this job has no AWS credentials at all.
+  # Runs npm and NuGet install scripts, so this job has no Google Cloud credentials at all.
   build:
     needs: test
     runs-on: ubuntu-latest
@@ -51,12 +51,14 @@ jobs:
           cache: npm
           cache-dependency-path: src/Fortaleza.Web/package-lock.json
 
-      - name: Build the site and the Lambda package
+      - name: Build the site and the API container image
         run: |
           npm ci --prefix src/Fortaleza.Web
           npm run build --prefix src/Fortaleza.Web -- --outDir "$GITHUB_WORKSPACE/terraform/build/site" --emptyOutDir
-          dotnet publish src/Fortaleza.Api -c Release -r linux-arm64 --self-contained false \
-            -p:PublishReadyToRun=true -p:ExcludeWwwroot=true -o terraform/build/publish
+          dotnet publish src/Fortaleza.Api -c Release -r linux-x64 -t:PublishContainer \
+            -p:PublishReadyToRun=true -p:ExcludeWwwroot=true -p:ContainerFamily=noble-chiseled \
+            -p:ContainerRepository=fortaleza-api -p:ContainerImageTag=build \
+            -p:ContainerArchiveOutputPath="$GITHUB_WORKSPACE/terraform/build/api-image.tar.gz"
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -65,13 +67,17 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  # Only this job can assume the AWS role, and it only runs pre-built artifacts and Terraform.
+  # Only this job can impersonate the deploy service account, and it only runs pre-built artifacts, Terraform
+  # and the Firebase CLI (installed without npm install scripts).
   deploy:
     needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # lets the job request an OIDC token to assume the AWS role
+      id-token: write # lets the job request an OIDC token for Workload Identity Federation
+    env:
+      GOOGLE_CLOUD_PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      GOOGLE_CLOUD_REGION: ${{ vars.GCP_REGION }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -86,29 +92,42 @@ jobs:
         with:
           terraform_wrapper: false
 
-      - uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
+          node-version: 22
 
-      # Runners are ephemeral, so the state must live in S3. The override file keeps local
+      - name: Install the Firebase CLI
+        run: |
+          npm install --ignore-scripts --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/firebase" firebase-tools@15.32.1
+          echo "FIREBASE_CLI=$RUNNER_TEMP/firebase/node_modules/.bin/firebase" >> "$GITHUB_ENV"
+
+      - id: auth
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+          token_format: access_token
+
+      - name: Log in to Artifact Registry
+        env:
+          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+        run: |
+          [[ "$GOOGLE_CLOUD_REGION" =~ ^[a-z0-9-]+$ ]] || { echo "Invalid GCP_REGION"; exit 1; }
+          docker login -u oauth2accesstoken --password-stdin "https://$GOOGLE_CLOUD_REGION-docker.pkg.dev" <<< "$ACCESS_TOKEN"
+
+      # Runners are ephemeral, so the state must live in GCS. The override file keeps local
       # runs of deploy.ps1 / deploy.sh on local state without any change to the Terraform code.
       - name: Configure remote state
         working-directory: terraform
         env:
           STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
-          STATE_REGION: ${{ vars.AWS_REGION }}
         run: |
-          [[ "$STATE_BUCKET" =~ ^[a-z0-9.-]{3,63}$ ]] || { echo "Invalid TF_STATE_BUCKET"; exit 1; }
-          [[ "$STATE_REGION" =~ ^[a-z0-9-]+$ ]] || { echo "Invalid AWS_REGION"; exit 1; }
+          [[ "$STATE_BUCKET" =~ ^[a-z0-9._-]{3,222}$ ]] || { echo "Invalid TF_STATE_BUCKET"; exit 1; }
           cat > backend_override.tf <<EOF
           terraform {
-            backend "s3" {
-              bucket       = "$STATE_BUCKET"
-              key          = "fortaleza/terraform.tfstate"
-              region       = "$STATE_REGION"
-              use_lockfile = true
-              encrypt      = true
+            backend "gcs" {
+              bucket = "$STATE_BUCKET"
+              prefix = "fortaleza"
             }
           }
           EOF
