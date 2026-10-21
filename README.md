@@ -4,8 +4,8 @@
 
 A modern, bilingual (Spanish / English) port of **La Fortaleza**, the text adventure written in Turbo Pascal
 in the 1990s by [Miguel Cepero](https://twitter.com/miguelcepero) (Merchise Group). You explore a living fortress,
-solve riddles, trade objects with strange creatures and try to defeat the Beast (game I) or escape the
-Fortress (game II).
+solve riddles, trade objects with strange creatures and try to defeat the Beast (game I) or escape La
+Fortaleza (game II).
 
 This repository contains:
 

@@ -84,7 +84,7 @@ export const texts = {
     lost: 'Game over',
     playAgain: 'Play again',
     objects: 'Tap an object to use it',
-    starting: 'Entering the Fortress…',
+    starting: 'Entering La Fortaleza…',
     about: 'About',
     introduction: 'Introduction',
     transcript: 'Adventure log',
