@@ -20,6 +20,13 @@ export const themes = {
       '--echo': '#8fc1a9',
       '--danger': '#e0715f',
       '--good': '#7fcf8a',
+      '--desk': '#0b0908',
+      '--p-bg': '#e9e2d6',
+      '--p-chip': '#dcd3c2',
+      '--p-text': '#1a1408',
+      '--p-accent': '#7a4f00',
+      '--p-echo': '#1f5c46',
+      '--p-edge': '#6b5f50',
       'color-scheme': 'dark'
     }
   },
@@ -38,6 +45,7 @@ export const themes = {
       '--echo': '#2f7358',
       '--danger': '#b3422f',
       '--good': '#276a33',
+      '--desk': '#cbbd9c',
       'color-scheme': 'light'
     }
   },
@@ -58,6 +66,7 @@ export const themes = {
       '--good': '#5dff6a',
       '--narrative': mono,
       '--ui': mono,
+      '--desk': '#000000',
       'color-scheme': 'dark'
     }
   },
@@ -76,6 +85,7 @@ export const themes = {
       '--echo': '#7ff0ff',
       '--danger': '#ff7a7a',
       '--good': '#7aff9a',
+      '--desk': '#000000',
       'color-scheme': 'dark'
     }
   },
@@ -95,6 +105,7 @@ export const themes = {
       '--danger': '#a80000',
       '--good': '#005f1c',
       '--weight': '500',
+      '--desk': '#bdbab0',
       'color-scheme': 'light'
     }
   }

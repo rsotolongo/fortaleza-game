@@ -1,38 +1,25 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { texts } from '../i18n'
+import { SCROLL, TYPEWRITE, interaction, setInteraction } from '../interaction'
 import { applyTheme, loadTheme, saveTheme, themes } from '../themes'
+import SelectField from './SelectField.vue'
 
-defineProps({ language: String })
+const props = defineProps({ language: String })
 
 const dialog = ref(null)
 const theme = ref(loadTheme())
-const open = ref(false)
-const trigger = ref(null)
 
-function choose(id) {
+const themeOptions = computed(() => Object.entries(themes).map(([id, entry]) => ({ id, label: entry.names[props.language] })))
+const interactionOptions = computed(() => [
+  { id: SCROLL, label: texts[props.language].interactionScroll },
+  { id: TYPEWRITE, label: texts[props.language].interactionTypewrite }
+])
+
+function chooseTheme(id) {
   theme.value = id
-  open.value = false
-  trigger.value.focus()
   applyTheme(id)
   saveTheme(id)
-}
-
-function step(delta) {
-  const ids = Object.keys(themes)
-  choose(ids[(ids.indexOf(theme.value) + delta + ids.length) % ids.length])
-}
-
-function leave(event) {
-  if (!event.currentTarget.contains(event.relatedTarget)) open.value = false
-}
-
-function escape(event) {
-  if (!open.value) return
-  event.stopPropagation()
-  event.preventDefault()
-  open.value = false
-  trigger.value.focus()
 }
 
 function show() {
@@ -54,36 +41,13 @@ defineExpose({ show })
         <h2 id="settings-title">{{ texts[language].settings }}</h2>
       </header>
 
-      <div class="field">
-        <span id="theme-label">{{ texts[language].theme }}</span>
-        <div class="select" @focusout="leave">
-          <button
-            ref="trigger"
-            type="button"
-            class="trigger"
-            aria-haspopup="listbox"
-            aria-labelledby="theme-label"
-            :aria-expanded="open"
-            @click="open = !open"
-            @keydown.down.prevent="step(1)"
-            @keydown.up.prevent="step(-1)"
-            @keydown.esc="escape"
-          >
-            <span>{{ themes[theme].names[language] }}</span>
-            <svg viewBox="0 0 12 8" width="12" height="8" aria-hidden="true">
-              <path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </button>
-          <ul v-if="open" role="listbox" aria-labelledby="theme-label" @mousedown.prevent @keydown.esc="escape">
-            <li v-for="(entry, id) in themes" :key="id" role="none">
-              <button type="button" role="option" :aria-selected="id === theme" @click="choose(id)">
-                {{ entry.names[language] }}
-                <span v-if="id === theme" aria-hidden="true">✓</span>
-              </button>
-            </li>
-          </ul>
-        </div>
-      </div>
+      <SelectField :label="texts[language].theme" :options="themeOptions" :model-value="theme" @update:model-value="chooseTheme" />
+      <SelectField
+        :label="texts[language].interaction"
+        :options="interactionOptions"
+        :model-value="interaction"
+        @update:model-value="setInteraction"
+      />
 
       <form method="dialog">
         <button class="primary" autofocus>{{ texts[language].close }}</button>

@@ -88,6 +88,8 @@ const advice = {
     '- Para terminar: terminar, abandonar. Este comando termina provocando su muerte.',
     '## Rastros',
     'Desde el menú (⋯) puede guardar un rastro, que almacena todos los comandos que ha tecleado y que afectan el estado de la Fortaleza (no cuentan mirar, ver, inventario, interrogar, etc.), y volver a cargarlo en cualquier momento. Como se trata de un fichero de texto, puede editarse; se permiten comentarios tipo Pascal "{ }". Los rastros son una de las herramientas más útiles cuando se está resolviendo una Fortaleza.',
+    '## Máquina de escribir',
+    'Si activa la interacción "Máquina de escribir" en Ajustes, el texto se escribe letra a letra sobre una hoja de papel (toque la hoja o pulse Esc para verlo completo). Pulse Ctrl+L en la línea de órdenes para arrancar un papiro nuevo, como en el original.',
     '## El comercial de siempre',
     'La Fortaleza es un juego abierto. Por esto, todas las sugerencias son bienvenidas. Es probable que usted desee crear su propio juego, con características similares a las de la Fortaleza. Puede contactar al autor: Miguel Enrique Cepero, Instituto de Informática, Universidad Central de Las Villas.',
     'La Fortaleza es un producto de Merchise Software, que no se dedica a hacer jueguitos solamente.'
@@ -126,6 +128,8 @@ const advice = {
     '- To finish: quit, exit. This command ends up causing your death.',
     '## Tracks',
     'From the menu (⋯) you can save a track, which stores every command you have typed that affects the state of the Fortress (looking, seeing, inventory, asking, etc. do not count), and load it again at any time. Since it is a text file, it can be edited; Pascal-style comments "{ }" are allowed. Tracks are one of the most useful tools when solving a Fortress.',
+    '## Typewrite',
+    'If you turn on the "Typewrite" interaction in Settings, text is typed out letter by letter on a sheet of paper (tap the sheet or press Esc to see it all at once). Press Ctrl+L in the command line to tear off a fresh sheet, as in the original.',
     '## The usual commercial',
     'La Fortaleza is an open game. Therefore, all suggestions are welcome. You may well want to create your own game with features similar to those of the Fortress. You can contact the author: Miguel Enrique Cepero, Instituto de Informática, Universidad Central de Las Villas.',
     'La Fortaleza is a product of Merchise Software, which does not make little games only.'
