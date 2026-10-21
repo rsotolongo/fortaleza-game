@@ -11,7 +11,7 @@ const emit = defineEmits(['start', 'resume', 'language', 'about', 'introduction'
   <main class="start">
     <header class="hero">
       <div class="crest" aria-hidden="true">🏰</div>
-      <h1>{{ texts[language].title }}</h1>
+      <h1 tabindex="-1">{{ texts[language].title }}</h1>
       <p>{{ texts[language].subtitle }}</p>
       <p class="modern-port">
         {{ texts[language].modernPortPre }}<a :href="modernPortUrl" target="_blank" rel="noopener">{{ modernPortUrl }}</a>{{ texts[language].modernPortPost }}
@@ -19,8 +19,8 @@ const emit = defineEmits(['start', 'resume', 'language', 'about', 'introduction'
     </header>
 
     <div class="lang" role="group" :aria-label="texts[language].language">
-      <button :class="{ on: language === 'es' }" @click="emit('language', 'es')">Español</button>
-      <button :class="{ on: language === 'en' }" @click="emit('language', 'en')">English</button>
+      <button lang="es" :class="{ on: language === 'es' }" :aria-pressed="language === 'es'" @click="emit('language', 'es')">Español</button>
+      <button lang="en" :class="{ on: language === 'en' }" :aria-pressed="language === 'en'" @click="emit('language', 'en')">English</button>
     </div>
 
     <button v-if="resumable" class="card resume" :disabled="busy" @click="emit('resume')">
@@ -43,11 +43,11 @@ const emit = defineEmits(['start', 'resume', 'language', 'about', 'introduction'
     </div>
 
     <footer class="colophon">
-      <button class="link" @click="emit('introduction', 1)">📜 {{ texts[language].introduction }} I</button>
-      <button class="link" @click="emit('introduction', 2)">📜 {{ texts[language].introduction }} II</button>
-      <button class="link" @click="emit('advices')">💡 {{ texts[language].advices }}</button>
-      <button class="link" @click="emit('settings')">⚙️ {{ texts[language].settings }}</button>
-      <button class="link" @click="emit('about')">ⓘ {{ texts[language].about }}</button>
+      <button class="link" @click="emit('introduction', 1)"><span aria-hidden="true">📜</span> {{ texts[language].introduction }} I</button>
+      <button class="link" @click="emit('introduction', 2)"><span aria-hidden="true">📜</span> {{ texts[language].introduction }} II</button>
+      <button class="link" @click="emit('advices')"><span aria-hidden="true">💡</span> {{ texts[language].advices }}</button>
+      <button class="link" @click="emit('settings')"><span aria-hidden="true">⚙️</span> {{ texts[language].settings }}</button>
+      <button class="link" @click="emit('about')"><span aria-hidden="true">ⓘ</span> {{ texts[language].about }}</button>
     </footer>
   </main>
 </template>

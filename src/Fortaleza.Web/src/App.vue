@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref, watch, watchEffect } from 'vue'
 import * as api from './api'
 import { browserLanguage, texts } from './i18n'
 import { clearSession, loadSession, saveSession } from './session'
@@ -22,6 +22,18 @@ const settings = ref(null)
 let noticeTimer = 0
 
 const gameLanguage = computed(() => session.value?.language ?? uiLanguage.value)
+
+watchEffect(() => {
+  document.documentElement.lang = gameLanguage.value
+})
+
+watch(
+  () => !!session.value,
+  async () => {
+    await nextTick()
+    document.querySelector('h1')?.focus()
+  }
+)
 
 function toast(message) {
   notice.value = message

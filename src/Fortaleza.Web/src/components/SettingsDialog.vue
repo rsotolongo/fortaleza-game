@@ -8,10 +8,12 @@ defineProps({ language: String })
 const dialog = ref(null)
 const theme = ref(loadTheme())
 const open = ref(false)
+const trigger = ref(null)
 
 function choose(id) {
   theme.value = id
   open.value = false
+  trigger.value.focus()
   applyTheme(id)
   saveTheme(id)
 }
@@ -30,6 +32,7 @@ function escape(event) {
   event.stopPropagation()
   event.preventDefault()
   open.value = false
+  trigger.value.focus()
 }
 
 function show() {
@@ -55,6 +58,7 @@ defineExpose({ show })
         <span id="theme-label">{{ texts[language].theme }}</span>
         <div class="select" @focusout="leave">
           <button
+            ref="trigger"
             type="button"
             class="trigger"
             aria-haspopup="listbox"
@@ -71,7 +75,7 @@ defineExpose({ show })
             </svg>
           </button>
           <ul v-if="open" role="listbox" aria-labelledby="theme-label" @mousedown.prevent @keydown.esc="escape">
-            <li v-for="(entry, id) in themes" :key="id">
+            <li v-for="(entry, id) in themes" :key="id" role="none">
               <button type="button" role="option" :aria-selected="id === theme" @click="choose(id)">
                 {{ entry.names[language] }}
                 <span v-if="id === theme" aria-hidden="true">✓</span>
