@@ -18,7 +18,7 @@ public class Fort2(Room start) : GameEngine(start)
     public static readonly IReadOnlyList<LocalizedText> Escape =
     [
         new("De repente las paredes comienzan a desvanecerse.\nUsted no quiere dar crédito a sus ojos: \n¡Ha logrado salir de la Fortaleza!",
-            "Suddenly the walls begin to fade away.\nYou cannot believe your eyes: \nYou have managed to get out of the Fortress!")
+            "Suddenly the walls begin to fade away.\nYou cannot believe your eyes: \nYou have managed to get out of La Fortaleza!")
     ];
 
     public static readonly IReadOnlyList<LocalizedText> EpilogueFirstPage =
@@ -31,7 +31,7 @@ public class Fort2(Room start) : GameEngine(start)
         new("Usted recuerda a la Doncella del Lago, y piensa en la vida que hubiera podido llevar junto a ella.",
             "You remember the Lady of the Lake, and think of the life you could have led by her side."),
         new("Piensa también en el Hechicero, un poderoso amigo, y en la remota y hermosa posibilidad de hacer renacer la civilización de los horantes. Ahora, sin la Bestia y sin la Hija del Hechicero, la Fortaleza podría ser convertida en un verdadero paraíso.",
-            "You also think of the Sorcerer, a powerful friend, and of the remote and beautiful possibility of reviving the civilization of the horantes. Now, without the Beast and without the Sorcerer's Daughter, the Fortress could be turned into a true paradise."),
+            "You also think of the Sorcerer, a powerful friend, and of the remote and beautiful possibility of reviving the civilization of the horantes. Now, without the Beast and without the Sorcerer's Daughter, La Fortaleza could be turned into a true paradise."),
         new("", ""),
         new("¿Quién está al otro extremo de los hilos que manejan al hombre?", "Who is at the other end of the strings that move man?"),
         new("¿Quién nos hace confundir lo que somos y lo que queremos ser?", "Who makes us confuse what we are with what we want to be?"),
@@ -43,7 +43,7 @@ public class Fort2(Room start) : GameEngine(start)
     public static readonly IReadOnlyList<LocalizedText> EpilogueLastPage =
     [
         new("Usted vuelve la cabeza hacia el lugar que ocupó la Fortaleza. Ahora lo comprende todo claramente, esta era la venganza de la Bestia: dejarlo vivir, pero fuera de la Fortaleza.",
-            "You turn your head toward the place the Fortress occupied. Now you understand everything clearly, this was the Beast's revenge: to let you live, but outside the Fortress."),
+            "You turn your head toward the place La Fortaleza occupied. Now you understand everything clearly, this was the Beast's revenge: to let you live, but outside La Fortaleza."),
         new("", ""),
         new("¿Quería un final feliz? Espere la próxima versión.", "Did you want a happy ending? Wait for the next version."),
         new("", ""),

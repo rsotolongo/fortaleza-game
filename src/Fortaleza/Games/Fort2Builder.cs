@@ -45,7 +45,7 @@ public static class Fort2Builder
         (new("el salón de las velas", "the hall of candles"),
             new("Deben ser varios kilómetros sembrados de velas. En el centro hay un círculo vacío.", "There must be several kilometers sown with candles. In the center there is an empty circle.")),
         (new("el cuarto del Inmortal", "the Immortal's room"),
-            new("Esta habitación luce más vieja que el resto de la Fortaleza. Hay muchas cosas colgadas de la pared: retratos, cartas, reconocimientos, estandartes y muchas telas de arañas.", "This room looks older than the rest of the Fortress. There are many things hanging on the wall: portraits, letters, certificates, banners and many spider webs.")),
+            new("Esta habitación luce más vieja que el resto de la Fortaleza. Hay muchas cosas colgadas de la pared: retratos, cartas, reconocimientos, estandartes y muchas telas de arañas.", "This room looks older than the rest of La Fortaleza. There are many things hanging on the wall: portraits, letters, certificates, banners and many spider webs.")),
         (new("el cuarto de juguetes", "the toy room"),
             new("Hay miles de juguetes regados por todas partes. Usted siente deseos de volver a ser un niño.", "There are thousands of toys scattered everywhere. You feel the desire to be a child again.")),
         (new("las Ruinas", "the Ruins"),
@@ -79,7 +79,7 @@ public static class Fort2Builder
         (new("la Catedral", "the Cathedral"),
             new("Es un lugar impresionante. Las paredes crecen hasta una altura increíble y se unen en una serie de simétricas torres. Usted se siente oprimido por la arquitectura, como si en realidad estuviese ante los ojos de Dios, en el día del juicio final.", "It is an impressive place. The walls rise to an incredible height and join in a series of symmetrical towers. You feel oppressed by the architecture, as if you were really standing before the eyes of God on the day of the last judgment.")),
         (new("el Desierto otra vez", "the Desert again"),
-            new("El calor lo asfixia. Usted no comprende cómo es posible que el clima varíe tanto de un lugar a otro de la Fortaleza.", "The heat suffocates you. You cannot understand how the climate can vary so much from one place to another in the Fortress.")),
+            new("El calor lo asfixia. Usted no comprende cómo es posible que el clima varíe tanto de un lugar a otro de la Fortaleza.", "The heat suffocates you. You cannot understand how the climate can vary so much from one place to another in La Fortaleza.")),
         (new("un extenso valle", "a vast valley"),
             new("Siente deseos de construir una casa y quedarse a vivir en el valle. Por todos lados crece una especie de árbol frutal que, valiéndose de dos manos que salen de su tronco, es capaz de cultivarse ella misma.", "You feel like building a house and staying to live in the valley. Everywhere grows a kind of fruit tree that, using two hands that come out of its trunk, is able to cultivate itself.")),
         (new("la cima del Pico Negro", "the summit of the Black Peak"),
@@ -112,8 +112,8 @@ public static class Fort2Builder
             new("Es un salón de pruebas tradicional. Este tipo de salón fue usado ampliamente por los horantes para educar a sus hijos.", "It is a traditional trial hall. This type of hall was widely used by the horantes to educate their children.")),
         (new("el Salón Blanco", "the White Hall"),
             new("Es un salón de pruebas tradicional. Este tipo de salón fue usado ampliamente por los horantes para educar a sus hijos. Es el último de la prueba.", "It is a traditional trial hall. This type of hall was widely used by the horantes to educate their children. It is the last one of the trial.")),
-        (new("los límites de la Fortaleza", "the limits of the Fortress"),
-            new("A su derecha crece la tercera muralla, hasta una altura irracional. Usted no puede creer que aquí termine la Fortaleza. Del otro lado de la muralla se escucha (usted no entiende cómo) el canto de los pájaros y el sonido del viento en los árboles.", "On your right the third wall rises to an irrational height. You cannot believe the Fortress ends here. From the other side of the wall you hear (you do not understand how) the singing of birds and the sound of the wind in the trees.")),
+        (new("los límites de la Fortaleza", "the limits of La Fortaleza"),
+            new("A su derecha crece la tercera muralla, hasta una altura irracional. Usted no puede creer que aquí termine la Fortaleza. Del otro lado de la muralla se escucha (usted no entiende cómo) el canto de los pájaros y el sonido del viento en los árboles.", "On your right the third wall rises to an irrational height. You cannot believe La Fortaleza ends here. From the other side of the wall you hear (you do not understand how) the singing of birds and the sound of the wind in the trees.")),
         (new("la Pirámide del Hechicero", "the Sorcerer's Pyramid"),
             new("Es una construcción gigantesca, a base de piedras. Al parecer, las piedras fueron colocadas sin orden alguno, olvidando las ventanas. El lugar está iluminado con numerosas antorchas.", "It is a gigantic construction made of stones. Apparently, the stones were placed in no order at all, forgetting the windows. The place is lit by numerous torches.")),
         (new("las Habitaciones del Hechicero", "the Sorcerer's Rooms"),
@@ -423,7 +423,7 @@ public static class Fort2Builder
                 r[18]));
         r[13].Children.Add(new Item(
                 new("Piedra", "Stone"),
-                new("Es una piedra común. Usted se pregunta qué hace en la Fortaleza, donde todo es tan exótico.", "It is an ordinary stone. You wonder what it is doing in the Fortress, where everything is so exotic."),
+                new("Es una piedra común. Usted se pregunta qué hace en la Fortaleza, donde todo es tan exótico.", "It is an ordinary stone. You wonder what it is doing in La Fortaleza, where everything is so exotic."),
                 5));
         r[13].Children.Add(new Troll(
                 new("Jardinero", "Gardener"),
@@ -950,7 +950,7 @@ public static class Fort2Builder
 
         r[40].Children.Add(new Item(
                 new("Inscripción", "Inscription"),
-                new("Dice:\n\"Aquí habitaron los horantes durante mucho tiempo, hasta que La Bestia ocupó el lugar. Ellos levantaron cada pared de la Fortaleza, solo ellos saben cómo salir.\"", "It says:\\n\"The horantes lived here for a long time, until the Beast took the place. They raised every wall of the Fortress, only they know how to get out.\""),
+                new("Dice:\n\"Aquí habitaron los horantes durante mucho tiempo, hasta que La Bestia ocupó el lugar. Ellos levantaron cada pared de la Fortaleza, solo ellos saben cómo salir.\"", "It says:\\n\"The horantes lived here for a long time, until the Beast took the place. They raised every wall of La Fortaleza, only they know how to get out.\""),
                 1));
         r[40].Children.Add(new OpenLink(
                 new("Túnel", "Tunnel"),
@@ -976,7 +976,7 @@ public static class Fort2Builder
                     new("Horante", "Horante"),
                     new("Es el último de los horantes.", "He is the last of the horantes."),
                     "Muñeco diabólico",
-                    new("Busca las dos mitades del Manuscrito de los Horantes y descífralo. Luego coloca las marcas para abrir la Fortaleza.", "Look for the two halves of the Manuscript of the Horantes and decipher it. Then place the marks to open the Fortress."),
+                    new("Busca las dos mitades del Manuscrito de los Horantes y descífralo. Luego coloca las marcas para abrir la Fortaleza.", "Look for the two halves of the Manuscript of the Horantes and decipher it. Then place the marks to open La Fortaleza."),
                     new("El horante trata de articular algo, pero un terrible dolor en su pierna derecha no lo deja.", "The horante tries to articulate something, but a terrible pain in his right leg will not let him."))));
 
         r[41].Children.Add(new Link(
