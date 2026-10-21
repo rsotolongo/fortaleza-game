@@ -1,12 +1,15 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref, watch, watchEffect } from 'vue'
 import * as api from './api'
 import { browserLanguage, texts } from './i18n'
+import { TYPEWRITE, interaction } from './interaction'
 import { clearSession, loadSession, saveSession } from './session'
 import { toEntries } from './transcript'
 import StartScreen from './components/StartScreen.vue'
 import GameView from './components/GameView.vue'
 import AboutDialog from './components/AboutDialog.vue'
+import ReaderDialog from './components/ReaderDialog.vue'
+import SettingsDialog from './components/SettingsDialog.vue'
 
 const stored = ref(loadSession())
 const uiLanguage = ref(stored.value?.language ?? browserLanguage())
@@ -15,9 +18,24 @@ const entries = ref([])
 const busy = ref(false)
 const notice = ref('')
 const about = ref(null)
+const settled = ref(false)
+const reader = ref(null)
+const settings = ref(null)
 let noticeTimer = 0
 
 const gameLanguage = computed(() => session.value?.language ?? uiLanguage.value)
+
+watchEffect(() => {
+  document.documentElement.lang = gameLanguage.value
+})
+
+watch(
+  () => !!session.value,
+  async () => {
+    await nextTick()
+    document.querySelector('h1')?.focus()
+  }
+)
 
 function toast(message) {
   notice.value = message
@@ -30,6 +48,7 @@ function persist() {
 }
 
 function apply(response, echo) {
+  const winning = response.status === 'won' && session.value?.status !== 'won'
   session.value = {
     game: response.game,
     language: response.language,
@@ -37,13 +56,20 @@ function apply(response, echo) {
     track: response.track
   }
   if (echo) entries.value.push({ kind: 'input', text: echo })
+  if (winning && interaction.value === TYPEWRITE) entries.value.push({ kind: 'tear' })
   entries.value.push(...toEntries(response.output, texts[response.language].markers))
+  persist()
+}
+
+function newSheet() {
+  entries.value.push({ kind: 'tear' })
   persist()
 }
 
 function reset() {
   clearSession()
   stored.value = null
+  settled.value = false
   session.value = null
   entries.value = []
 }
@@ -62,6 +88,7 @@ async function guarded(action) {
 const start = (game) =>
   guarded(async () => {
     entries.value = []
+    settled.value = false
     apply(await api.startGame(game, uiLanguage.value))
   })
 
@@ -70,6 +97,7 @@ function resume() {
   uiLanguage.value = saved.language
   session.value = { game: saved.game, language: saved.language, status: saved.status, track: saved.track }
   entries.value = saved.entries
+  settled.value = true
 }
 
 const command = (text) =>
@@ -112,6 +140,9 @@ const load = (file) =>
     @start="start"
     @resume="resume"
     @about="about.show()"
+    @introduction="reader.show('introduction', $event)"
+    @advices="reader.show('advices')"
+    @settings="settings.show()"
   />
   <GameView
     v-else
@@ -120,13 +151,20 @@ const load = (file) =>
     :status="session.status"
     :entries="entries"
     :busy="busy"
+    :settled="settled"
     @command="command"
+    @sheet="newSheet"
     @save="save"
     @load="load"
     @new="reset"
     @about="about.show()"
+    @introduction="reader.show('introduction', session.game)"
+    @advices="reader.show('advices')"
+    @settings="settings.show()"
   />
   <AboutDialog ref="about" :language="gameLanguage" />
+  <ReaderDialog ref="reader" :language="gameLanguage" />
+  <SettingsDialog ref="settings" :language="gameLanguage" />
   <transition name="fade">
     <div v-if="notice" class="toast" role="status">{{ notice }}</div>
   </transition>

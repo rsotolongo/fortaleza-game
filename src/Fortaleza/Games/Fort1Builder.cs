@@ -52,7 +52,7 @@ public static class Fort1Builder
             new("Todo palpita rítmicamente. Usted siente cómo los latidos se adueñan del lugar, especialmente de su propio corazón.", "Everything throbs rhythmically. You feel the beats taking over the place, especially your own heart.")),
         (new("el Cerebro de la Bestia", "the Brain of the Beast"),
             new("Es como un tarjetero gigante. Cada idea está escrita en una tarjeta y, cuando es necesario, la tarjeta es sacada por una mano invisible y leída al resto de la Bestia.", "It is like a giant card index. Each idea is written on a card and, when necessary, the card is pulled out by an invisible hand and read to the rest of the Beast.")),
-        (new("los Almacenes de la Fortaleza", "the Storehouses of the Fortress"),
+        (new("los Almacenes de la Fortaleza", "the Storehouses of La Fortaleza"),
             new("Están llenos de carne humana. Usted aparta el cadáver de una mujer para poder observar bien el lugar.", "They are full of human flesh. You push aside the corpse of a woman to be able to look at the place properly.")),
         (new("un extenso páramo", "a vast moor"),
             new("Hay muy poca vegetación y el suelo es pantanoso. Usted nunca imaginó que el interior de la fortaleza fuera tan grande.", "There is very little vegetation and the ground is marshy. You never imagined that the inside of the fortress would be so large.")),
@@ -150,7 +150,7 @@ public static class Fort1Builder
         r[2].Children.Add(new Link(
                 new("Puerta principal", "Main door"),
                 new("Inmensa y oprimente.", "Immense and oppressive."),
-                new("Usted se siente de regreso a la vida. Ha salido de La Fortaleza.", "You feel back to life. You have left The Fortress."),
+                new("Usted se siente de regreso a la vida. Ha salido de La Fortaleza.", "You feel back to life. You have left La Fortaleza."),
                 GameKeys.K02.Es,
                 r[1]) { AltKey = GameKeys.K02.En });
         r[2].Children.Add(new Link(

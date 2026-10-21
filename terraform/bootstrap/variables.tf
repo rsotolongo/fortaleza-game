@@ -16,7 +16,7 @@ variable "project_name" {
 }
 
 variable "github_repository" {
-  description = "Repository allowed to deploy, as owner/name (for example rsotolongo/fortaleza-dotnet)."
+  description = "Repository allowed to deploy, as owner/name (for example rsotolongo/fortaleza-game)."
   type        = string
 }
 
