@@ -3,6 +3,7 @@
   --surface: #1f1a17;
   --surface-2: #2a231f;
   --border: #3a302a;
+  --edge: #8c7f70;
   --text: #e9e2d6;
   --muted: #a39887;
   --accent: #d9a441;
@@ -22,6 +23,7 @@
     --surface: #fffaf0;
     --surface-2: #efe6d4;
     --border: #d8ccb4;
+    --edge: #76684f;
     --text: #2a2118;
     --muted: #7a6c58;
     --accent: #9a6a12;
@@ -48,6 +50,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--ui);
+  font-weight: var(--weight, 400);
   -webkit-text-size-adjust: 100%;
   overscroll-behavior: none;
 }
@@ -57,7 +60,7 @@ button {
   color: inherit;
   cursor: pointer;
   min-height: 44px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--edge);
   background: var(--surface-2);
   border-radius: 999px;
   padding: 0 16px;
@@ -69,10 +72,13 @@ button:disabled {
   cursor: default;
 }
 
-button:focus-visible,
-input:focus-visible {
+:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+h1:focus {
+  outline: none;
 }
 
 /* ---------- start screen ---------- */
@@ -107,6 +113,15 @@ input:focus-visible {
 .hero p {
   margin: 0;
   color: var(--muted);
+}
+
+.hero .modern-port {
+  margin-top: 6px;
+  font-size: 0.85rem;
+}
+
+.hero .modern-port a {
+  color: var(--accent);
 }
 
 .lang {
@@ -286,11 +301,150 @@ button.link:hover {
   justify-content: flex-end;
 }
 
+.settings .field {
+  display: grid;
+  gap: 6px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.settings {
+  overflow: visible;
+}
+
+.settings .select {
+  position: relative;
+  letter-spacing: normal;
+  text-transform: none;
+  font-size: 1rem;
+}
+
+.settings .trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 18px 0 16px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+}
+
+.settings .trigger svg {
+  flex: none;
+  color: var(--muted);
+}
+
+.settings ul {
+  position: absolute;
+  inset: calc(100% + 6px) 0 auto;
+  z-index: 1;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.35);
+}
+
+.settings li button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  text-align: left;
+  border: none;
+  border-radius: calc(var(--radius) - 4px);
+  background: none;
+}
+
+.settings li button:hover,
+.settings li button:focus-visible {
+  background: var(--surface-2);
+}
+
+.settings li button[aria-selected='true'] {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .about .primary {
   background: var(--accent);
   color: var(--accent-text);
   border-color: var(--accent);
   font-weight: 600;
+}
+
+/* ---------- reader dialog ---------- */
+
+.reader {
+  width: min(640px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 0.45);
+}
+
+.reader::backdrop {
+  background: rgb(0 0 0 / 0.55);
+}
+
+.reader header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.reader h2 {
+  margin: 0;
+  font-family: var(--narrative);
+  font-size: 1.3rem;
+}
+
+.reader article {
+  padding: 8px 20px 24px;
+  font-family: var(--narrative);
+  line-height: 1.55;
+}
+
+.reader h3 {
+  margin: 24px 0 4px;
+  font-size: 1.1rem;
+  color: var(--accent);
+}
+
+.reader p,
+.reader ul,
+.reader blockquote {
+  margin: 12px 0;
+}
+
+.reader ul {
+  padding-left: 20px;
+}
+
+.reader li {
+  margin: 8px 0;
+}
+
+.reader blockquote {
+  padding-left: 14px;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+  font-style: italic;
 }
 
 /* ---------- game screen ---------- */
@@ -470,7 +624,7 @@ button.link:hover {
   font-size: 16px; /* prevents iOS zoom on focus */
   color: var(--text);
   background: var(--bg);
-  border: 1px solid var(--border);
+  border: 1px solid var(--edge);
   border-radius: 999px;
 }
 
@@ -515,6 +669,120 @@ button.link:hover {
 
   .fade-enter-active,
   .fade-leave-active {
+    transition: none;
+  }
+}
+
+/* ---------- typewrite interaction ---------- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.transcript.typewrite {
+  padding: 0 16px;
+  background: var(--desk);
+}
+
+.paper {
+  max-width: 72ch;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 0 20px 24px;
+  overflow: hidden;
+  background: var(--p-bg, var(--surface));
+  color: var(--p-text, var(--text));
+  border-inline: 1px solid var(--p-edge, var(--edge));
+}
+
+.paper .echo {
+  color: var(--p-echo, var(--echo));
+}
+
+.paper .emphasis {
+  color: var(--p-accent, var(--accent));
+}
+
+.paper button {
+  color: var(--p-text, var(--text));
+  background: var(--p-chip, var(--surface-2));
+  border-color: var(--p-edge, var(--edge));
+}
+
+.paper .banner {
+  background: var(--p-chip, var(--surface-2));
+  border-color: var(--p-edge, var(--edge));
+}
+
+.edge {
+  margin: 0 -20px;
+  overflow: hidden;
+  white-space: pre;
+  user-select: none;
+  font-family: ui-monospace, 'Cascadia Mono', Menlo, monospace;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--p-bg, var(--surface));
+  background: var(--desk);
+}
+
+.edge.top {
+  margin-bottom: 16px;
+}
+
+.paper.tearing {
+  min-height: 0;
+  padding-bottom: 0;
+}
+
+.edge.bottom {
+  margin-top: 16px;
+}
+
+.paper .typing > span[aria-hidden]::after {
+  content: '▌';
+  animation: caret 1s steps(1) infinite;
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+.feed-leave-active {
+  transition: transform 0.6s ease-in, opacity 0.6s ease-in;
+}
+
+.feed-leave-to {
+  transform: translateY(-40%);
+  opacity: 0;
+}
+
+.feed-enter-active {
+  transition: transform 0.6s ease-out, opacity 0.6s ease-out;
+}
+
+.feed-enter-from {
+  transform: translateY(40%);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paper .typing > span[aria-hidden]::after {
+    animation: none;
+  }
+
+  .feed-leave-active,
+  .feed-enter-active {
     transition: none;
   }
 }
