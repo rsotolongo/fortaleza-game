@@ -109,6 +109,15 @@ input:focus-visible {
   color: var(--muted);
 }
 
+.hero .modern-port {
+  margin-top: 6px;
+  font-size: 0.85rem;
+}
+
+.hero .modern-port a {
+  color: var(--accent);
+}
+
 .lang {
   display: flex;
   justify-content: center;
@@ -291,6 +300,74 @@ button.link:hover {
   color: var(--accent-text);
   border-color: var(--accent);
   font-weight: 600;
+}
+
+/* ---------- reader dialog ---------- */
+
+.reader {
+  width: min(640px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 0.45);
+}
+
+.reader::backdrop {
+  background: rgb(0 0 0 / 0.55);
+}
+
+.reader header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.reader h2 {
+  margin: 0;
+  font-family: var(--narrative);
+  font-size: 1.3rem;
+}
+
+.reader article {
+  padding: 8px 20px 24px;
+  font-family: var(--narrative);
+  line-height: 1.55;
+}
+
+.reader h3 {
+  margin: 24px 0 4px;
+  font-size: 1.1rem;
+  color: var(--accent);
+}
+
+.reader p,
+.reader ul,
+.reader blockquote {
+  margin: 12px 0;
+}
+
+.reader ul {
+  padding-left: 20px;
+}
+
+.reader li {
+  margin: 8px 0;
+}
+
+.reader blockquote {
+  padding-left: 14px;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+  font-style: italic;
 }
 
 /* ---------- game screen ---------- */
