@@ -4,7 +4,7 @@ import { texts } from '../i18n'
 const modernPortUrl = 'https://fortressadventure.com/'
 
 defineProps({ language: String, resumable: Object, busy: Boolean })
-const emit = defineEmits(['start', 'resume', 'language', 'about', 'introduction', 'advices'])
+const emit = defineEmits(['start', 'resume', 'language', 'about', 'introduction', 'advices', 'settings'])
 </script>
 
 <template>
@@ -46,6 +46,7 @@ const emit = defineEmits(['start', 'resume', 'language', 'about', 'introduction'
       <button class="link" @click="emit('introduction', 1)">📜 {{ texts[language].introduction }} I</button>
       <button class="link" @click="emit('introduction', 2)">📜 {{ texts[language].introduction }} II</button>
       <button class="link" @click="emit('advices')">💡 {{ texts[language].advices }}</button>
+      <button class="link" @click="emit('settings')">⚙️ {{ texts[language].settings }}</button>
       <button class="link" @click="emit('about')">ⓘ {{ texts[language].about }}</button>
     </footer>
   </main>
