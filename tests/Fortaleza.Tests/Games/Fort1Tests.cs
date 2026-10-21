@@ -30,8 +30,8 @@ public class Fort1Tests
             case Link link:
                 yield return link;
                 break;
-            case Hidden hidden:
-                foreach (var inner in LinksOf(hidden.HiddenChild))
+            case Hidden { HiddenChild: { } child }:
+                foreach (var inner in LinksOf(child))
                     yield return inner;
                 break;
         }
@@ -123,8 +123,8 @@ public class Fort1Tests
         foreach (var thing in things)
         {
             yield return thing;
-            if (thing is Hidden hidden)
-                foreach (var inner in Flatten([hidden.HiddenChild]))
+            if (thing is Hidden { HiddenChild: { } child })
+                foreach (var inner in Flatten([child]))
                     yield return inner;
         }
     }
