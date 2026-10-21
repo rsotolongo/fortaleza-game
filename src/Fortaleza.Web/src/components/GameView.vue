@@ -67,27 +67,27 @@ function pickFile(event) {
 </script>
 
 <template>
-  <div class="game">
+  <main class="game">
     <header class="bar">
-      <h1>
+      <h1 tabindex="-1">
         {{ texts[language].title }} <small>{{ game === 1 ? 'I' : 'II' }}</small>
       </h1>
-      <div class="menu">
-        <button class="icon" :aria-label="texts[language].menu" :aria-expanded="menuOpen" @click="menuOpen = !menuOpen">⋯</button>
+      <div class="menu" @keydown.esc="menuOpen = false">
+        <button class="icon" :aria-label="texts[language].menu" aria-haspopup="true" :aria-expanded="menuOpen" @click="menuOpen = !menuOpen">⋯</button>
         <div v-if="menuOpen" class="sheet" @click="menuOpen = false">
-          <button @click="emit('save')">⬇ {{ texts[language].save }}</button>
-          <button @click.stop="fileInput.click()">⬆ {{ texts[language].load }}</button>
-          <button @click="emit('new')">✦ {{ texts[language].newGame }}</button>
-          <button @click="emit('introduction')">📜 {{ texts[language].introduction }}</button>
-          <button @click="emit('advices')">💡 {{ texts[language].advices }}</button>
-          <button @click="emit('settings')">⚙️ {{ texts[language].settings }}</button>
-          <button @click="emit('about')">ⓘ {{ texts[language].about }}</button>
+          <button @click="emit('save')"><span aria-hidden="true">⬇</span> {{ texts[language].save }}</button>
+          <button @click.stop="fileInput.click()"><span aria-hidden="true">⬆</span> {{ texts[language].load }}</button>
+          <button @click="emit('new')"><span aria-hidden="true">✦</span> {{ texts[language].newGame }}</button>
+          <button @click="emit('introduction')"><span aria-hidden="true">📜</span> {{ texts[language].introduction }}</button>
+          <button @click="emit('advices')"><span aria-hidden="true">💡</span> {{ texts[language].advices }}</button>
+          <button @click="emit('settings')"><span aria-hidden="true">⚙️</span> {{ texts[language].settings }}</button>
+          <button @click="emit('about')"><span aria-hidden="true">ⓘ</span> {{ texts[language].about }}</button>
         </div>
         <input ref="fileInput" type="file" accept=".trk,.TRK,text/plain" hidden @change="pickFile" />
       </div>
     </header>
 
-    <div ref="scroller" class="transcript" aria-live="polite">
+    <div ref="scroller" class="transcript" role="log" tabindex="0" :aria-label="texts[language].transcript">
       <template v-for="(entry, index) in entries" :key="index">
         <p v-if="entry.kind === 'input'" class="echo">› {{ entry.text }}</p>
         <p v-else-if="entry.kind === 'text'" :class="{ emphasis: entry.emphasis, blank: entry.text === '' }">{{ entry.text }}</p>
@@ -105,7 +105,7 @@ function pickFile(event) {
     </div>
 
     <footer class="console">
-      <nav class="verbs" aria-label="verbs">
+      <nav class="verbs" :aria-label="texts[language].verbsLabel" :tabindex="ended() ? 0 : undefined">
         <button v-for="entry in texts[language].verbs" :key="entry[0]" :disabled="busy || ended()" @click="verb(entry)">
           {{ entry[0] }}
         </button>
@@ -117,6 +117,7 @@ function pickFile(event) {
           type="text"
           enterkeyhint="send"
           autocomplete="off"
+          :aria-label="texts[language].commandLabel"
           autocapitalize="off"
           autocorrect="off"
           spellcheck="false"
@@ -129,5 +130,5 @@ function pickFile(event) {
         <button type="submit" :disabled="busy || ended() || !input.trim()" :aria-label="texts[language].send">➤</button>
       </form>
     </footer>
-  </div>
+  </main>
 </template>
