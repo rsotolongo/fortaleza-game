@@ -7,6 +7,7 @@ import { toEntries } from './transcript'
 import StartScreen from './components/StartScreen.vue'
 import GameView from './components/GameView.vue'
 import AboutDialog from './components/AboutDialog.vue'
+import ReaderDialog from './components/ReaderDialog.vue'
 
 const stored = ref(loadSession())
 const uiLanguage = ref(stored.value?.language ?? browserLanguage())
@@ -15,6 +16,7 @@ const entries = ref([])
 const busy = ref(false)
 const notice = ref('')
 const about = ref(null)
+const reader = ref(null)
 let noticeTimer = 0
 
 const gameLanguage = computed(() => session.value?.language ?? uiLanguage.value)
@@ -112,6 +114,8 @@ const load = (file) =>
     @start="start"
     @resume="resume"
     @about="about.show()"
+    @introduction="reader.show('introduction', $event)"
+    @advices="reader.show('advices')"
   />
   <GameView
     v-else
@@ -125,8 +129,11 @@ const load = (file) =>
     @load="load"
     @new="reset"
     @about="about.show()"
+    @introduction="reader.show('introduction', session.game)"
+    @advices="reader.show('advices')"
   />
   <AboutDialog ref="about" :language="gameLanguage" />
+  <ReaderDialog ref="reader" :language="gameLanguage" />
   <transition name="fade">
     <div v-if="notice" class="toast" role="status">{{ notice }}</div>
   </transition>

@@ -9,7 +9,7 @@ const props = defineProps({
   entries: Array,
   busy: Boolean
 })
-const emit = defineEmits(['command', 'save', 'load', 'new', 'about'])
+const emit = defineEmits(['command', 'save', 'load', 'new', 'about', 'introduction', 'advices'])
 
 const input = ref('')
 const field = ref(null)
@@ -78,6 +78,8 @@ function pickFile(event) {
           <button @click="emit('save')">⬇ {{ texts[language].save }}</button>
           <button @click.stop="fileInput.click()">⬆ {{ texts[language].load }}</button>
           <button @click="emit('new')">✦ {{ texts[language].newGame }}</button>
+          <button @click="emit('introduction')">📜 {{ texts[language].introduction }}</button>
+          <button @click="emit('advices')">💡 {{ texts[language].advices }}</button>
           <button @click="emit('about')">ⓘ {{ texts[language].about }}</button>
         </div>
         <input ref="fileInput" type="file" accept=".trk,.TRK,text/plain" hidden @change="pickFile" />
