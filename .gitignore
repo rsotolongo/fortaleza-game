@@ -1,6 +1,7 @@
+.remember/
 .superpowers/
-bin/
-obj/
 .vs/
+bin/
 node_modules/
+obj/
 wwwroot/

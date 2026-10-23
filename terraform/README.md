@@ -82,14 +82,14 @@ Copy `terraform.tfvars.example` to `terraform.tfvars`:
 
 ## Automatic deployment (GitHub Actions)
 
-`.github/workflows/deploy.yml` runs on every push or merge to `master` in three jobs: **test**, then **build**
+`.github/workflows/deploy.yml` runs on every push or merge to `main` in three jobs: **test**, then **build**
 (npm and NuGet run here, with no Google credentials at all; the site and the container image tarball are uploaded
 as an artifact), then **deploy**, the only job that can impersonate the deploy service account. It pushes the
 pre-built image, runs Terraform and publishes the site (`deploy.sh --skip-build`). The Firebase CLI is installed
 with `--ignore-scripts`, so no package install script runs next to the credentials.
 
 Authentication uses **Workload Identity Federation**, so no service account keys exist: the provider only accepts
-tokens whose `repository_id` is the repository's numeric id and whose `ref` is `refs/heads/master`, so it works
+tokens whose `repository_id` is the repository's numeric id and whose `ref` is `refs/heads/main`, so it works
 with or without immutable subject claims and a renamed or re-created repository cannot deploy. The Terraform state
 lives in a versioned GCS bucket; the `gcs` backend locks natively.
 
@@ -103,7 +103,7 @@ gh variable set GCP_DEPLOY_SERVICE_ACCOUNT     --repo <owner>/<repo> --body "<de
 gh variable set TF_STATE_BUCKET                --repo <owner>/<repo> --body "<state_bucket>"
 ```
 
-Push to `master` (or run the **Deploy** workflow manually) and the site URL appears in the job summary.
+Push to `main` (or run the **Deploy** workflow manually) and the site URL appears in the job summary.
 
 Notes:
 

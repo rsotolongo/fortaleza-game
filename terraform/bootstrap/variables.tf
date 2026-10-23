@@ -28,7 +28,7 @@ variable "github_repository_id" {
 variable "github_branch" {
   description = "Only workflows running on this branch can impersonate the deploy service account."
   type        = string
-  default     = "master"
+  default     = "main"
 }
 
 variable "hosting_site_id" {

@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches-ignore: [master] # master is covered by the Deploy workflow
+    branches-ignore: [main] # main is covered by the Deploy workflow
 
 permissions:
   contents: read
