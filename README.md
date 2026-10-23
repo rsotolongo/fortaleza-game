@@ -138,7 +138,7 @@ After the one-time `terraform/bootstrap` stack ([terraform/README.md](terraform/
 GOOGLE_CLOUD_PROJECT=my-project ./terraform/deploy.sh    # or deploy.ps1 in PowerShell 7
 ```
 
-Pushes and merges to `master` also deploy automatically through GitHub Actions (Workload Identity Federation,
+Pushes and merges to `main` also deploy automatically through GitHub Actions (Workload Identity Federation,
 no stored keys); the setup is in [terraform/README.md](terraform/README.md#automatic-deployment-github-actions).
 
 It builds the site and the API container, pushes the image to Artifact Registry, runs `terraform apply` and
