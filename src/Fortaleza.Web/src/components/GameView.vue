@@ -19,11 +19,14 @@ const scroller = ref(null)
 const fileInput = ref(null)
 const menuButton = ref(null)
 const menuOpen = ref(false)
+const verbsOpen = ref(false)
+const moreButton = ref(null)
 const history = []
 let cursor = -1
 
 const ended = () => props.status !== 'playing'
 
+const PRIMARY_VERBS = 4
 const TYPE_DELAY = 14
 const TEAR_HOLD = 900
 const TEAR_FEED = 1300
@@ -187,6 +190,7 @@ function recall(step) {
 }
 
 function verb(entry) {
+  verbsOpen.value = false
   input.value = entry[1]
   if (entry[1].endsWith(' ')) field.value?.focus()
   else submit()
@@ -197,6 +201,12 @@ function useItem(name) {
   const separator = current && !current.endsWith(' ') ? ' ' : ''
   input.value = `${current}${separator}${name.toLowerCase()}`
   field.value?.focus()
+}
+
+function closeVerbs() {
+  if (!verbsOpen.value) return
+  verbsOpen.value = false
+  moreButton.value?.focus()
 }
 
 function choose(name) {
@@ -275,9 +285,26 @@ function pickFile(event) {
     </div>
 
     <footer class="console">
-      <nav class="verbs" :aria-label="texts[language].verbsLabel" :tabindex="ended() ? 0 : undefined">
-        <button v-for="entry in texts[language].verbs" :key="entry[0]" :disabled="busy || ended()" @click="verb(entry)">
+      <nav class="verbs" :class="{ open: verbsOpen }" :aria-label="texts[language].verbsLabel" @keydown.esc="closeVerbs">
+        <button
+          v-for="(entry, index) in texts[language].verbs"
+          :key="entry[0]"
+          :class="{ extra: index >= PRIMARY_VERBS }"
+          :disabled="busy || ended()"
+          @click="verb(entry)"
+        >
           {{ entry[0] }}
+        </button>
+        <button
+          ref="moreButton"
+          type="button"
+          class="more"
+          aria-haspopup="true"
+          :aria-expanded="verbsOpen"
+          :disabled="busy || ended()"
+          @click="verbsOpen = !verbsOpen"
+        >
+          {{ texts[language].moreVerbs }}
         </button>
       </nav>
       <form class="line" @submit.prevent="submit">
