@@ -1,7 +1,7 @@
 <script setup>
 import { computed, nextTick, ref, watch, watchEffect } from 'vue'
 import * as api from './api'
-import { browserLanguage, texts } from './i18n'
+import { texts } from './i18n'
 import { TYPEWRITE, interaction } from './interaction'
 import { clearSession, loadSession, saveSession } from './session'
 import { toEntries } from './transcript'
@@ -12,7 +12,7 @@ import ReaderDialog from './components/ReaderDialog.vue'
 import SettingsDialog from './components/SettingsDialog.vue'
 
 const stored = ref(loadSession())
-const uiLanguage = ref(stored.value?.language ?? browserLanguage())
+const uiLanguage = ref(stored.value?.language ?? 'es')
 const session = ref(null)
 const entries = ref([])
 const busy = ref(false)
