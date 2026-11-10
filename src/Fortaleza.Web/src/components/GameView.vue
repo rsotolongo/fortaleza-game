@@ -17,6 +17,7 @@ const input = ref('')
 const field = ref(null)
 const scroller = ref(null)
 const fileInput = ref(null)
+const menuButton = ref(null)
 const menuOpen = ref(false)
 const history = []
 let cursor = -1
@@ -198,6 +199,21 @@ function useItem(name) {
   field.value?.focus()
 }
 
+function choose(name) {
+  menuOpen.value = false
+  menuButton.value?.focus()
+  emit(name)
+}
+
+function closeMenu() {
+  menuOpen.value = false
+  menuButton.value?.focus()
+}
+
+function leaveMenu(event) {
+  if (!event.currentTarget.contains(event.relatedTarget)) menuOpen.value = false
+}
+
 function pickFile(event) {
   const file = event.target.files?.[0]
   event.target.value = ''
@@ -212,16 +228,16 @@ function pickFile(event) {
       <h1 tabindex="-1">
         {{ texts[language].title }} <small>{{ game === 1 ? 'I' : 'II' }}</small>
       </h1>
-      <div class="menu" @keydown.esc="menuOpen = false">
-        <button class="icon" :aria-label="texts[language].menu" aria-haspopup="true" :aria-expanded="menuOpen" @click="menuOpen = !menuOpen">⋯</button>
-        <div v-if="menuOpen" class="sheet" @click="menuOpen = false">
-          <button @click="emit('save')"><span aria-hidden="true">⬇</span> {{ texts[language].save }}</button>
+      <div class="menu" @keydown.esc="closeMenu" @focusout="leaveMenu">
+        <button ref="menuButton" class="icon" :aria-label="texts[language].menu" aria-haspopup="true" :aria-expanded="menuOpen" @click="menuOpen = !menuOpen">⋯</button>
+        <div v-if="menuOpen" class="sheet">
+          <button @click="choose('save')"><span aria-hidden="true">⬇</span> {{ texts[language].save }}</button>
           <button @click.stop="fileInput.click()"><span aria-hidden="true">⬆</span> {{ texts[language].load }}</button>
-          <button @click="emit('new')"><span aria-hidden="true">✦</span> {{ texts[language].newGame }}</button>
-          <button @click="emit('introduction')"><span aria-hidden="true">📜</span> {{ texts[language].introduction }}</button>
-          <button @click="emit('advices')"><span aria-hidden="true">💡</span> {{ texts[language].advices }}</button>
-          <button @click="emit('settings')"><span aria-hidden="true">⚙️</span> {{ texts[language].settings }}</button>
-          <button @click="emit('about')"><span aria-hidden="true">ⓘ</span> {{ texts[language].about }}</button>
+          <button @click="choose('new')"><span aria-hidden="true">✦</span> {{ texts[language].newGame }}</button>
+          <button @click="choose('introduction')"><span aria-hidden="true">📜</span> {{ texts[language].introduction }}</button>
+          <button @click="choose('advices')"><span aria-hidden="true">💡</span> {{ texts[language].advices }}</button>
+          <button @click="choose('settings')"><span aria-hidden="true">⚙️</span> {{ texts[language].settings }}</button>
+          <button @click="choose('about')"><span aria-hidden="true">ⓘ</span> {{ texts[language].about }}</button>
         </div>
         <input ref="fileInput" type="file" accept=".trk,.TRK,text/plain" hidden @change="pickFile" />
       </div>
