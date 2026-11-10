@@ -25,12 +25,12 @@
     --border: #d8ccb4;
     --edge: #76684f;
     --text: #2a2118;
-    --muted: #7a6c58;
-    --accent: #9a6a12;
+    --muted: #6b5d49;
+    --accent: #7f5508;
     --accent-text: #fff8e8;
     --echo: #2f7358;
     --danger: #b3422f;
-    --good: #2f7d3d;
+    --good: #276a33;
     color-scheme: light;
   }
 }
@@ -79,6 +79,22 @@ button:disabled {
 
 h1:focus {
   outline: none;
+}
+
+::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+.paper :focus-visible {
+  outline-color: var(--p-text, var(--text));
+}
+
+.hero .modern-port a,
+.about a,
+.about a.repo {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* ---------- start screen ---------- */
@@ -310,10 +326,6 @@ button.link:hover {
   color: var(--muted);
 }
 
-.settings {
-  overflow: visible;
-}
-
 .settings .select {
   position: relative;
   letter-spacing: normal;
@@ -338,10 +350,7 @@ button.link:hover {
 }
 
 .settings ul {
-  position: absolute;
-  inset: calc(100% + 6px) 0 auto;
-  z-index: 1;
-  margin: 0;
+  margin: 6px 0 0;
   padding: 6px;
   list-style: none;
   background: var(--surface);
