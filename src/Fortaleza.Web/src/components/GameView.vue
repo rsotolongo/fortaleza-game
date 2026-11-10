@@ -305,6 +305,9 @@ function pickFile(event) {
           @click="verbsOpen = !verbsOpen"
         >
           {{ texts[language].moreVerbs }}
+          <svg viewBox="0 0 12 8" width="10" height="7" aria-hidden="true">
+            <path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
         </button>
       </nav>
       <form class="line" @submit.prevent="submit">
