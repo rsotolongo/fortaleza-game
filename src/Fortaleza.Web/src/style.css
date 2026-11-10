@@ -621,10 +621,34 @@ button.link:hover {
 
 .verbs .more {
   order: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 10px;
+  border-style: dashed;
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.verbs .more svg {
+  flex: none;
+  transition: transform 0.15s;
 }
 
 .verbs .more[aria-expanded='true'] {
-  border-color: var(--accent);
+  border-style: solid;
+}
+
+.verbs .more[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verbs .more svg {
+    transition: none;
+  }
 }
 
 .verbs:not(.open) .extra {
