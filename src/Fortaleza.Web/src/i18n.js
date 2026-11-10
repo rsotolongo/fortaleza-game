@@ -28,6 +28,7 @@ export const texts = {
     introduction: 'Introducción',
     transcript: 'Historia de la aventura',
     verbsLabel: 'Verbos',
+    moreVerbs: 'Más…',
     commandLabel: 'Orden',
     settings: 'Ajustes',
     interaction: 'Interacción',
@@ -89,6 +90,7 @@ export const texts = {
     introduction: 'Introduction',
     transcript: 'Adventure log',
     verbsLabel: 'Verbs',
+    moreVerbs: 'More…',
     commandLabel: 'Command',
     settings: 'Settings',
     interaction: 'Interaction',
@@ -121,8 +123,4 @@ export const texts = {
     ],
     markers: { room: 'You see:', bag: 'Your belongings are:' }
   }
-}
-
-export function browserLanguage() {
-  return (navigator.language || 'es').toLowerCase().startsWith('en') ? 'en' : 'es'
 }
