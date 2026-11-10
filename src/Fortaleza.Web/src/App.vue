@@ -165,7 +165,9 @@ const load = (file) =>
   <AboutDialog ref="about" :language="gameLanguage" />
   <ReaderDialog ref="reader" :language="gameLanguage" />
   <SettingsDialog ref="settings" :language="gameLanguage" />
-  <transition name="fade">
-    <div v-if="notice" class="toast" role="status">{{ notice }}</div>
-  </transition>
+  <div role="status" aria-live="polite">
+    <transition name="fade">
+      <div v-if="notice" class="toast">{{ notice }}</div>
+    </transition>
+  </div>
 </template>
