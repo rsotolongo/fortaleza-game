@@ -2,12 +2,19 @@ using Fortaleza.Engine;
 
 namespace Fortaleza.Games;
 
-public class Fort1(Room start) : GameEngine(start)
+internal sealed class Fort1(Room start) : GameEngine(start)
 {
-    public override bool CheckGoal() =>
-        GetRoom(21).Get("Centro del cerebro") is null
-        && GetRoom(20).Get("Centro del corazon") is null
-        && GetRoom(19).Get("Centro del estomago") is null
-        && GetRoom(18).Get("Centro de los pulmones") is null
-        && GetRoom(11).Get("Troll") is null;
+    private static readonly (int Room, string Name)[] Targets =
+    [
+        (21, "Centro del cerebro"),
+        (20, "Centro del corazon"),
+        (19, "Centro del estomago"),
+        (18, "Centro de los pulmones"),
+        (11, "Troll"),
+    ];
+
+    public override bool CheckGoal()
+    {
+        return Array.TrueForAll(Targets, target => GetRoom(target.Room).Get(target.Name) is null);
+    }
 }

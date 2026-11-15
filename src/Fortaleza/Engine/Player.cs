@@ -1,17 +1,25 @@
+using System.Globalization;
 using Fortaleza.Engine.Links;
 using Fortaleza.Localization;
 
 namespace Fortaleza.Engine;
 
-public class Player(Room start) : LivingThing(new("jugador", "player"), new("", ""), 0)
+internal sealed class Player(Room start) : LivingThing(new("jugador", "player"), new(string.Empty, string.Empty), 0)
 {
+    private const string _complete2 = "Complete";
+    private const string _notInBag2 = "NotInBag";
+
     public Room CurrentRoom { get; private set; } = start;
     public Inventory Bag { get; } = new();
     public int VisitCount { get; private set; }
 
     public override bool Die(string weapon)
     {
-        if (Dead) return false;
+        if (Dead)
+        {
+            return false;
+        }
+
         base.Die(weapon);
         Output(Localizer.Msg("Dying"));
         return true;
@@ -19,16 +27,28 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
 
     public void Go(Room next)
     {
-        if (Dead) return;
+        if (Dead)
+        {
+            return;
+        }
+
         CurrentRoom = next;
-        if (next.Visited) return;
+        if (next.Visited)
+        {
+            return;
+        }
+
         next.Visited = true;
         VisitCount++;
     }
 
     public void Look()
     {
-        if (Dead || !Visible) return;
+        if (Dead || !Visible)
+        {
+            return;
+        }
+
         Output(Localizer.Msg("YouAreIn") + CurrentRoom.Name.Get() + ".");
         Output(CurrentRoom.Description.Get());
         Output(Localizer.Msg("RoomContains"));
@@ -37,13 +57,17 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
 
     public void See(string what)
     {
-        if (Dead) return;
-        if (what == "")
+        if (Dead)
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(what))
         {
             Output(Localizer.Msg("WhatSee"));
             return;
         }
-        var thing = CurrentRoom.Get(what) ?? Bag.Get(what);
+        Thing? thing = CurrentRoom.Get(what) ?? Bag.Get(what);
         Output(thing is not null
             ? thing.Image()
             : Localizer.Msg("ThereIsNo") + what + Localizer.Msg("InTheRoom") + Localizer.Msg("AlsoNotInBag"));
@@ -51,13 +75,17 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
 
     public void Take(string what)
     {
-        if (Dead) return;
-        var thing = CurrentRoom.Get(what);
+        if (Dead)
+        {
+            return;
+        }
+
+        Thing? thing = CurrentRoom.Get(what);
         if (thing is null)
         {
-            Output(what != ""
+            Output(!string.IsNullOrEmpty(what)
                 ? Localizer.Msg("ThereIsNo") + what + Localizer.Msg("InTheRoom")
-                : Localizer.Msg("Complete"));
+                : Localizer.Msg(_complete2));
             return;
         }
         if (!Bag.CanAdd(thing.Weight))
@@ -71,13 +99,17 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
 
     public void LeaveItem(string what)
     {
-        if (Dead) return;
-        var thing = Bag.Take(what);
+        if (Dead)
+        {
+            return;
+        }
+
+        Thing? thing = Bag.Take(what);
         if (thing is null)
         {
-            Output(what != ""
-                ? Quoted(what) + Localizer.Msg("NotInBag")
-                : Localizer.Msg("Complete"));
+            Output(!string.IsNullOrEmpty(what)
+                ? Quoted(what) + Localizer.Msg(_notInBag2)
+                : Localizer.Msg(_complete2));
             return;
         }
         CurrentRoom.Children.Add(thing);
@@ -98,13 +130,17 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
 
     public void Walk(string door)
     {
-        if (Dead) return;
-        var thing = CurrentRoom.Get(door);
+        if (Dead)
+        {
+            return;
+        }
+
+        Thing? thing = CurrentRoom.Get(door);
         if (thing is null)
         {
-            Output(door != ""
+            Output(!string.IsNullOrEmpty(door)
                 ? Localizer.Msg("ThereIsNo") + door + Localizer.Msg("InTheRoom")
-                : Localizer.Msg("Complete"));
+                : Localizer.Msg(_complete2));
             return;
         }
         if (thing is not Link link)
@@ -112,7 +148,7 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
             Output(Localizer.Msg("CantOpenThis"));
             return;
         }
-        var next = link.GetDest();
+        Room? next = link.GetDest();
         if (next is null)
         {
             Output(Localizer.Msg("Ouch"));
@@ -125,8 +161,12 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
 
     public void OpenDoor(string door, string key)
     {
-        if (Dead) return;
-        if (key != "")
+        if (Dead)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(key))
         {
             Output(Localizer.Msg("MagicWords"));
             Output(key + "!!!");
@@ -136,27 +176,35 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
 
     public void Kill(string who, string weapon)
     {
-        if (Dead) return;
-        var target = CurrentRoom.Get(who);
-        if (target is null)
+        if (Dead)
         {
-            Output(who != ""
-                ? Quoted(who) + Localizer.Msg("NotHere")
-                : Localizer.Msg("Complete"));
             return;
         }
-        if (target is not (Troll or Guard))
+
+        Thing? target = CurrentRoom.Get(who);
+        if (target is null)
+        {
+            Output(!string.IsNullOrEmpty(who)
+                ? Quoted(who) + Localizer.Msg("NotHere")
+                : Localizer.Msg(_complete2));
+            return;
+        }
+        if (target is not (Troll or Guard) || target is not LivingThing living)
         {
             Output(Localizer.Msg("CantKillInanimate"));
             return;
         }
-        if (weapon != "" && Bag.Get(weapon) is null)
+        if (!string.IsNullOrEmpty(weapon) && Bag.Get(weapon) is null)
         {
-            Output(Quoted(weapon) + Localizer.Msg("NotInBag"));
+            Output(Quoted(weapon) + Localizer.Msg(_notInBag2));
             return;
         }
-        if (((LivingThing)target).Die(weapon))
-            CurrentRoom.Children.Remove(target);
+        if (!living.Die(weapon))
+        {
+            return;
+        }
+
+        CurrentRoom.Children.Remove(target);
     }
 
     public void Give(string what, string who)
@@ -166,10 +214,10 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
             Output(Localizer.Msg("BagEmpty"));
             return;
         }
-        var target = CurrentRoom.Get(who);
+        Thing? target = CurrentRoom.Get(who);
         if (target is null)
         {
-            Output(who != ""
+            Output(!string.IsNullOrEmpty(who)
                 ? Quoted(who) + Localizer.Msg("NotHere")
                 : Localizer.Msg("WhosGift"));
             return;
@@ -179,38 +227,49 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
             Output(Localizer.Msg("GiftRejected"));
             return;
         }
-        var gift = Bag.Take(what);
-        if (gift is null)
+        if (Bag.Take(what) is not Item gift)
         {
-            Output(Quoted(what) + Localizer.Msg("NotInBag"));
+            Output(Quoted(what) + Localizer.Msg(_notInBag2));
             return;
         }
-        troll.Accept((Item)gift);
+        troll.Accept(gift);
     }
 
     public void Ask(string who)
     {
-        if (Dead) return;
-        var target = CurrentRoom.Get(who);
-        if (target is null)
+        if (Dead)
         {
-            Output(who != ""
-                ? Quoted(who) + Localizer.Msg("NotHere")
-                : Localizer.Msg("Complete"));
             return;
         }
-        if (target is Troll or Guard)
-            ((LivingThing)target).Speak();
+
+        Thing? target = CurrentRoom.Get(who);
+        if (target is null)
+        {
+            Output(!string.IsNullOrEmpty(who)
+                ? Quoted(who) + Localizer.Msg("NotHere")
+                : Localizer.Msg(_complete2));
+            return;
+        }
+        if (target is (Troll or Guard) and LivingThing living)
+        {
+            living.Speak();
+        }
         else
+        {
             Output(Localizer.Msg("TalkingAlone"));
+        }
     }
 
     public void Break(string what, string with)
     {
-        if (with == "" || Bag.Get(with) is not null)
+        if (string.IsNullOrEmpty(with) || Bag.Get(with) is not null)
+        {
             CurrentRoom.BreakThing(what, with);
+        }
         else
-            Output(Quoted(with) + Localizer.Msg("NotInBag"));
+        {
+            Output(Quoted(with) + Localizer.Msg(_notInBag2));
+        }
     }
 
     public void Weigh(string what)
@@ -220,11 +279,11 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
             Output(Localizer.Msg("NoScale"));
             return;
         }
-        var thing = Bag.Get(what) ?? CurrentRoom.Get(what);
+        Thing? thing = Bag.Get(what) ?? CurrentRoom.Get(what);
         if (thing is null)
         {
-            Output(what == ""
-                ? Localizer.Msg("Complete")
+            Output(string.IsNullOrEmpty(what)
+                ? Localizer.Msg(_complete2)
                 : Localizer.Msg("WeighThereIsNo") + what + Localizer.Msg("WeighNotHere"));
             return;
         }
@@ -233,18 +292,22 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
             Output(Localizer.Msg("WeighCrazy"));
             return;
         }
-        if (StringHelper.Normalize(item.Name.Es) == "BALANZA")
+        if (StringHelper.Normalize(item.Name.Es) is "BALANZA")
         {
             Output(Localizer.Msg("WeighSelf"));
             return;
         }
-        Output(Localizer.Msg("YouWeigh") + item.Weight
-            + (item.Weight == 1 ? Localizer.Msg("BagUnit") : Localizer.Msg("BagUnits")));
+        Output(Localizer.Msg("YouWeigh") + item.Weight.ToString(CultureInfo.InvariantCulture)
+            + (item.Weight is 1 ? Localizer.Msg("BagUnit") : Localizer.Msg("BagUnits")));
     }
 
     public void Inventory()
     {
-        if (Dead) return;
+        if (Dead)
+        {
+            return;
+        }
+
         if (Bag.IsEmpty)
         {
             Output(Localizer.Msg("BagEmpty"));
@@ -254,5 +317,8 @@ public class Player(Room start) : LivingThing(new("jugador", "player"), new("", 
         Bag.Describe();
     }
 
-    private static string Quoted(string s) => $"\"{s}\"";
+    private static string Quoted(string s)
+    {
+        return $"\"{s}\"";
+    }
 }

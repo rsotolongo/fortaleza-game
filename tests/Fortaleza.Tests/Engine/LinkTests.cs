@@ -1,91 +1,98 @@
 using Fortaleza.Engine;
 using Fortaleza.Engine.Links;
 using Fortaleza.Localization;
-using Xunit;
 
 namespace Fortaleza.Tests.Engine;
 
-public class LinkTests
+public sealed class LinkTests
 {
-    private static Room MakeRoom() =>
-        new(new("sala", "room"), new("", ""), Inventory.LWeight + 1);
-
-    private static Inventory MakeBag() => new();
-
     [Fact]
-    public void Link_TryOpen_SucceedsWithEmptyKey()
+    public void LinkTryOpenSucceedsWithEmptyKey()
     {
-        var link = new Link(new("Puerta", "Door"), new("", ""), new("you pass", "you pass"), "", MakeRoom());
-        Assert.True(link.TryOpen(""));
+        var link = new Link(new("Puerta", "Door"), new(string.Empty, string.Empty), new("you pass", "you pass"), string.Empty, MakeRoom());
+        Assert.True(link.TryOpen(string.Empty));
     }
 
     [Fact]
-    public void Link_TryOpen_SucceedsWithCorrectKey()
+    public void LinkTryOpenSucceedsWithCorrectKey()
     {
-        var link = new Link(new("Puerta", "Door"), new("", ""), new("", ""), "Fortaleza", MakeRoom());
+        var link = new Link(new("Puerta", "Door"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), "Fortaleza", MakeRoom());
         Assert.True(link.TryOpen("Fortaleza"));
         Assert.True(link.TryOpen("FORTALEZA"));
     }
 
     [Fact]
-    public void Link_TryOpen_FailsWithWrongKey()
+    public void LinkTryOpenFailsWithWrongKey()
     {
-        var link = new Link(new("Puerta", "Door"), new("", ""), new("", ""), "Fortaleza", MakeRoom());
+        var link = new Link(new("Puerta", "Door"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), "Fortaleza", MakeRoom());
         Assert.False(link.TryOpen("wrong"));
     }
 
     [Fact]
-    public void Link_GetDest_ReturnsNullWhenClosed()
+    public void LinkGetDestReturnsNullWhenClosed()
     {
-        var dest = MakeRoom();
-        var link = new Link(new("Puerta", "Door"), new("", ""), new("", ""), "Fortaleza", dest);
+        Room dest = MakeRoom();
+        var link = new Link(new("Puerta", "Door"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), "Fortaleza", dest);
         Assert.Null(link.GetDest());
     }
 
     [Fact]
-    public void Link_GetDest_ReturnsRoomWhenOpen()
+    public void LinkGetDestReturnsRoomWhenOpen()
     {
-        var dest = MakeRoom();
-        var link = new Link(new("Puerta", "Door"), new("", ""), new("", ""), Link.OpenDoor, dest);
+        Room dest = MakeRoom();
+        var link = new Link(new("Puerta", "Door"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), Link.OpenDoor, dest);
         Assert.Same(dest, link.GetDest());
     }
 
     [Fact]
-    public void OpenLink_IsAlwaysOpen()
+    public void OpenLinkIsAlwaysOpen()
     {
-        var dest = MakeRoom();
-        var link = new OpenLink(new("Puerta", "Door"), new("", ""), new("", ""), dest);
+        Room dest = MakeRoom();
+        var link = new OpenLink(new("Puerta", "Door"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), dest);
         Assert.NotNull(link.GetDest());
         Assert.True(link.TryOpen("anything"));
     }
 
     // Review Focus: RiddleLink diacritic-insensitive match
     [Fact]
-    public void RiddleLink_TryOpen_IgnoresDiacriticsAndCase()
+    public void RiddleLinkTryOpenIgnoresDiacriticsAndCase()
     {
-        var link = new RiddleLink(new("Escalera", "Staircase"), new("", ""),
-            new("¿Cuántos peldaños?", "How many steps?"), "Treinta y nueve",
-            new("you climb", "you climb"), MakeRoom());
+        var link = new RiddleLink(
+            new("Escalera", "Staircase"),
+            new(string.Empty, string.Empty),
+            new("¿Cuántos peldaños?", "How many steps?"),
+            "Treinta y nueve",
+            new("you climb", "you climb"),
+            MakeRoom());
         Assert.True(link.TryOpen("treinta y nueve"));
         Assert.True(link.TryOpen("TREINTA Y NUEVE"));
         Assert.True(link.TryOpen("Treinta Y Nueve"));
     }
 
     [Fact]
-    public void RiddleLink_TryOpen_ReturnsFalseOnWrongAnswer()
+    public void RiddleLinkTryOpenReturnsFalseOnWrongAnswer()
     {
-        var link = new RiddleLink(new("Escalera", "Staircase"), new("", ""),
-            new("¿Cuántos peldaños?", "How many steps?"), "Treinta y nueve",
-            new("you climb", "you climb"), MakeRoom());
+        var link = new RiddleLink(
+            new("Escalera", "Staircase"),
+            new(string.Empty, string.Empty),
+            new("¿Cuántos peldaños?", "How many steps?"),
+            "Treinta y nueve",
+            new("you climb", "you climb"),
+            MakeRoom());
         Assert.False(link.TryOpen("cuarenta"));
     }
 
     [Fact]
-    public void RiddleLink_GetDest_ReturnsNullUntilSolved()
+    public void RiddleLinkGetDestReturnsNullUntilSolved()
     {
-        var dest = MakeRoom();
-        var link = new RiddleLink(new("Escalera", "Staircase"), new("", ""),
-            new("?", "?"), "Treinta y nueve", new("", ""), dest);
+        Room dest = MakeRoom();
+        var link = new RiddleLink(
+            new("Escalera", "Staircase"),
+            new(string.Empty, string.Empty),
+            new("?", "?"),
+            "Treinta y nueve",
+            new(string.Empty, string.Empty),
+            dest);
         Assert.Null(link.GetDest());
         link.TryOpen("treinta y nueve");
         Assert.Same(dest, link.GetDest());
@@ -93,49 +100,83 @@ public class LinkTests
 
     // Review Focus: DangerLink kills without talisman
     [Fact]
-    public void DangerLink_Pass_KillsPlayerWithoutTalisman()
+    public void DangerLinkPassKillsPlayerWithoutTalisman()
     {
-        var killed = false;
-        var bag = MakeBag();
-        var link = new DangerLink(new("Traquea", "Trachea"), new("", ""),
-            new("", ""), "", "Talismán de aire", MakeRoom(), () => killed = true);
+        bool killed = false;
+        Inventory bag = MakeBag();
+        var link = new DangerLink(
+            new("Traquea", "Trachea"),
+            new(string.Empty, string.Empty),
+            new(string.Empty, string.Empty),
+            string.Empty,
+            "Talismán de aire",
+            MakeRoom(),
+            () => killed = true);
         link.Pass(bag);
         Assert.True(killed);
     }
 
     [Fact]
-    public void DangerLink_Pass_SucceedsWithTalisman()
+    public void DangerLinkPassSucceedsWithTalisman()
     {
-        var killed = false;
-        var bag = MakeBag();
-        bag.Children.Add(new Item(new("Talismán de aire", "Air talisman"), new("", ""), 1));
-        var link = new DangerLink(new("Traquea", "Trachea"), new("", ""),
-            new("", ""), "", "Talismán de aire", MakeRoom(), () => killed = true);
+        bool killed = false;
+        Inventory bag = MakeBag();
+        bag.Children.Add(new Item(new("Talismán de aire", "Air talisman"), new(string.Empty, string.Empty), 1));
+        var link = new DangerLink(
+            new("Traquea", "Trachea"),
+            new(string.Empty, string.Empty),
+            new(string.Empty, string.Empty),
+            string.Empty,
+            "Talismán de aire",
+            MakeRoom(),
+            () => killed = true);
         link.Pass(bag);
         Assert.False(killed);
     }
 
     // Review Focus: DangerLink2 item-must-be-absent
     [Fact]
-    public void DangerLink2_Pass_KillsPlayerWithForbiddenItem()
+    public void DangerLink2PassKillsPlayerWithForbiddenItem()
     {
-        var killed = false;
-        var bag = MakeBag();
-        bag.Children.Add(new Item(new("Talismán de Nieve", "Snow talisman"), new("", ""), 1));
-        var link = new DangerLink2(new("Camino", "Path"), new("", ""),
-            new("", ""), "", "Talismán de Nieve", MakeRoom(), () => killed = true);
+        bool killed = false;
+        Inventory bag = MakeBag();
+        bag.Children.Add(new Item(new("Talismán de Nieve", "Snow talisman"), new(string.Empty, string.Empty), 1));
+        var link = new DangerLink2(
+            new("Camino", "Path"),
+            new(string.Empty, string.Empty),
+            new(string.Empty, string.Empty),
+            string.Empty,
+            "Talismán de Nieve",
+            MakeRoom(),
+            () => killed = true);
         link.Pass(bag);
         Assert.True(killed);
     }
 
     [Fact]
-    public void DangerLink2_Pass_SucceedsWithoutForbiddenItem()
+    public void DangerLink2PassSucceedsWithoutForbiddenItem()
     {
-        var killed = false;
-        var bag = MakeBag();
-        var link = new DangerLink2(new("Camino", "Path"), new("", ""),
-            new("", ""), "", "Talismán de Nieve", MakeRoom(), () => killed = true);
+        bool killed = false;
+        Inventory bag = MakeBag();
+        var link = new DangerLink2(
+            new("Camino", "Path"),
+            new(string.Empty, string.Empty),
+            new(string.Empty, string.Empty),
+            string.Empty,
+            "Talismán de Nieve",
+            MakeRoom(),
+            () => killed = true);
         link.Pass(bag);
         Assert.False(killed);
+    }
+
+    private static Room MakeRoom()
+    {
+        return new(new("sala", "room"), new(string.Empty, string.Empty), Inventory.LWeight + 1);
+    }
+
+    private static Inventory MakeBag()
+    {
+        return new();
     }
 }

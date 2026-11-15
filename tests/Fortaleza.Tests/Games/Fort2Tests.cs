@@ -2,47 +2,17 @@ using Fortaleza.Engine;
 using Fortaleza.Engine.Links;
 using Fortaleza.Games;
 using Fortaleza.Localization;
-using Xunit;
 
 namespace Fortaleza.Tests.Games;
 
-public class Fort2Tests
+public sealed class Fort2Tests
 {
-    private static HashSet<Room> ReachableRooms(Room start)
-    {
-        var seen = new HashSet<Room>();
-        var pending = new Stack<Room>([start]);
-        while (pending.Count > 0)
-        {
-            var room = pending.Pop();
-            if (!seen.Add(room)) continue;
-            foreach (var thing in room.Children)
-                foreach (var link in LinksOf(thing))
-                    pending.Push(link.Destination);
-        }
-        return seen;
-    }
-
-    private static IEnumerable<Link> LinksOf(Thing? thing)
-    {
-        switch (thing)
-        {
-            case Link link:
-                yield return link;
-                break;
-            case Hidden hidden:
-                foreach (var inner in LinksOf(hidden.HiddenChild))
-                    yield return inner;
-                break;
-        }
-    }
-
     [Fact]
-    public void Build_RegistersFiftyFiveRoomsStartingAtTheGuestRoom()
+    public void BuildRegistersFiftyFiveRoomsStartingAtTheGuestRoom()
     {
         Localizer.Current = Language.Spanish;
 
-        var game = Fort2Builder.Build();
+        Fort2 game = Fort2Builder.Build();
 
         Assert.Equal("una habitación para huéspedes", game.GetRoom(0).Name.Es);
         Assert.Equal("las Habitaciones del Hechicero", game.GetRoom(54).Name.Es);
@@ -50,11 +20,11 @@ public class Fort2Tests
     }
 
     [Fact]
-    public void Build_EveryRoomHasAnEnglishNameAndDescription()
+    public void BuildEveryRoomHasAnEnglishNameAndDescription()
     {
-        var game = Fort2Builder.Build();
+        Fort2 game = Fort2Builder.Build();
 
-        for (var i = 0; i < 55; i++)
+        for (int i = 0; i < 55; i++)
         {
             Assert.False(string.IsNullOrWhiteSpace(game.GetRoom(i).Name.En));
             Assert.False(string.IsNullOrWhiteSpace(game.GetRoom(i).Description.En));
@@ -62,45 +32,87 @@ public class Fort2Tests
     }
 
     [Fact]
-    public void Build_RoomsReachableFromTheStart_AreAllButTheOriginalsUnusedRoom()
+    public void BuildRoomsReachableFromTheStartAreAllButTheOriginalsUnusedRoom()
     {
-        var game = Fort2Builder.Build();
+        Fort2 game = Fort2Builder.Build();
 
-        var reachable = ReachableRooms(game.GetRoom(0));
+        HashSet<Room> reachable = ReachableRooms(game.GetRoom(0));
 
         Assert.Equal(54, reachable.Count);
         Assert.DoesNotContain(game.GetRoom(29), reachable);
     }
 
     [Fact]
-    public void CheckGoal_AtStart_IsFalse()
+    public void CheckGoalAtStartIsFalse()
     {
-        var game = Fort2Builder.Build();
+        Fort2 game = Fort2Builder.Build();
 
         Assert.False(game.CheckGoal());
     }
 
     [Fact]
-    public void CheckGoal_WhenTheDaughterIsGone_LeavesAChaliceInHerRoom()
+    public void CheckGoalWhenTheDaughterIsGoneLeavesAChaliceInHerRoom()
     {
-        var game = Fort2Builder.Build();
+        Fort2 game = Fort2Builder.Build();
         game.GetRoom(45).Take("Hija del Hechicero");
 
         game.CheckGoal();
         game.CheckGoal();
 
         Assert.NotNull(game.GetRoom(45).Get("Cáliz"));
-        Assert.Single(game.GetRoom(45).Children, t => t.Name.Es == "Cáliz");
+        Assert.Single(game.GetRoom(45).Children, static t => t.Name.Es is "Cáliz");
     }
 
     [Fact]
-    public void CheckGoal_WithTheHandkerchiefLeftInTheKitchen_KillsThePlayer()
+    public void CheckGoalWithTheHandkerchiefLeftInTheKitchenKillsThePlayer()
     {
-        var game = Fort2Builder.Build();
-        game.GetRoom(6).Children.Add(new Item(new("Pañuelo", "Handkerchief"), new("", ""), 1));
+        Fort2 game = Fort2Builder.Build();
+        game.GetRoom(6).Children.Add(new Item(new("Pañuelo", "Handkerchief"), new(string.Empty, string.Empty), 1));
 
         game.CheckGoal();
 
         Assert.True(game.Player.Dead);
+    }
+
+    private static HashSet<Room> ReachableRooms(Room start)
+    {
+        var seen = new HashSet<Room>();
+        var pending = new Stack<Room>([start]);
+        while (pending.Count > 0)
+        {
+            Room room = pending.Pop();
+            if (!seen.Add(room))
+            {
+                continue;
+            }
+
+            foreach (Thing thing in room.Children)
+            {
+                foreach (Link link in LinksOf(thing))
+                {
+                    pending.Push(link.Destination);
+                }
+            }
+        }
+        return seen;
+    }
+
+    private static IEnumerable<Link> LinksOf(Thing? thing)
+    {
+        if (thing is Link link)
+        {
+            yield return link;
+            yield break;
+        }
+
+        if (thing is not Hidden hidden)
+        {
+            yield break;
+        }
+
+        foreach (Link inner in LinksOf(hidden.HiddenChild))
+        {
+            yield return inner;
+        }
     }
 }

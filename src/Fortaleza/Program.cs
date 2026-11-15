@@ -7,22 +7,21 @@ Console.OutputEncoding = System.Text.Encoding.UTF8;
 Console.WriteLine("Seleccione idioma / Select language:");
 Console.WriteLine("  1. Español");
 Console.WriteLine("  2. English");
-var languageKey = ReadChoice();
+char languageKey = ReadChoice();
 Localizer.Current = languageKey == '2' ? Language.English : Language.Spanish;
 ClearScreen();
 
 Console.WriteLine(Localizer.Msg("SelectGame"));
 Console.WriteLine("  1. La Fortaleza I");
 Console.WriteLine("  2. La Fortaleza II");
-var gameKey = ReadChoice();
+char gameKey = ReadChoice();
 ClearScreen();
 
 GameEngine engine = gameKey == '2' ? Fort2Builder.Build() : Fort1Builder.Build();
 engine.Start();
-engine.Player.Output("");
+Thing.Output(string.Empty);
 
-var hour = DateTime.Now.Hour;
-engine.Player.Output(Localizer.Msg(hour < 12 ? "GoodMorning" : hour > 18 ? "GoodEvening" : "GoodAfternoon"));
+Thing.Output(Localizer.Msg(GreetingKey(TimeProvider.System.GetLocalNow().Hour)));
 
 while (!engine.CheckGoal() && !engine.IsOver)
 {
@@ -30,50 +29,80 @@ while (!engine.CheckGoal() && !engine.IsOver)
     engine.ProcessWish();
 }
 
-if (engine.CheckGoal())
-{
-    if (engine is Fort2)
-    {
-        ShowPage(Fort2.Escape);
-        ClearScreen();
-        ShowPage(Fort2.EpilogueFirstPage);
-        ReadChoice();
-        ClearScreen();
-        ShowPage(Fort2.EpilogueLastPage);
-    }
-    else
-    {
-        ClearScreen();
-        engine.Player.Output(Localizer.Msg("Victory1_Fort1"));
-        engine.Player.Output(Localizer.Msg("Victory2_Fort1"));
-        engine.Player.Output(Localizer.Msg("Victory3_Fort1"));
-        engine.Player.Output(Localizer.Msg("Victory4_Fort1"));
-    }
-}
-else
-{
-    Console.Beep();
-    engine.Player.Output(Localizer.Msg("Defeat"));
-}
+ShowOutcome(engine);
 
-engine.Player.Output("");
-engine.Player.Output(Localizer.Msg("SaveTrack"));
+Thing.Output(string.Empty);
+Thing.Output(Localizer.Msg("SaveTrack"));
 if (char.ToUpperInvariant(ReadChoice()) is 'S' or 'Y')
 {
-    engine.Player.Output(Localizer.Msg("SaveTrackTo") + GameEngine.DefaultTrackFile);
+    Thing.Output(Localizer.Msg("SaveTrackTo") + GameEngine.DefaultTrackFile);
     engine.SaveTrack(GameEngine.DefaultTrackFile);
 }
 
-static char ReadChoice() => Console.IsInputRedirected ? (char)Console.Read() : Console.ReadKey(true).KeyChar;
-
-void ShowPage(IReadOnlyList<LocalizedText> lines)
+static char ReadChoice()
 {
-    foreach (var line in lines)
-        engine.Player.Output(line.Get());
+    if (!Console.IsInputRedirected)
+    {
+        return Console.ReadKey(intercept: true).KeyChar;
+    }
+
+    int next = Console.Read();
+    return next < 0 ? '\0' : Convert.ToChar(next);
+}
+
+static string GreetingKey(int hour)
+{
+    if (hour < 12)
+    {
+        return "GoodMorning";
+    }
+
+    return hour > 18 ? "GoodEvening" : "GoodAfternoon";
+}
+
+static void ShowOutcome(GameEngine engine)
+{
+    if (engine.CheckGoal())
+    {
+        if (engine is Fort2)
+        {
+            ShowPage(Fort2.Escape);
+            ClearScreen();
+            ShowPage(Fort2.EpilogueFirstPage);
+            ReadChoice();
+            ClearScreen();
+            ShowPage(Fort2.EpilogueLastPage);
+        }
+        else
+        {
+            ClearScreen();
+            Thing.Output(Localizer.Msg("Victory1_Fort1"));
+            Thing.Output(Localizer.Msg("Victory2_Fort1"));
+            Thing.Output(Localizer.Msg("Victory3_Fort1"));
+            Thing.Output(Localizer.Msg("Victory4_Fort1"));
+        }
+    }
+    else
+    {
+        Console.Beep();
+        Thing.Output(Localizer.Msg("Defeat"));
+    }
+}
+
+static void ShowPage(IReadOnlyList<LocalizedText> lines)
+{
+    foreach (LocalizedText line in lines)
+    {
+        Thing.Output(line.Get());
+    }
 }
 
 static void ClearScreen()
 {
-    if (!Console.IsOutputRedirected)
-        Console.Clear();
+    if (Console.IsOutputRedirected)
+    {
+        return;
+    }
+
+    Console.Clear();
 }

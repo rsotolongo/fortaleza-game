@@ -2,9 +2,12 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Engine;
 
-public class Troll(
-    LocalizedText name, LocalizedText description, string likeness,
-    LocalizedText hiData, LocalizedText loData)
+internal sealed class Troll(
+    LocalizedText name,
+    LocalizedText description,
+    string likeness,
+    LocalizedText hiData,
+    LocalizedText loData)
     : LivingThing(name, description, 100)
 {
     public string Likeness { get; } = likeness;
@@ -12,7 +15,10 @@ public class Troll(
     public LocalizedText LoData { get; } = loData;
     public bool Happy { get; private set; }
 
-    public override void Speak() => Output(Happy ? HiData.Get() : LoData.Get());
+    public override void Speak()
+    {
+        Output(Happy ? HiData.Get() : LoData.Get());
+    }
 
     public override void Accept(Item gift)
     {

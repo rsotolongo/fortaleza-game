@@ -8,6 +8,11 @@
     <RootNamespace>Fortaleza</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="Fortaleza.Api" />
+    <InternalsVisibleTo Include="Fortaleza.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="Localization\res\messages.es.json" WithCulture="false" LogicalName="Fortaleza.Localization.res.messages.es.json" />
     <EmbeddedResource Include="Localization\res\messages.en.json" WithCulture="false" LogicalName="Fortaleza.Localization.res.messages.en.json" />
   </ItemGroup>

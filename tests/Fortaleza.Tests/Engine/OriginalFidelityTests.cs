@@ -1,22 +1,18 @@
 using Fortaleza.Engine;
 using Fortaleza.Engine.Links;
 using Fortaleza.Localization;
-using Xunit;
 
 namespace Fortaleza.Tests.Engine;
 
-public class OriginalFidelityTests
+public sealed class OriginalFidelityTests
 {
-    private static Room MakeRoom() =>
-        new(new("sala", "room"), new("", ""), Inventory.LWeight + 1);
-
     [Fact]
-    public void Weights_NpcsHiddenAndLinks_MatchOriginal()
+    public void WeightsNpcsHiddenAndLinksMatchOriginal()
     {
-        var troll = new Troll(new("Bruja", "Witch"), new("", ""), "x", new("", ""), new("", ""));
-        var guard = new Guard(new("Lobo", "Wolf"), new("", ""), new("", ""), "x");
-        var hidden = new Hidden(new("Jarrón", "Vase"), new("", ""), "x", new Item(new("a", "a"), new("", ""), 1));
-        var link = new Link(new("Puerta", "Door"), new("", ""), new("", ""), "", MakeRoom());
+        var troll = new Troll(new("Bruja", "Witch"), new(string.Empty, string.Empty), "x", new(string.Empty, string.Empty), new(string.Empty, string.Empty));
+        var guard = new Guard(new("Lobo", "Wolf"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), "x");
+        var hidden = new Hidden(new("Jarrón", "Vase"), new(string.Empty, string.Empty), "x", new Item(new("a", "a"), new(string.Empty, string.Empty), 1));
+        var link = new Link(new("Puerta", "Door"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), string.Empty, MakeRoom());
 
         Assert.Equal(100, troll.Weight);
         Assert.Equal(Inventory.LWeight + 1, guard.Weight);
@@ -25,10 +21,10 @@ public class OriginalFidelityTests
     }
 
     [Fact]
-    public void Take_Guard_CannotBeCarried()
+    public void TakeGuardCannotBeCarried()
     {
-        var room = MakeRoom();
-        var guard = new Guard(new("Lobo", "Wolf"), new("", ""), new("", ""), "Látigo");
+        Room room = MakeRoom();
+        var guard = new Guard(new("Lobo", "Wolf"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), "Látigo");
         room.Children.Add(guard);
         var player = new Player(room);
 
@@ -39,10 +35,10 @@ public class OriginalFidelityTests
     }
 
     [Fact]
-    public void Get_PartialWordsOfName_FindsThing()
+    public void GetPartialWordsOfNameFindsThing()
     {
-        var room = MakeRoom();
-        var door = new Link(new("Puerta de hierro", "Iron door"), new("", ""), new("", ""), "", MakeRoom());
+        Room room = MakeRoom();
+        var door = new Link(new("Puerta de hierro", "Iron door"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), string.Empty, MakeRoom());
         room.Children.Add(door);
 
         Assert.Same(door, room.Get("hierro"));
@@ -50,11 +46,11 @@ public class OriginalFidelityTests
     }
 
     [Fact]
-    public void Get_ExactNameWins_OverEarlierPartialMatch()
+    public void GetExactNameWinsOverEarlierPartialMatch()
     {
-        var room = MakeRoom();
-        var big = new Item(new("Espejo grande", "Big mirror"), new("", ""), 1);
-        var exact = new Item(new("Espejo", "Mirror"), new("", ""), 1);
+        Room room = MakeRoom();
+        var big = new Item(new("Espejo grande", "Big mirror"), new(string.Empty, string.Empty), 1);
+        var exact = new Item(new("Espejo", "Mirror"), new(string.Empty, string.Empty), 1);
         room.Children.Add(big);
         room.Children.Add(exact);
 
@@ -65,21 +61,21 @@ public class OriginalFidelityTests
     [InlineData("la maza")]
     [InlineData("maza roja")]
     [InlineData("")]
-    public void Get_QueryWordNotInName_ReturnsNull(string query)
+    public void GetQueryWordNotInNameReturnsNull(string query)
     {
-        var room = MakeRoom();
-        room.Children.Add(new Item(new("Maza", "Mace"), new("", ""), 1));
+        Room room = MakeRoom();
+        room.Children.Add(new Item(new("Maza", "Mace"), new(string.Empty, string.Empty), 1));
 
         Assert.Null(room.Get(query));
     }
 
     [Fact]
-    public void Link_EmptyKey_StartsClosedAndOpensWithAnyWord()
+    public void LinkEmptyKeyStartsClosedAndOpensWithAnyWord()
     {
-        var link = new Link(new("Puerta", "Door"), new("", ""), new("", ""), "", MakeRoom());
+        var link = new Link(new("Puerta", "Door"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), string.Empty, MakeRoom());
 
-        var closedAtStart = link.GetDest();
-        var opened = link.TryOpen("");
+        Room? closedAtStart = link.GetDest();
+        bool opened = link.TryOpen(string.Empty);
 
         Assert.Null(closedAtStart);
         Assert.True(opened);
@@ -87,59 +83,65 @@ public class OriginalFidelityTests
     }
 
     [Fact]
-    public void Link_OpenDoorSentinel_StartsOpen()
+    public void LinkOpenDoorSentinelStartsOpen()
     {
-        var dest = MakeRoom();
-        var link = new Link(new("Puerta", "Door"), new("", ""), new("", ""), Link.OpenDoor, dest);
+        Room dest = MakeRoom();
+        var link = new Link(new("Puerta", "Door"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), Link.OpenDoor, dest);
 
         Assert.Same(dest, link.GetDest());
-    }
-
-    private static string Capture(Action action)
-    {
-        var writer = new StringWriter();
-        var original = Console.Out;
-        Console.SetOut(writer);
-        try { action(); }
-        finally { Console.SetOut(original); }
-        return writer.ToString().Replace(Environment.NewLine, " ");
     }
 
     [Theory]
     [InlineData(1, "AlmostFull")]
     [InlineData(0, "CannotCarryMore")]
-    public void Inventory_NearlyFull_UsesOriginalThresholds(int remaining, string messageKey)
+    public void InventoryNearlyFullUsesOriginalThresholds(int remaining, string messageKey)
     {
         Localizer.Current = Language.Spanish;
         var player = new Player(MakeRoom());
-        player.Bag.Children.Add(new Item(new("Yunque", "Anvil"), new("", ""), Inventory.LWeight - remaining));
+        player.Bag.Children.Add(new Item(new("Yunque", "Anvil"), new(string.Empty, string.Empty), Inventory.LWeight - remaining));
 
-        var output = Capture(player.Inventory);
+        string output = Capture(player.Inventory);
 
-        Assert.Contains(Localizer.Msg(messageKey), output);
+        Assert.Contains(Localizer.Msg(messageKey), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Inventory_PlentyOfRoom_ReportsRemainingBags()
+    public void InventoryPlentyOfRoomReportsRemainingBags()
     {
         Localizer.Current = Language.Spanish;
         var player = new Player(MakeRoom());
-        player.Bag.Children.Add(new Item(new("Maza", "Mace"), new("", ""), 5));
+        player.Bag.Children.Add(new Item(new("Maza", "Mace"), new(string.Empty, string.Empty), 5));
 
-        var output = Capture(player.Inventory);
+        string output = Capture(player.Inventory);
 
-        Assert.Contains(Localizer.Msg("CouldCarryMore") + "35" + Localizer.Msg("MoreBags"), output);
+        Assert.Contains(Localizer.Msg("CouldCarryMore") + "35" + Localizer.Msg("MoreBags"), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Inventory_EmptyBag_ReportsNothingCarried()
+    public void InventoryEmptyBagReportsNothingCarried()
     {
         Localizer.Current = Language.Spanish;
         var player = new Player(MakeRoom());
 
-        var output = Capture(player.Inventory);
+        string output = Capture(player.Inventory);
 
-        Assert.Contains(Localizer.Msg("BagEmpty"), output);
-        Assert.DoesNotContain(Localizer.Msg("BagContains"), output);
+        Assert.Contains(Localizer.Msg("BagEmpty"), output, StringComparison.Ordinal);
+        Assert.DoesNotContain(Localizer.Msg("BagContains"), output, StringComparison.Ordinal);
+    }
+
+    private static Room MakeRoom()
+    {
+        return new(new("sala", "room"), new(string.Empty, string.Empty), Inventory.LWeight + 1);
+    }
+
+    private static string Capture(Action action)
+    {
+        var writer = new StringWriter();
+        TextWriter original = Console.Out;
+        Console.SetOut(writer);
+        try
+        { action(); }
+        finally { Console.SetOut(original); }
+        return writer.ToString().Replace(Environment.NewLine, " ", StringComparison.Ordinal);
     }
 }

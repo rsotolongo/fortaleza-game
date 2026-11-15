@@ -1,104 +1,125 @@
 using Fortaleza.Engine;
 using Fortaleza.Localization;
-using Xunit;
 
 namespace Fortaleza.Tests.Engine;
 
-public class HiddenTests
+public sealed class HiddenTests
 {
-    private static Troll MakeTroll(string likeness) =>
-        new(new("Bruja", "Witch"), new("", ""), likeness,
-            new("Gracias", "Thank you"), new("Dame la escoba", "Give me the broom"));
-
     [Fact]
-    public void Troll_Accept_SetsHappyOnCorrectGift()
+    public void TrollAcceptSetsHappyOnCorrectGift()
     {
-        var troll = new Troll(new("Bruja", "Witch"), new("", ""), "Escoba",
-            new("Gracias", "Thank you"), new("Dame mi escoba", "Give me my broom"));
-        troll.Accept(new Item(new("Escoba", "Broom"), new("", ""), 1));
+        var troll = new Troll(
+            new("Bruja", "Witch"),
+            new(string.Empty, string.Empty),
+            "Escoba",
+            new("Gracias", "Thank you"),
+            new("Dame mi escoba", "Give me my broom"));
+        troll.Accept(new Item(new("Escoba", "Broom"), new(string.Empty, string.Empty), 1));
         Assert.True(troll.Happy);
     }
 
     [Fact]
-    public void Troll_Accept_IgnoresWrongGift()
+    public void TrollAcceptIgnoresWrongGift()
     {
-        var troll = MakeTroll("Escoba");
-        troll.Accept(new Item(new("Maza", "Mace"), new("", ""), 1));
+        Troll troll = MakeTroll("Escoba");
+        troll.Accept(new Item(new("Maza", "Mace"), new(string.Empty, string.Empty), 1));
         Assert.False(troll.Happy);
     }
 
     [Fact]
-    public void Guard_Die_ReturnsTrueWithCorrectWeapon()
+    public void GuardDieReturnsTrueWithCorrectWeapon()
     {
-        var guard = new Guard(new("Ciclope", "Cyclops"), new("", ""),
-            new("Dying words", "Dying words"), "Maza");
+        var guard = new Guard(
+            new("Ciclope", "Cyclops"),
+            new(string.Empty, string.Empty),
+            new("Dying words", "Dying words"),
+            "Maza");
         Assert.True(guard.Die("Maza"));
     }
 
     [Fact]
-    public void Guard_Die_ReturnsFalseWithWrongWeapon()
+    public void GuardDieReturnsFalseWithWrongWeapon()
     {
-        var guard = new Guard(new("Ciclope", "Cyclops"), new("", ""),
-            new("Dying", "Dying"), "Maza");
+        var guard = new Guard(
+            new("Ciclope", "Cyclops"),
+            new(string.Empty, string.Empty),
+            new("Dying", "Dying"),
+            "Maza");
         Assert.False(guard.Die("Espada"));
     }
 
     [Fact]
-    public void Guard_Die_SetsDeadOnCorrectWeapon()
+    public void GuardDieSetsDeadOnCorrectWeapon()
     {
-        var guard = new Guard(new("Ciclope", "Cyclops"), new("", ""),
-            new("Dying", "Dying"), "Maza");
+        var guard = new Guard(
+            new("Ciclope", "Cyclops"),
+            new(string.Empty, string.Empty),
+            new("Dying", "Dying"),
+            "Maza");
         guard.Die("Maza");
         Assert.True(guard.Dead);
     }
 
     [Fact]
-    public void Guard_Die_DoesNotSetDeadOnWrongWeapon()
+    public void GuardDieDoesNotSetDeadOnWrongWeapon()
     {
-        var guard = new Guard(new("Ciclope", "Cyclops"), new("", ""),
-            new("Dying", "Dying"), "Maza");
+        var guard = new Guard(
+            new("Ciclope", "Cyclops"),
+            new(string.Empty, string.Empty),
+            new("Dying", "Dying"),
+            "Maza");
         guard.Die("Espada");
         Assert.False(guard.Dead);
     }
 
     [Fact]
-    public void Hidden_TryBreak_ReturnsTrueOnMatch()
+    public void HiddenTryBreakReturnsTrueOnMatch()
     {
-        var child = new Item(new("Puerta oculta", "Hidden door"), new("", ""), 100);
-        var hidden = new Hidden(new("Espejo opaco", "Opaque mirror"), new("", ""), "Hueso de gato", child);
+        var child = new Item(new("Puerta oculta", "Hidden door"), new(string.Empty, string.Empty), 100);
+        var hidden = new Hidden(new("Espejo opaco", "Opaque mirror"), new(string.Empty, string.Empty), "Hueso de gato", child);
         Assert.True(hidden.TryBreak("Hueso de gato"));
     }
 
     [Fact]
-    public void Hidden_TryBreak_ReturnsFalseOnMismatch()
+    public void HiddenTryBreakReturnsFalseOnMismatch()
     {
-        var child = new Item(new("Tesoro", "Treasure"), new("", ""), 1);
-        var hidden = new Hidden(new("Cofre", "Chest"), new("", ""), "Llave", child);
+        var child = new Item(new("Tesoro", "Treasure"), new(string.Empty, string.Empty), 1);
+        var hidden = new Hidden(new("Cofre", "Chest"), new(string.Empty, string.Empty), "Llave", child);
         Assert.False(hidden.TryBreak("Espada"));
     }
 
     [Fact]
-    public void Room_Break_InsertHiddenChildAtSameIndex()
+    public void RoomBreakInsertHiddenChildAtSameIndex()
     {
-        var room = new Room(new("", ""), new("", ""), 100);
-        var before = new Item(new("A", "A"), new("", ""), 1);
-        var hiddenChild = new Item(new("C", "C"), new("", ""), 1);
-        var hidden = new Hidden(new("B", "B"), new("", ""), "Hacha", hiddenChild);
-        var after = new Item(new("D", "D"), new("", ""), 1);
+        var room = new Room(new(string.Empty, string.Empty), new(string.Empty, string.Empty), 100);
+        var before = new Item(new("A", "A"), new(string.Empty, string.Empty), 1);
+        var hiddenChild = new Item(new("C", "C"), new(string.Empty, string.Empty), 1);
+        var hidden = new Hidden(new("B", "B"), new(string.Empty, string.Empty), "Hacha", hiddenChild);
+        var after = new Item(new("D", "D"), new(string.Empty, string.Empty), 1);
         room.Children.AddRange([before, hidden, after]);
         room.BreakThing("B", "Hacha");
         Assert.Equal(1, room.Children.IndexOf(hiddenChild));
     }
 
     [Fact]
-    public void Room_Break_RemovesHiddenContainerOnSuccess()
+    public void RoomBreakRemovesHiddenContainerOnSuccess()
     {
-        var room = new Room(new("", ""), new("", ""), 100);
-        var hiddenChild = new Item(new("C", "C"), new("", ""), 1);
-        var hidden = new Hidden(new("B", "B"), new("", ""), "Hacha", hiddenChild);
+        var room = new Room(new(string.Empty, string.Empty), new(string.Empty, string.Empty), 100);
+        var hiddenChild = new Item(new("C", "C"), new(string.Empty, string.Empty), 1);
+        var hidden = new Hidden(new("B", "B"), new(string.Empty, string.Empty), "Hacha", hiddenChild);
         room.Children.Add(hidden);
         room.BreakThing("B", "Hacha");
         Assert.DoesNotContain(hidden, room.Children);
         Assert.Contains(hiddenChild, room.Children);
+    }
+
+    private static Troll MakeTroll(string likeness)
+    {
+        return new(
+            new("Bruja", "Witch"),
+            new(string.Empty, string.Empty),
+            likeness,
+            new("Gracias", "Thank you"),
+            new("Dame la escoba", "Give me the broom"));
     }
 }

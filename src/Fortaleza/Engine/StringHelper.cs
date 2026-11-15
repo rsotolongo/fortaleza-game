@@ -2,50 +2,62 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Engine;
 
-public static class StringHelper
+internal static class StringHelper
 {
-    private static readonly (char from, char to)[] Diacritics =
-    [
-        ('á','a'),('é','e'),('í','i'),('ó','o'),('ú','u'),('ü','u'),('ñ','n'),
-        ('Á','A'),('É','E'),('Í','I'),('Ó','O'),('Ú','U'),('Ü','U'),('Ñ','N'),
-    ];
+    private static readonly Dictionary<char, char> Diacritics = new()
+    {
+        ['á'] = 'a',
+        ['é'] = 'e',
+        ['í'] = 'i',
+        ['ó'] = 'o',
+        ['ú'] = 'u',
+        ['ü'] = 'u',
+        ['ñ'] = 'n',
+        ['Á'] = 'A',
+        ['É'] = 'E',
+        ['Í'] = 'I',
+        ['Ó'] = 'O',
+        ['Ú'] = 'U',
+        ['Ü'] = 'U',
+        ['Ñ'] = 'N',
+    };
 
     public static string Normalize(string s)
     {
-        var chars = s.ToCharArray();
-        for (var i = 0; i < chars.Length; i++)
+        char[] chars = s.ToCharArray();
+        for (int i = 0; i < chars.Length; i++)
         {
-            foreach (var (from, to) in Diacritics)
-            {
-                if (chars[i] == from) { chars[i] = to; break; }
-            }
+            chars[i] = Diacritics.GetValueOrDefault(chars[i], chars[i]);
         }
+
         return new string(chars).ToUpperInvariant();
     }
 
-    public static bool ContainsAllWords(LocalizedText name, string query) =>
-        ContainsAllWords(Normalize(name.Es), query) || ContainsAllWords(Normalize(name.En), query);
-
-    public static bool EqualsName(LocalizedText name, string typed) =>
-        Normalize(name.Es) == Normalize(typed) || Normalize(name.En) == Normalize(typed);
+    public static bool ContainsAllWords(LocalizedText name, string query)
+    {
+        return ContainsAllWords(Normalize(name.Es), query) || ContainsAllWords(Normalize(name.En), query);
+    }
 
     public static bool ContainsAllWords(string name, string query)
     {
-        var nameWords = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var queryWords = query.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var match = 0;
-        var i = 0;
-        while (match < queryWords.Length && i < nameWords.Length)
+        string[] nameWords = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        string[] queryWords = query.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        int match = 0;
+        for (int i = 0; match < queryWords.Length && i < nameWords.Length; i++)
         {
-            var j = 0;
-            while (match < queryWords.Length && j < queryWords.Length)
+            for (int j = 0; match < queryWords.Length && j < queryWords.Length; j++)
             {
                 if (nameWords[i] == queryWords[j])
+                {
                     match++;
-                j++;
+                }
             }
-            i++;
         }
         return queryWords.Length > 0 && match >= queryWords.Length;
+    }
+
+    public static bool EqualsName(LocalizedText name, string typed)
+    {
+        return Normalize(name.Es) == Normalize(typed) || Normalize(name.En) == Normalize(typed);
     }
 }

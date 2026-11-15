@@ -1,0 +1,22 @@
+# Place as .editorconfig in each application project folder (API, worker, console)
+[*.cs]
+dotnet_diagnostic.CA2007.severity = none
+# Only if the app is not consumed as a library:
+dotnet_diagnostic.CS1591.severity = none
+
+# The game is a synchronous console application
+dotnet_diagnostic.MA0045.severity = none
+
+# Populating every enum member in a switch expression only adds noise
+dotnet_diagnostic.IDE0072.severity = none
+dotnet_diagnostic.IDE0010.severity = none
+
+# Internal types keep their members public: the visibility only matters across assemblies
+dotnet_diagnostic.S3059.severity = none
+
+# Declarative game data and the command dispatcher are long by design
+[Games/Fort*Builder.cs]
+dotnet_diagnostic.MA0051.severity = none
+
+[Engine/GameEngine.cs]
+dotnet_diagnostic.MA0051.severity = none

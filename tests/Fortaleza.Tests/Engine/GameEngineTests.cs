@@ -1,56 +1,18 @@
 using Fortaleza.Engine;
 using Fortaleza.Engine.Links;
 using Fortaleza.Localization;
-using Xunit;
 
 namespace Fortaleza.Tests.Engine;
 
-public class GameEngineTests
+public sealed class GameEngineTests
 {
-    private sealed class TestEngine(Room start) : GameEngine(start)
-    {
-        public Queue<string> Input { get; } = new();
-
-        public override bool CheckGoal() => false;
-
-        protected override string? ReadLine() => Input.Count > 0 ? Input.Dequeue() : null;
-    }
-
-    private static Room MakeRoom() =>
-        new(new("sala", "room"), new("descripción", "description"), Inventory.LWeight + 1);
-
-    private static TestEngine BuildMinimalEngine(int extraRooms = 0)
-    {
-        var room = MakeRoom();
-        room.Children.Add(new Item(new("Maza", "Mace"), new("una maza", "a mace"), 5));
-        var engine = new TestEngine(room);
-        engine.AddRoom(room);
-        for (var i = 0; i < extraRooms; i++)
-            engine.AddRoom(MakeRoom());
-        engine.Start();
-        return engine;
-    }
-
-    private static string Capture(Action action)
-    {
-        var writer = new StringWriter();
-        var original = Console.Out;
-        Console.SetOut(writer);
-        try { action(); }
-        finally { Console.SetOut(original); }
-        return writer.ToString().Replace(Environment.NewLine, " ");
-    }
-
-    private static string TempTrack() =>
-        Path.Combine(Path.GetTempPath(), $"fortaleza-{Guid.NewGuid():N}.trk");
-
     [Fact]
-    public void ProcessCommand_TakeAndLeave_RoundTrips()
+    public void ProcessCommandTakeAndLeaveRoundTrips()
     {
-        var engine = BuildMinimalEngine();
+        TestEngine engine = BuildMinimalEngine();
 
         engine.ProcessCommand("coger maza");
-        var afterTake = engine.Player.Bag.Children.Count;
+        int afterTake = engine.Player.Bag.Children.Count;
         engine.ProcessCommand("dejar maza");
 
         Assert.Equal(1, afterTake);
@@ -58,9 +20,9 @@ public class GameEngineTests
     }
 
     [Fact]
-    public void ProcessCommand_LeaveAll_EmptiesBag()
+    public void ProcessCommandLeaveAllEmptiesBag()
     {
-        var engine = BuildMinimalEngine();
+        TestEngine engine = BuildMinimalEngine();
 
         engine.ProcessCommand("take mace");
         engine.ProcessCommand("drop all");
@@ -69,21 +31,21 @@ public class GameEngineTests
     }
 
     [Fact]
-    public void ProcessCommand_TakeAll_AsksToTakeOneThingAtATime()
+    public void ProcessCommandTakeAllAsksToTakeOneThingAtATime()
     {
         Localizer.Current = Language.Spanish;
-        var engine = BuildMinimalEngine();
+        TestEngine engine = BuildMinimalEngine();
 
-        var output = Capture(() => engine.ProcessCommand("tomar todo"));
+        string output = Capture(() => engine.ProcessCommand("tomar todo"));
 
         Assert.Empty(engine.Player.Bag.Children);
-        Assert.Contains(Localizer.Msg("TakeOneAtATime"), output);
+        Assert.Contains(Localizer.Msg("TakeOneAtATime"), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void ProcessCommand_Quit_KillsPlayerAndEndsGame()
+    public void ProcessCommandQuitKillsPlayerAndEndsGame()
     {
-        var engine = BuildMinimalEngine();
+        TestEngine engine = BuildMinimalEngine();
 
         engine.ProcessCommand("abandonar");
 
@@ -92,19 +54,19 @@ public class GameEngineTests
     }
 
     [Fact]
-    public void IsOver_PlayerDies_ReturnsTrue()
+    public void IsOverPlayerDiesReturnsTrue()
     {
-        var engine = BuildMinimalEngine();
+        TestEngine engine = BuildMinimalEngine();
 
-        engine.Player.Die("");
+        engine.Player.Die(string.Empty);
 
         Assert.True(engine.IsOver);
     }
 
     [Fact]
-    public void AskPlayer_EndOfInput_EndsGame()
+    public void AskPlayerEndOfInputEndsGame()
     {
-        var engine = BuildMinimalEngine();
+        TestEngine engine = BuildMinimalEngine();
 
         Capture(engine.AskPlayer);
 
@@ -112,74 +74,74 @@ public class GameEngineTests
     }
 
     [Fact]
-    public void ProcessCommand_LookWithObject_ShowsItsDescription()
+    public void ProcessCommandLookWithObjectShowsItsDescription()
     {
         Localizer.Current = Language.Spanish;
-        var engine = BuildMinimalEngine();
+        TestEngine engine = BuildMinimalEngine();
 
-        var output = Capture(() => engine.ProcessCommand("mirar maza"));
+        string output = Capture(() => engine.ProcessCommand("mirar maza"));
 
-        Assert.Contains("una maza", output);
+        Assert.Contains("una maza", output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void ProcessCommand_GoThroughClosedUnlockedDoor_OpensItSilentlyThenWalks()
+    public void ProcessCommandGoThroughClosedUnlockedDoorOpensItSilentlyThenWalks()
     {
         Localizer.Current = Language.Spanish;
-        var engine = BuildMinimalEngine();
-        var next = MakeRoom();
+        TestEngine engine = BuildMinimalEngine();
+        Room next = MakeRoom();
         engine.Player.CurrentRoom.Children.Add(
-            new Link(new("Puerta azul", "Blue door"), new("", ""), new("", ""), "", next));
+            new Link(new("Puerta azul", "Blue door"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), string.Empty, next));
 
-        var output = Capture(() => engine.ProcessCommand("ir puerta azul"));
+        string output = Capture(() => engine.ProcessCommand("ir puerta azul"));
 
         Assert.Same(next, engine.Player.CurrentRoom);
-        Assert.DoesNotContain(Localizer.Msg("Ok"), output);
+        Assert.DoesNotContain(Localizer.Msg("Ok"), output, StringComparison.Ordinal);
         Assert.True(Thing.Visible);
     }
 
     [Fact]
-    public void ProcessCommand_GoThroughLockedDoor_BumpsNose()
+    public void ProcessCommandGoThroughLockedDoorBumpsNose()
     {
         Localizer.Current = Language.Spanish;
-        var engine = BuildMinimalEngine();
-        var start = engine.Player.CurrentRoom;
-        start.Children.Add(new Link(new("Puerta azul", "Blue door"), new("", ""), new("", ""), "secreto", MakeRoom()));
+        TestEngine engine = BuildMinimalEngine();
+        Room start = engine.Player.CurrentRoom;
+        start.Children.Add(new Link(new("Puerta azul", "Blue door"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), "secreto", MakeRoom()));
 
-        var output = Capture(() => engine.ProcessCommand("ir puerta azul"));
+        string output = Capture(() => engine.ProcessCommand("ir puerta azul"));
 
         Assert.Same(start, engine.Player.CurrentRoom);
-        Assert.Contains(Localizer.Msg("Ouch"), output);
+        Assert.Contains(Localizer.Msg("Ouch"), output, StringComparison.Ordinal);
     }
 
     [Theory]
     [InlineData("cls", "Cls")]
     [InlineData("orinar", "Piss")]
     [InlineData("xyzzy", "DontUnderstand")]
-    public void ProcessCommand_JokeAndUnknownCommands_ShowTheirMessages(string input, string messageKey)
+    public void ProcessCommandJokeAndUnknownCommandsShowTheirMessages(string input, string messageKey)
     {
         Localizer.Current = Language.Spanish;
-        var engine = BuildMinimalEngine();
+        TestEngine engine = BuildMinimalEngine();
 
-        var output = Capture(() => engine.ProcessCommand(input));
+        string output = Capture(() => engine.ProcessCommand(input));
 
-        Assert.Contains(Localizer.Msg(messageKey), output);
+        Assert.Contains(Localizer.Msg(messageKey), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void ProcessCommand_EmptyInput_SaysNothing()
+    public void ProcessCommandEmptyInputSaysNothing()
     {
-        var engine = BuildMinimalEngine();
+        TestEngine engine = BuildMinimalEngine();
 
-        var output = Capture(() => engine.ProcessCommand(""));
+        string output = Capture(() => engine.ProcessCommand(string.Empty));
 
-        Assert.Equal("", output);
+        Assert.Equal(string.Empty, output);
     }
 
     [Fact]
-    public void Track_OnlyRelevantCommandsAreLogged()
+    public void TrackOnlyRelevantCommandsAreLogged()
     {
-        var engine = BuildMinimalEngine(2);
+        TestEngine engine = BuildMinimalEngine(2);
 
         engine.ProcessCommand("mirar");
         engine.ProcessCommand("inventario");
@@ -193,9 +155,9 @@ public class GameEngineTests
     }
 
     [Fact]
-    public void Track_StoresTheOriginalTypedText()
+    public void TrackStoresTheOriginalTypedText()
     {
-        var engine = BuildMinimalEngine();
+        TestEngine engine = BuildMinimalEngine();
 
         engine.ProcessCommand("Coger la MAZA");
 
@@ -203,30 +165,30 @@ public class GameEngineTests
     }
 
     [Fact]
-    public void SaveTrack_SingleCommand_SaysNothingToSaveAndWritesNoFile()
+    public void SaveTrackSingleCommandSaysNothingToSaveAndWritesNoFile()
     {
         Localizer.Current = Language.Spanish;
-        var path = TempTrack();
-        var engine = BuildMinimalEngine();
+        string path = TempTrack();
+        TestEngine engine = BuildMinimalEngine();
         engine.ProcessCommand("coger maza");
 
-        var output = Capture(() => engine.SaveTrack(path));
+        string output = Capture(() => engine.SaveTrack(path));
 
         Assert.False(File.Exists(path));
-        Assert.Contains(Localizer.Msg("NothingToSave"), output);
+        Assert.Contains(Localizer.Msg("NothingToSave"), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void SaveTrack_ThenLoadTrack_ReplaysCommands()
+    public void SaveTrackThenLoadTrackReplaysCommands()
     {
-        var path = TempTrack();
-        var source = BuildMinimalEngine();
+        string path = TempTrack();
+        TestEngine source = BuildMinimalEngine();
         source.ProcessCommand("coger maza");
         source.ProcessCommand("mirar");
         source.SaveTrack(path);
-        var target = BuildMinimalEngine();
+        TestEngine target = BuildMinimalEngine();
 
-        var loaded = false;
+        bool loaded = false;
         Capture(() => loaded = target.LoadTrack(path));
         File.Delete(path);
 
@@ -236,42 +198,42 @@ public class GameEngineTests
     }
 
     [Fact]
-    public void LoadTrack_Verbose_EchoesEachCommand()
+    public void LoadTrackVerboseEchoesEachCommand()
     {
         Localizer.Current = Language.Spanish;
-        var path = TempTrack();
+        string path = TempTrack();
         File.WriteAllLines(path, ["coger maza"]);
-        var engine = BuildMinimalEngine();
+        TestEngine engine = BuildMinimalEngine();
 
-        var output = Capture(() => engine.LoadTrack(path));
+        string output = Capture(() => engine.LoadTrack(path));
         File.Delete(path);
 
-        Assert.Contains(Localizer.Msg("ExecRunning"), output);
-        Assert.Contains(" coger maza", output);
+        Assert.Contains(Localizer.Msg("ExecRunning"), output, StringComparison.Ordinal);
+        Assert.Contains(" coger maza", output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void LoadTrack_Silent_HidesCommandOutputButRestoresVisibility()
+    public void LoadTrackSilentHidesCommandOutputButRestoresVisibility()
     {
         Localizer.Current = Language.Spanish;
-        var path = TempTrack();
+        string path = TempTrack();
         File.WriteAllLines(path, ["coger maza"]);
-        var engine = BuildMinimalEngine();
+        TestEngine engine = BuildMinimalEngine();
 
-        var output = Capture(() => engine.LoadTrack(path, verbose: false));
+        string output = Capture(() => engine.LoadTrack(path, verbose: false));
         File.Delete(path);
 
-        Assert.DoesNotContain("coger maza", output);
+        Assert.DoesNotContain("coger maza", output, StringComparison.Ordinal);
         Assert.Single(engine.Player.Bag.Children);
         Assert.True(Thing.Visible);
     }
 
     [Fact]
-    public void LoadTrack_StopsWhenPlayerDies()
+    public void LoadTrackStopsWhenPlayerDies()
     {
-        var path = TempTrack();
+        string path = TempTrack();
         File.WriteAllLines(path, ["abandonar", "coger maza"]);
-        var engine = BuildMinimalEngine();
+        TestEngine engine = BuildMinimalEngine();
 
         Capture(() => engine.LoadTrack(path));
         File.Delete(path);
@@ -280,24 +242,24 @@ public class GameEngineTests
     }
 
     [Fact]
-    public void LoadTrack_MissingFile_ReportsItAndReturnsFalse()
+    public void LoadTrackMissingFileReportsItAndReturnsFalse()
     {
         Localizer.Current = Language.Spanish;
-        var engine = BuildMinimalEngine();
-        var loaded = true;
+        TestEngine engine = BuildMinimalEngine();
+        bool loaded = true;
 
-        var output = Capture(() => loaded = engine.LoadTrack(TempTrack()));
+        string output = Capture(() => loaded = engine.LoadTrack(TempTrack()));
 
         Assert.False(loaded);
-        Assert.Contains(Localizer.Msg("FileNotFound"), output);
+        Assert.Contains(Localizer.Msg("FileNotFound"), output, StringComparison.Ordinal);
         Assert.True(Thing.Visible);
     }
 
     [Fact]
-    public void ProcessCommand_ExecuteWithoutFileName_DoesNothingMore()
+    public void ProcessCommandExecuteWithoutFileNameDoesNothingMore()
     {
-        var engine = BuildMinimalEngine();
-        engine.Input.Enqueue("");
+        TestEngine engine = BuildMinimalEngine();
+        engine.Input.Enqueue(string.Empty);
 
         Capture(() => engine.ProcessCommand("ejecutar"));
 
@@ -309,39 +271,91 @@ public class GameEngineTests
     [InlineData(1, 2, "100%")]
     [InlineData(1, 3, "67%")]
     [InlineData(0, 3, "33%")]
-    public void ShowPercent_VisitedOverRoomsMinusOne_IsRounded(int moves, int extraRooms, string expected)
+    public void ShowPercentVisitedOverRoomsMinusOneIsRounded(int moves, int extraRooms, string expected)
     {
-        var engine = BuildMinimalEngine(extraRooms);
-        var rooms = Enumerable.Range(1, extraRooms).Select(engine.GetRoom).Take(moves).ToList();
-        foreach (var room in rooms)
+        TestEngine engine = BuildMinimalEngine(extraRooms);
+        foreach (Room? room in Enumerable.Range(1, extraRooms).Select(engine.GetRoom).Take(moves).ToList())
+        {
             engine.Player.Go(room);
+        }
 
-        var output = Capture(engine.ShowPercent);
+        string output = Capture(engine.ShowPercent);
 
-        Assert.Contains(expected, output);
+        Assert.Contains(expected, output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void ShowPercent_UsesAdvancedMessage()
+    public void ShowPercentUsesAdvancedMessage()
     {
         Localizer.Current = Language.Spanish;
-        var engine = BuildMinimalEngine(2);
+        TestEngine engine = BuildMinimalEngine(2);
 
-        var output = Capture(engine.ShowPercent);
+        string output = Capture(engine.ShowPercent);
 
-        Assert.Contains(Localizer.Msg("Advanced") + "50%", output);
+        Assert.Contains(Localizer.Msg("Advanced") + "50%", output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void ProcessCommand_WalkThroughOpenLink_UpdatesCurrentRoom()
+    public void ProcessCommandWalkThroughOpenLinkUpdatesCurrentRoom()
     {
-        var engine = BuildMinimalEngine();
-        var next = MakeRoom();
+        TestEngine engine = BuildMinimalEngine();
+        Room next = MakeRoom();
         engine.AddRoom(next);
-        engine.Player.CurrentRoom.Children.Add(new OpenLink(new("Puerta", "Door"), new("", ""), new("", ""), next));
+        engine.Player.CurrentRoom.Children.Add(new OpenLink(new("Puerta", "Door"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), next));
 
         engine.ProcessCommand("ir puerta");
 
         Assert.Same(next, engine.Player.CurrentRoom);
+    }
+
+    private static Room MakeRoom()
+    {
+        return new(new("sala", "room"), new("descripción", "description"), Inventory.LWeight + 1);
+    }
+
+    private static TestEngine BuildMinimalEngine(int extraRooms = 0)
+    {
+        Room room = MakeRoom();
+        room.Children.Add(new Item(new("Maza", "Mace"), new("una maza", "a mace"), 5));
+        var engine = new TestEngine(room);
+        engine.AddRoom(room);
+        for (int i = 0; i < extraRooms; i++)
+        {
+            engine.AddRoom(MakeRoom());
+        }
+
+        engine.Start();
+        return engine;
+    }
+
+    private static string Capture(Action action)
+    {
+        var writer = new StringWriter();
+        TextWriter original = Console.Out;
+        Console.SetOut(writer);
+        try
+        { action(); }
+        finally { Console.SetOut(original); }
+        return writer.ToString().Replace(Environment.NewLine, " ", StringComparison.Ordinal);
+    }
+
+    private static string TempTrack()
+    {
+        return Path.Combine(Path.GetTempPath(), $"fortaleza-{Guid.NewGuid():N}.trk");
+    }
+
+    private sealed class TestEngine(Room start) : GameEngine(start)
+    {
+        public Queue<string> Input { get; } = new();
+
+        public override bool CheckGoal()
+        {
+            return false;
+        }
+
+        protected override string? ReadLine()
+        {
+            return Input.Count > 0 ? Input.Dequeue() : null;
+        }
     }
 }

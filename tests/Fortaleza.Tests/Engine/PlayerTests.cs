@@ -1,25 +1,15 @@
 using Fortaleza.Engine;
 using Fortaleza.Engine.Links;
-using Xunit;
 
 namespace Fortaleza.Tests.Engine;
 
-public class PlayerTests
+public sealed class PlayerTests
 {
-    private static Room MakeRoom() =>
-        new(new("sala", "room"), new("", ""), Inventory.LWeight + 1);
-
-    private static (Player Player, Room Room) SetupPlayerInRoom()
-    {
-        var room = MakeRoom();
-        return (new Player(room), room);
-    }
-
     [Fact]
-    public void Take_ItemInRoom_AddsItemToBag()
+    public void TakeItemInRoomAddsItemToBag()
     {
-        var (player, room) = SetupPlayerInRoom();
-        room.Children.Add(new Item(new("Maza", "Mace"), new("", ""), 5));
+        (Player? player, Room? room) = SetupPlayerInRoom();
+        room.Children.Add(new Item(new("Maza", "Mace"), new(string.Empty, string.Empty), 5));
 
         player.Take("Maza");
 
@@ -28,10 +18,10 @@ public class PlayerTests
     }
 
     [Fact]
-    public void Take_ItemTooHeavy_LeavesItemInRoom()
+    public void TakeItemTooHeavyLeavesItemInRoom()
     {
-        var (player, room) = SetupPlayerInRoom();
-        room.Children.Add(new Item(new("Cedro", "Cedar"), new("", ""), Inventory.LWeight + 1));
+        (Player? player, Room? room) = SetupPlayerInRoom();
+        room.Children.Add(new Item(new("Cedro", "Cedar"), new(string.Empty, string.Empty), Inventory.LWeight + 1));
 
         player.Take("Cedro");
 
@@ -40,11 +30,11 @@ public class PlayerTests
     }
 
     [Fact]
-    public void Take_BagWouldOverflow_LeavesItemInRoom()
+    public void TakeBagWouldOverflowLeavesItemInRoom()
     {
-        var (player, room) = SetupPlayerInRoom();
-        player.Bag.Children.Add(new Item(new("Yunque", "Anvil"), new("", ""), Inventory.LWeight - 1));
-        room.Children.Add(new Item(new("Maza", "Mace"), new("", ""), 5));
+        (Player? player, Room? room) = SetupPlayerInRoom();
+        player.Bag.Children.Add(new Item(new("Yunque", "Anvil"), new(string.Empty, string.Empty), Inventory.LWeight - 1));
+        room.Children.Add(new Item(new("Maza", "Mace"), new(string.Empty, string.Empty), 5));
 
         player.Take("Maza");
 
@@ -53,10 +43,10 @@ public class PlayerTests
     }
 
     [Fact]
-    public void LeaveItem_ItemInBag_MovesItemToRoom()
+    public void LeaveItemItemInBagMovesItemToRoom()
     {
-        var (player, room) = SetupPlayerInRoom();
-        player.Bag.Children.Add(new Item(new("Maza", "Mace"), new("", ""), 5));
+        (Player? player, Room? room) = SetupPlayerInRoom();
+        player.Bag.Children.Add(new Item(new("Maza", "Mace"), new(string.Empty, string.Empty), 5));
 
         player.LeaveItem("Maza");
 
@@ -65,11 +55,11 @@ public class PlayerTests
     }
 
     [Fact]
-    public void LeaveAll_BagWithItems_MovesEverythingToRoom()
+    public void LeaveAllBagWithItemsMovesEverythingToRoom()
     {
-        var (player, room) = SetupPlayerInRoom();
-        player.Bag.Children.Add(new Item(new("Maza", "Mace"), new("", ""), 5));
-        player.Bag.Children.Add(new Item(new("Soga", "Rope"), new("", ""), 1));
+        (Player? player, Room? room) = SetupPlayerInRoom();
+        player.Bag.Children.Add(new Item(new("Maza", "Mace"), new(string.Empty, string.Empty), 5));
+        player.Bag.Children.Add(new Item(new("Soga", "Rope"), new(string.Empty, string.Empty), 1));
 
         player.LeaveAll();
 
@@ -78,12 +68,12 @@ public class PlayerTests
     }
 
     [Fact]
-    public void Kill_GuardWithCorrectWeapon_RemovesGuardFromRoom()
+    public void KillGuardWithCorrectWeaponRemovesGuardFromRoom()
     {
-        var (player, room) = SetupPlayerInRoom();
-        var guard = new Guard(new("Lobo", "Wolf"), new("", ""), new("I die", "I die"), "Látigo");
+        (Player? player, Room? room) = SetupPlayerInRoom();
+        var guard = new Guard(new("Lobo", "Wolf"), new(string.Empty, string.Empty), new("I die", "I die"), "Látigo");
         room.Children.Add(guard);
-        player.Bag.Children.Add(new Item(new("Látigo", "Whip"), new("", ""), 2));
+        player.Bag.Children.Add(new Item(new("Látigo", "Whip"), new(string.Empty, string.Empty), 2));
 
         player.Kill("Lobo", "Látigo");
 
@@ -91,12 +81,12 @@ public class PlayerTests
     }
 
     [Fact]
-    public void Kill_GuardWithWrongWeapon_KeepsGuardInRoom()
+    public void KillGuardWithWrongWeaponKeepsGuardInRoom()
     {
-        var (player, room) = SetupPlayerInRoom();
-        var guard = new Guard(new("Lobo", "Wolf"), new("", ""), new("I die", "I die"), "Látigo");
+        (Player? player, Room? room) = SetupPlayerInRoom();
+        var guard = new Guard(new("Lobo", "Wolf"), new(string.Empty, string.Empty), new("I die", "I die"), "Látigo");
         room.Children.Add(guard);
-        player.Bag.Children.Add(new Item(new("Maza", "Mace"), new("", ""), 2));
+        player.Bag.Children.Add(new Item(new("Maza", "Mace"), new(string.Empty, string.Empty), 2));
 
         player.Kill("Lobo", "Maza");
 
@@ -104,10 +94,10 @@ public class PlayerTests
     }
 
     [Fact]
-    public void Kill_WeaponNotInBag_KeepsGuardInRoom()
+    public void KillWeaponNotInBagKeepsGuardInRoom()
     {
-        var (player, room) = SetupPlayerInRoom();
-        var guard = new Guard(new("Lobo", "Wolf"), new("", ""), new("I die", "I die"), "Látigo");
+        (Player? player, Room? room) = SetupPlayerInRoom();
+        var guard = new Guard(new("Lobo", "Wolf"), new(string.Empty, string.Empty), new("I die", "I die"), "Látigo");
         room.Children.Add(guard);
 
         player.Kill("Lobo", "Látigo");
@@ -117,13 +107,17 @@ public class PlayerTests
     }
 
     [Fact]
-    public void Give_ToTroll_RemovesItemFromBagAndMakesTrollHappy()
+    public void GiveToTrollRemovesItemFromBagAndMakesTrollHappy()
     {
-        var (player, room) = SetupPlayerInRoom();
-        var troll = new Troll(new("Bruja", "Witch"), new("", ""), "Escoba",
-            new("Gracias", "Thanks"), new("Dame la escoba", "Give broom"));
+        (Player? player, Room? room) = SetupPlayerInRoom();
+        var troll = new Troll(
+            new("Bruja", "Witch"),
+            new(string.Empty, string.Empty),
+            "Escoba",
+            new("Gracias", "Thanks"),
+            new("Dame la escoba", "Give broom"));
         room.Children.Add(troll);
-        player.Bag.Children.Add(new Item(new("Escoba", "Broom"), new("", ""), 1));
+        player.Bag.Children.Add(new Item(new("Escoba", "Broom"), new(string.Empty, string.Empty), 1));
 
         player.Give("Escoba", "Bruja");
 
@@ -132,11 +126,11 @@ public class PlayerTests
     }
 
     [Fact]
-    public void Walk_OpenLink_MovesPlayerToDestination()
+    public void WalkOpenLinkMovesPlayerToDestination()
     {
-        var (player, room) = SetupPlayerInRoom();
-        var next = MakeRoom();
-        room.Children.Add(new OpenLink(new("Puerta", "Door"), new("", ""), new("pasas", "you pass"), next));
+        (Player? player, Room? room) = SetupPlayerInRoom();
+        Room next = MakeRoom();
+        room.Children.Add(new OpenLink(new("Puerta", "Door"), new(string.Empty, string.Empty), new("pasas", "you pass"), next));
 
         player.Walk("Puerta");
 
@@ -144,10 +138,10 @@ public class PlayerTests
     }
 
     [Fact]
-    public void Walk_ClosedLink_KeepsPlayerInRoom()
+    public void WalkClosedLinkKeepsPlayerInRoom()
     {
-        var (player, room) = SetupPlayerInRoom();
-        room.Children.Add(new Link(new("Puerta", "Door"), new("", ""), new("", ""), "clave", MakeRoom()));
+        (Player? player, Room? room) = SetupPlayerInRoom();
+        room.Children.Add(new Link(new("Puerta", "Door"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), "clave", MakeRoom()));
 
         player.Walk("Puerta");
 
@@ -155,11 +149,17 @@ public class PlayerTests
     }
 
     [Fact]
-    public void Walk_DangerLinkWithoutTalisman_KillsPlayer()
+    public void WalkDangerLinkWithoutTalismanKillsPlayer()
     {
-        var (player, room) = SetupPlayerInRoom();
-        room.Children.Add(new DangerLink(new("Traquea", "Trachea"), new("", ""), new("", ""), Link.OpenDoor,
-            "Talismán de aire", MakeRoom(), () => player.Die("")));
+        (Player? player, Room? room) = SetupPlayerInRoom();
+        room.Children.Add(new DangerLink(
+            new("Traquea", "Trachea"),
+            new(string.Empty, string.Empty),
+            new(string.Empty, string.Empty),
+            Link.OpenDoor,
+            "Talismán de aire",
+            MakeRoom(),
+            () => player.Die(string.Empty)));
 
         player.Walk("Traquea");
 
@@ -167,11 +167,11 @@ public class PlayerTests
     }
 
     [Fact]
-    public void OpenDoor_CorrectKey_OpensLinkSoPlayerCanWalk()
+    public void OpenDoorCorrectKeyOpensLinkSoPlayerCanWalk()
     {
-        var (player, room) = SetupPlayerInRoom();
-        var next = MakeRoom();
-        room.Children.Add(new Link(new("Puerta", "Door"), new("", ""), new("", ""), "clave", next));
+        (Player? player, Room? room) = SetupPlayerInRoom();
+        Room next = MakeRoom();
+        room.Children.Add(new Link(new("Puerta", "Door"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), "clave", next));
 
         player.OpenDoor("Puerta", "clave");
         player.Walk("Puerta");
@@ -180,10 +180,10 @@ public class PlayerTests
     }
 
     [Fact]
-    public void Go_FirstVisitOnly_IncrementsVisitCount()
+    public void GoFirstVisitOnlyIncrementsVisitCount()
     {
-        var (player, _) = SetupPlayerInRoom();
-        var room = MakeRoom();
+        (Player? player, Room _) = SetupPlayerInRoom();
+        Room room = MakeRoom();
 
         player.Go(room);
         player.Go(room);
@@ -192,12 +192,12 @@ public class PlayerTests
     }
 
     [Fact]
-    public void Die_Player_SetsDeadAndBlocksFurtherActions()
+    public void DiePlayerSetsDeadAndBlocksFurtherActions()
     {
-        var (player, room) = SetupPlayerInRoom();
-        room.Children.Add(new Item(new("Maza", "Mace"), new("", ""), 5));
+        (Player? player, Room? room) = SetupPlayerInRoom();
+        room.Children.Add(new Item(new("Maza", "Mace"), new(string.Empty, string.Empty), 5));
 
-        player.Die("");
+        player.Die(string.Empty);
         player.Take("Maza");
 
         Assert.True(player.Dead);
@@ -205,11 +205,11 @@ public class PlayerTests
     }
 
     [Fact]
-    public void Break_WithoutWeaponInBag_DoesNotBreakHidden()
+    public void BreakWithoutWeaponInBagDoesNotBreakHidden()
     {
-        var (player, room) = SetupPlayerInRoom();
-        var inner = new Item(new("Llave", "Key"), new("", ""), 1);
-        var hidden = new Hidden(new("Jarrón", "Vase"), new("", ""), "Maza", inner);
+        (Player? player, Room? room) = SetupPlayerInRoom();
+        var inner = new Item(new("Llave", "Key"), new(string.Empty, string.Empty), 1);
+        var hidden = new Hidden(new("Jarrón", "Vase"), new(string.Empty, string.Empty), "Maza", inner);
         room.Children.Add(hidden);
 
         player.Break("Jarrón", "Maza");
@@ -218,15 +218,26 @@ public class PlayerTests
     }
 
     [Fact]
-    public void Break_WithWeaponInBag_ReplacesHiddenWithChild()
+    public void BreakWithWeaponInBagReplacesHiddenWithChild()
     {
-        var (player, room) = SetupPlayerInRoom();
-        var inner = new Item(new("Llave", "Key"), new("", ""), 1);
-        room.Children.Add(new Hidden(new("Jarrón", "Vase"), new("", ""), "Maza", inner));
-        player.Bag.Children.Add(new Item(new("Maza", "Mace"), new("", ""), 2));
+        (Player? player, Room? room) = SetupPlayerInRoom();
+        var inner = new Item(new("Llave", "Key"), new(string.Empty, string.Empty), 1);
+        room.Children.Add(new Hidden(new("Jarrón", "Vase"), new(string.Empty, string.Empty), "Maza", inner));
+        player.Bag.Children.Add(new Item(new("Maza", "Mace"), new(string.Empty, string.Empty), 2));
 
         player.Break("Jarrón", "Maza");
 
         Assert.Contains(inner, room.Children);
+    }
+
+    private static Room MakeRoom()
+    {
+        return new(new("sala", "room"), new(string.Empty, string.Empty), Inventory.LWeight + 1);
+    }
+
+    private static (Player Player, Room Room) SetupPlayerInRoom()
+    {
+        Room room = MakeRoom();
+        return (new Player(room), room);
     }
 }

@@ -1,16 +1,20 @@
 using System.Reflection;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Fortaleza.Tests;
 
-public class ResourceDebugTests(ITestOutputHelper output)
+public sealed class ResourceDebugTests(ITestOutputHelper output)
 {
     [Fact]
     public void ListEmbeddedResources()
     {
-        var assembly = Assembly.GetAssembly(typeof(Fortaleza.Localization.Localizer))!;
-        foreach (var name in assembly.GetManifestResourceNames())
+        Assembly assembly = Assembly.GetAssembly(typeof(Localization.Localizer))!;
+        string[] names = assembly.GetManifestResourceNames();
+        foreach (string name in names)
+        {
             output.WriteLine(name);
+        }
+
+        Assert.NotEmpty(names);
     }
 }

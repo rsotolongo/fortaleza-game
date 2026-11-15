@@ -1,0 +1,8 @@
+# Test classes must be public for xUnit, and they need no XML documentation
+[*.cs]
+dotnet_diagnostic.CA1515.severity = none
+dotnet_diagnostic.CS1591.severity = none
+
+# xUnit v2 offers no per-test CancellationToken, and test classes are never inspected in a debugger
+dotnet_diagnostic.MA0032.severity = none
+dotnet_diagnostic.RCS1223.severity = none

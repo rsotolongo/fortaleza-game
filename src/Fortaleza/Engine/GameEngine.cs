@@ -1,39 +1,51 @@
+using System.Globalization;
 using Fortaleza.Localization;
 using Fortaleza.Parser;
 
 namespace Fortaleza.Engine;
 
-public abstract class GameEngine(Room startRoom)
+internal abstract class GameEngine(Room startRoom)
 {
     public const string DefaultTrackFile = "TRAVEL.TRK";
 
     private readonly List<Room> _rooms = [];
     private readonly List<string> _track = [];
-    private string _wishBack = "";
+    private string _wishBack = string.Empty;
     private bool _executing;
-    private bool _quit;
 
     public Player Player { get; } = new(startRoom);
-    public string Wish { get; private set; } = "";
-    public bool IsOver => _quit || Player.Dead;
+    public string Wish { get; private set; } = string.Empty;
+    public bool IsOver { get => field || Player.Dead; private set; }
     public IReadOnlyList<string> Track => _track;
 
     public abstract bool CheckGoal();
 
-    public void AddRoom(Room room) => _rooms.Add(room);
+    public void AddRoom(Room room)
+    {
+        _rooms.Add(room);
+    }
 
-    public Room GetRoom(int index) => _rooms[index];
+    public Room GetRoom(int index)
+    {
+        return _rooms[index];
+    }
 
-    public void Start() => Player.Go(startRoom);
+    public void Start()
+    {
+        Player.Go(startRoom);
+    }
 
     public void AskPlayer()
     {
-        Player.Output("");
-        Player.Output(Localizer.Msg("WhatToDo"));
-        var line = ReadLine();
+        Thing.Output(string.Empty);
+        Thing.Output(Localizer.Msg("WhatToDo"));
+        string? line = ReadLine();
         if (line is null)
-            _quit = true;
-        SetWish(line ?? "");
+        {
+            IsOver = true;
+        }
+
+        SetWish(line ?? string.Empty);
     }
 
     public void ProcessCommand(string input)
@@ -44,68 +56,167 @@ public abstract class GameEngine(Room startRoom)
 
     public void ProcessWish()
     {
-        var cmd = CommandParser.Parse(Wish);
-        var relevant = true;
+        ParsedCommand cmd = CommandParser.Parse(Wish);
+        bool relevant = true;
         switch (cmd.Type)
         {
             case CommandType.Go:
-                OpenSilently(cmd.Arg1);
-                Player.Walk(cmd.Arg1);
-                break;
-            case CommandType.Take: Player.Take(cmd.Arg1); break;
-            case CommandType.TakeAll: Player.Output(Localizer.Msg("TakeOneAtATime")); break;
-            case CommandType.Leave: Player.LeaveItem(cmd.Arg1); break;
-            case CommandType.LeaveAll: Player.LeaveAll(); break;
-            case CommandType.Open: Player.OpenDoor(cmd.Arg1, cmd.Arg2); break;
-            case CommandType.Kill: Player.Kill(cmd.Arg1, cmd.Arg2); break;
-            case CommandType.Look: Player.Look(); break;
-            case CommandType.See: Player.See(cmd.Arg1); break;
-            case CommandType.Break: Player.Break(cmd.Arg1, cmd.Arg2); break;
-            case CommandType.Ask: Player.Ask(cmd.Arg1); break;
-            case CommandType.Give: Player.Give(cmd.Arg1, cmd.Arg2); break;
-            case CommandType.Piss: Player.Output(Localizer.Msg("Piss")); break;
-            case CommandType.Clear: Player.Output(Localizer.Msg("Cls")); break;
+                {
+                    OpenSilently(cmd.Arg1);
+                    Player.Walk(cmd.Arg1);
+                    break;
+                }
+
+            case CommandType.Take:
+                {
+                    Player.Take(cmd.Arg1);
+                    break;
+                }
+
+            case CommandType.TakeAll:
+                {
+                    Thing.Output(Localizer.Msg("TakeOneAtATime"));
+                    break;
+                }
+
+            case CommandType.Leave:
+                {
+                    Player.LeaveItem(cmd.Arg1);
+                    break;
+                }
+
+            case CommandType.LeaveAll:
+                {
+                    Player.LeaveAll();
+                    break;
+                }
+
+            case CommandType.Open:
+                {
+                    Player.OpenDoor(cmd.Arg1, cmd.Arg2);
+                    break;
+                }
+
+            case CommandType.Kill:
+                {
+                    Player.Kill(cmd.Arg1, cmd.Arg2);
+                    break;
+                }
+
+            case CommandType.Look:
+                {
+                    Player.Look();
+                    break;
+                }
+
+            case CommandType.See:
+                {
+                    Player.See(cmd.Arg1);
+                    break;
+                }
+
+            case CommandType.Break:
+                {
+                    Player.Break(cmd.Arg1, cmd.Arg2);
+                    break;
+                }
+
+            case CommandType.Ask:
+                {
+                    Player.Ask(cmd.Arg1);
+                    break;
+                }
+
+            case CommandType.Give:
+                {
+                    Player.Give(cmd.Arg1, cmd.Arg2);
+                    break;
+                }
+
+            case CommandType.Piss:
+                {
+                    Thing.Output(Localizer.Msg("Piss"));
+                    break;
+                }
+
+            case CommandType.Clear:
+                {
+                    Thing.Output(Localizer.Msg("Cls"));
+                    break;
+                }
+
             case CommandType.Inventory:
-                Player.Inventory();
-                relevant = false;
-                break;
+                {
+                    Player.Inventory();
+                    relevant = false;
+                    break;
+                }
+
             case CommandType.Quit:
-                Player.Die("");
-                relevant = false;
-                break;
+                {
+                    Player.Die(string.Empty);
+                    relevant = false;
+                    break;
+                }
+
             case CommandType.Weigh:
-                Player.Weigh(cmd.Arg1);
-                relevant = false;
-                break;
+                {
+                    Player.Weigh(cmd.Arg1);
+                    relevant = false;
+                    break;
+                }
+
             case CommandType.Exec:
-                LoadTrackInteractive();
-                relevant = false;
-                break;
+                {
+                    LoadTrackInteractive();
+                    relevant = false;
+                    break;
+                }
+
             case CommandType.Save:
-                SaveTrackInteractive();
-                relevant = false;
-                break;
+                {
+                    SaveTrackInteractive();
+                    relevant = false;
+                    break;
+                }
+
             case CommandType.Percent:
-                ShowPercent();
-                relevant = false;
-                break;
+                {
+                    ShowPercent();
+                    relevant = false;
+                    break;
+                }
+
             default:
-                if (Wish.Trim() != "")
-                    Player.Output(Localizer.Msg("DontUnderstand"));
-                relevant = false;
-                break;
+                {
+                    if (!string.IsNullOrEmpty(Wish.Trim()))
+                    {
+                        Thing.Output(Localizer.Msg("DontUnderstand"));
+                    }
+
+                    relevant = false;
+                    break;
+                }
         }
 
-        if (relevant && _wishBack != "" && !_executing)
-            _track.Add(_wishBack);
+        if (!relevant || string.IsNullOrEmpty(_wishBack) || _executing)
+        {
+            return;
+        }
+
+        _track.Add(_wishBack);
     }
 
     public void SaveTrack(string path)
     {
-        if (path == "") return;
+        if (string.IsNullOrEmpty(path))
+        {
+            return;
+        }
+
         if (_track.Count <= 1)
         {
-            Player.Output(Localizer.Msg("NothingToSave"));
+            Thing.Output(Localizer.Msg("NothingToSave"));
             return;
         }
         try
@@ -114,27 +225,34 @@ public abstract class GameEngine(Room startRoom)
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
-            Player.Output(Localizer.Msg("SaveError"));
+            Thing.Output(Localizer.Msg("SaveError"));
         }
     }
 
     public bool LoadTrack(string path, bool verbose = true)
     {
-        var wasVisible = Thing.Visible;
-        Player.Output(Localizer.Msg("ExecRunning"));
+        bool wasVisible = Thing.Visible;
+        Thing.Output(Localizer.Msg("ExecRunning"));
         if (!verbose)
+        {
             Thing.Visible = false;
+        }
+
         try
         {
-            if (path == "") return false;
-            if (!File.Exists(path))
+            if (string.IsNullOrEmpty(path))
             {
-                Thing.Visible = true;
-                Player.Output(Localizer.Msg("FileNotFound"));
                 return false;
             }
 
-            var lines = File.ReadLines(path).Where(l => l != "").ToList();
+            if (!File.Exists(path))
+            {
+                Thing.Visible = true;
+                Thing.Output(Localizer.Msg("FileNotFound"));
+                return false;
+            }
+
+            var lines = File.ReadLines(path).Where(static l => !string.IsNullOrEmpty(l)).ToList();
             Replay(lines);
             return true;
         }
@@ -147,13 +265,16 @@ public abstract class GameEngine(Room startRoom)
 
     public void ExecuteTrack(IEnumerable<string> commands, bool verbose = true)
     {
-        var wasVisible = Thing.Visible;
-        Player.Output(Localizer.Msg("ExecRunning"));
+        bool wasVisible = Thing.Visible;
+        Thing.Output(Localizer.Msg("ExecRunning"));
         if (!verbose)
+        {
             Thing.Visible = false;
+        }
+
         try
         {
-            Replay(commands.Where(l => l != "").ToList());
+            Replay([.. commands.Where(static l => !string.IsNullOrEmpty(l))]);
         }
         finally
         {
@@ -163,11 +284,18 @@ public abstract class GameEngine(Room startRoom)
 
     public void ShowPercent()
     {
-        var reachable = _rooms.Count - 1;
-        var percent = reachable <= 0
+        int reachable = _rooms.Count - 1;
+        int percent = reachable <= 0
             ? 0
-            : (int)Math.Round((double)Player.VisitCount / reachable * 100, MidpointRounding.AwayFromZero);
-        Player.Output(Localizer.Msg("Advanced") + percent + "%");
+            : Convert.ToInt32(
+                Math.Round(Convert.ToDouble(Player.VisitCount, CultureInfo.InvariantCulture) / reachable * 100, MidpointRounding.AwayFromZero),
+                CultureInfo.InvariantCulture);
+        Thing.Output(Localizer.Msg("Advanced") + percent.ToString(CultureInfo.InvariantCulture) + "%");
+    }
+
+    protected virtual string? ReadLine()
+    {
+        return Console.ReadLine();
     }
 
     private void Replay(List<string> lines)
@@ -177,12 +305,13 @@ public abstract class GameEngine(Room startRoom)
         _executing = true;
         try
         {
-            foreach (var line in lines)
+            bool finished = false;
+            for (int i = 0; i < lines.Count && !finished; i++)
             {
-                Player.Output("");
-                Player.Output(" " + line);
-                ProcessCommand(line);
-                if (CheckGoal() || IsOver) break;
+                Thing.Output(string.Empty);
+                Thing.Output(" " + lines[i]);
+                ProcessCommand(lines[i]);
+                finished = CheckGoal() || IsOver;
             }
         }
         finally
@@ -191,22 +320,24 @@ public abstract class GameEngine(Room startRoom)
         }
     }
 
-    protected virtual string? ReadLine() => Console.ReadLine();
-
     private void SetWish(string input)
     {
         Wish = input;
-        if (input != "")
-            _wishBack = input;
+        if (string.IsNullOrEmpty(input))
+        {
+            return;
+        }
+
+        _wishBack = input;
     }
 
     private void OpenSilently(string door)
     {
-        var wasVisible = Thing.Visible;
+        bool wasVisible = Thing.Visible;
         Thing.Visible = false;
         try
         {
-            Player.OpenDoor(door, "");
+            Player.OpenDoor(door, string.Empty);
         }
         finally
         {
@@ -216,14 +347,14 @@ public abstract class GameEngine(Room startRoom)
 
     private void SaveTrackInteractive()
     {
-        Player.Output(Localizer.Msg("EnterFileName"));
-        var path = (ReadLine() ?? "").Trim();
-        SaveTrack(path == "" ? DefaultTrackFile : path);
+        Thing.Output(Localizer.Msg("EnterFileName"));
+        string path = (ReadLine() ?? string.Empty).Trim();
+        SaveTrack(string.IsNullOrEmpty(path) ? DefaultTrackFile : path);
     }
 
     private void LoadTrackInteractive()
     {
-        Player.Output(Localizer.Msg("EnterFileName"));
-        LoadTrack((ReadLine() ?? "").Trim());
+        Thing.Output(Localizer.Msg("EnterFileName"));
+        LoadTrack((ReadLine() ?? string.Empty).Trim());
     }
 }

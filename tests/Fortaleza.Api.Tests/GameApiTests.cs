@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
 using Fortaleza.Api.Games;
@@ -5,36 +6,17 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Fortaleza.Api.Tests;
 
-public class GameApiTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public sealed class GameApiTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly HttpClient _client = factory.CreateClient();
-
-    private static string SavePath(string file) => Path.Combine(AppContext.BaseDirectory, "saves", file);
-
-    private async Task<GameResponse> StartAsync(int game, string language)
-    {
-        var response = await _client.PostAsJsonAsync("/api/games/start", new StartGameRequest(game, language));
-        response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<GameResponse>())!;
-    }
-
-    private async Task<GameResponse> PlayAsync(int game, string language, IReadOnlyList<string> track, string command)
-    {
-        var response = await _client.PostAsJsonAsync("/api/games/play", new PlayRequest(game, language, track, command));
-        response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<GameResponse>())!;
-    }
-
-    private Task<HttpResponseMessage> LoadAsync(int game, string language, byte[] bytes) =>
-        _client.PutAsync($"/api/games/load?game={game}&language={language}", new ByteArrayContent(bytes));
 
     [Theory]
     [InlineData(1, "es", "Usted se encuentra en el exterior de la fortaleza.")]
     [InlineData(1, "en", "You are in the exterior of the fortress.")]
     [InlineData(2, "es", "Usted se encuentra en una habitación para huéspedes.")]
-    public async Task Start_ValidRequest_ReturnsOpeningRoomAndEmptyTrack(int game, string language, string expected)
+    public async Task StartValidRequestReturnsOpeningRoomAndEmptyTrackAsync(int game, string language, string expected)
     {
-        var started = await StartAsync(game, language);
+        GameResponse started = await StartAsync(game, language).ConfigureAwait(true);
 
         Assert.Equal(GameStatus.Playing, started.Status);
         Assert.Equal(expected, started.Output[0]);
@@ -44,9 +26,9 @@ public class GameApiTests(WebApplicationFactory<Program> factory) : IClassFixtur
     [Theory]
     [InlineData(3, "es")]
     [InlineData(1, "fr")]
-    public async Task Start_InvalidRequest_ReturnsBadRequest(int game, string language)
+    public async Task StartInvalidRequestReturnsBadRequestAsync(int game, string language)
     {
-        var response = await _client.PostAsJsonAsync("/api/games/start", new StartGameRequest(game, language));
+        HttpResponseMessage response = await _client.PostAsJsonAsync("/api/games/start", new StartGameRequest(game, language)).ConfigureAwait(true);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -56,21 +38,21 @@ public class GameApiTests(WebApplicationFactory<Program> factory) : IClassFixtur
     [InlineData(1, "en", "FORT1_EN.TRK")]
     [InlineData(2, "es", "FORT2_ES.TRK")]
     [InlineData(2, "en", "FORT2_EN.TRK")]
-    public async Task Play_MinimalPathOneCommandPerRequest_WinsOnTheLastCommand(int game, string language, string file)
+    public async Task PlayMinimalPathOneCommandPerRequestWinsOnTheLastCommandAsync(int game, string language, string file)
     {
-        var commands = (await File.ReadAllLinesAsync(SavePath(file))).Where(line => line != "").ToList();
+        var commands = (await File.ReadAllLinesAsync(SavePath(file)).ConfigureAwait(true)).Where(static line => !string.IsNullOrEmpty(line)).ToList();
         IReadOnlyList<string> track = [];
         var statuses = new List<string>();
 
-        foreach (var command in commands)
+        foreach (string? command in commands)
         {
-            var response = await PlayAsync(game, language, track, command);
+            GameResponse response = await PlayAsync(game, language, track, command).ConfigureAwait(true);
             track = response.Track;
             statuses.Add(response.Status);
         }
 
         Assert.Equal(commands, track);
-        Assert.All(statuses.SkipLast(1), status => Assert.Equal(GameStatus.Playing, status));
+        Assert.All(statuses.SkipLast(1), static status => Assert.Equal(GameStatus.Playing, status));
         Assert.Equal(GameStatus.Won, statuses[^1]);
     }
 
@@ -79,34 +61,34 @@ public class GameApiTests(WebApplicationFactory<Program> factory) : IClassFixtur
     [InlineData(1, "en", "FORT1_EN.TRK")]
     [InlineData(2, "es", "FORT2_ES.TRK")]
     [InlineData(2, "en", "FORT2_EN.TRK")]
-    public async Task Load_MinimalPath_WinsTheGameAndReturnsTheTrack(int game, string language, string file)
+    public async Task LoadMinimalPathWinsTheGameAndReturnsTheTrackAsync(int game, string language, string file)
     {
-        var response = await LoadAsync(game, language, await File.ReadAllBytesAsync(SavePath(file)));
+        HttpResponseMessage response = await LoadAsync(game, language, await File.ReadAllBytesAsync(SavePath(file)).ConfigureAwait(true)).ConfigureAwait(true);
 
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<GameResponse>();
+        GameResponse? result = await response.Content.ReadFromJsonAsync<GameResponse>().ConfigureAwait(true);
         Assert.Equal(GameStatus.Won, result!.Status);
         Assert.NotEmpty(result.Track);
     }
 
     [Fact]
-    public async Task Play_NonTrackedCommand_DoesNotGrowTheTrack()
+    public async Task PlayNonTrackedCommandDoesNotGrowTheTrackAsync()
     {
-        var first = await PlayAsync(1, "es", [], "tomar pastel");
+        GameResponse first = await PlayAsync(1, "es", [], "tomar pastel").ConfigureAwait(true);
 
-        var bag = await PlayAsync(1, "es", first.Track, "inventario");
+        GameResponse bag = await PlayAsync(1, "es", first.Track, "inventario").ConfigureAwait(true);
 
         Assert.Equal(["tomar pastel"], bag.Track);
-        Assert.Contains("Pastel de cerezas (2)", bag.Output);
+        Assert.Contains("Pastel de cerezas (2)", bag.Output, StringComparer.Ordinal);
     }
 
     [Fact]
-    public async Task Play_AfterWinning_ReportsTheGameIsOver()
+    public async Task PlayAfterWinningReportsTheGameIsOverAsync()
     {
-        var loaded = await LoadAsync(1, "es", await File.ReadAllBytesAsync(SavePath("FORT1_ES.TRK")));
-        var won = await loaded.Content.ReadFromJsonAsync<GameResponse>();
+        HttpResponseMessage loaded = await LoadAsync(1, "es", await File.ReadAllBytesAsync(SavePath("FORT1_ES.TRK")).ConfigureAwait(true)).ConfigureAwait(true);
+        GameResponse? won = await loaded.Content.ReadFromJsonAsync<GameResponse>().ConfigureAwait(true);
 
-        var result = await PlayAsync(1, "es", won!.Track, "mirar");
+        GameResponse result = await PlayAsync(1, "es", won!.Track, "mirar").ConfigureAwait(true);
 
         Assert.Equal(GameStatus.Won, result.Status);
         Assert.Equal(["La partida ha terminado. Inicie una nueva."], result.Output);
@@ -116,86 +98,113 @@ public class GameApiTests(WebApplicationFactory<Program> factory) : IClassFixtur
     [InlineData("salvar")]
     [InlineData("ejecutar")]
     [InlineData("save")]
-    public async Task Play_TrackCommands_AreNotPassedToTheConsole(string command)
+    public async Task PlayTrackCommandsAreNotPassedToTheConsoleAsync(string command)
     {
-        var result = await PlayAsync(1, "es", [], command);
+        GameResponse result = await PlayAsync(1, "es", [], command).ConfigureAwait(true);
 
         Assert.Equal(["Use los botones Guardar y Cargar para manejar el rastro."], result.Output);
     }
 
     [Fact]
-    public async Task Play_TrackContainingExecuteCommand_ReturnsBadRequest()
+    public async Task PlayTrackContainingExecuteCommandReturnsBadRequestAsync()
     {
-        var response = await _client.PostAsJsonAsync("/api/games/play", new PlayRequest(1, "es", ["tomar pastel", "ejecutar"], "mirar"));
+        HttpResponseMessage response = await _client.PostAsJsonAsync("/api/games/play", new PlayRequest(1, "es", ["tomar pastel", "ejecutar"], "mirar")).ConfigureAwait(true);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
-    public async Task Play_TrackTooLong_ReturnsBadRequest()
+    public async Task PlayTrackTooLongReturnsBadRequestAsync()
     {
         var track = Enumerable.Repeat("mirar", TrackFile.MaxLines + 1).ToList();
 
-        var response = await _client.PostAsJsonAsync("/api/games/play", new PlayRequest(1, "es", track, "mirar"));
+        HttpResponseMessage response = await _client.PostAsJsonAsync("/api/games/play", new PlayRequest(1, "es", track, "mirar")).ConfigureAwait(true);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
-    public async Task Load_ContainingExecuteCommand_ReturnsBadRequest()
+    public async Task LoadContainingExecuteCommandReturnsBadRequestAsync()
     {
-        var response = await LoadAsync(1, "es", "tomar pastel\r\nejecutar\r\n"u8.ToArray());
+        HttpResponseMessage response = await LoadAsync(1, "es", "tomar pastel\r\nejecutar\r\n"u8.ToArray()).ConfigureAwait(true);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
-    public async Task Load_EmptyFile_ReturnsBadRequest()
+    public async Task LoadEmptyFileReturnsBadRequestAsync()
     {
-        var response = await LoadAsync(1, "es", []);
+        HttpResponseMessage response = await LoadAsync(1, "es", []).ConfigureAwait(true);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
-    public async Task Load_LegacyCodePageFile_IsDecoded()
+    public async Task LoadLegacyCodePageFileIsDecodedAsync()
     {
-        var bytes = new byte[] { (byte)'i', (byte)'r', (byte)' ', (byte)'t', 0xA3, (byte)'n', (byte)'e', (byte)'l', 0x0D, 0x0A };
+        byte[] bytes = [0x69, 0x72, 0x20, 0x74, 0xA3, 0x6E, 0x65, 0x6C, 0x0D, 0x0A];
 
-        var response = await LoadAsync(1, "es", bytes);
+        HttpResponseMessage response = await LoadAsync(1, "es", bytes).ConfigureAwait(true);
 
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<GameResponse>();
-        Assert.Contains(result!.Output, line => line.Contains("El olor de la carne descompuesta"));
+        GameResponse? result = await response.Content.ReadFromJsonAsync<GameResponse>().ConfigureAwait(true);
+        Assert.Contains(result!.Output, static line => line.Contains("El olor de la carne descompuesta", StringComparison.Ordinal));
     }
 
     [Fact]
-    public async Task Play_ConcurrentSpanishAndEnglishPlayers_NeverMixLanguages()
+    public async Task PlayConcurrentSpanishAndEnglishPlayersNeverMixLanguagesAsync()
     {
-        var tasks = Enumerable.Range(0, 60).Select(async i =>
+        IEnumerable<Task<(bool Spanish, string Text)>> tasks = Enumerable.Range(0, 60).Select(async i =>
         {
-            var spanish = i % 2 == 0;
-            var result = await PlayAsync(1, spanish ? "es" : "en", ["tomar pastel"], "mirar");
+            bool spanish = i % 2 is 0;
+            GameResponse result = await PlayAsync(1, spanish ? "es" : "en", ["tomar pastel"], "mirar").ConfigureAwait(true);
             return (Spanish: spanish, Text: string.Join('\n', result.Output));
         });
-        var results = await Task.WhenAll(tasks);
+        (bool Spanish, string Text)[] results = await Task.WhenAll(tasks).ConfigureAwait(true);
 
-        Assert.All(results.Where(r => r.Spanish), r => Assert.Contains("Usted se encuentra", r.Text));
-        Assert.All(results.Where(r => !r.Spanish), r => Assert.Contains("You are in", r.Text));
+        Assert.All(results.Where(static r => r.Spanish), static r => Assert.Contains("Usted se encuentra", r.Text, StringComparison.Ordinal));
+        Assert.All(results.Where(static r => !r.Spanish), static r => Assert.Contains("You are in", r.Text, StringComparison.Ordinal));
     }
 
     [Fact]
-    public async Task Play_ConcurrentPlayersWithDifferentTracks_KeepIndependentState()
+    public async Task PlayConcurrentPlayersWithDifferentTracksKeepIndependentStateAsync()
     {
-        var tasks = Enumerable.Range(0, 40).Select(async i =>
+        IEnumerable<Task<(bool Carrying, IReadOnlyList<string> Output)>> tasks = Enumerable.Range(0, 40).Select(async i =>
         {
-            var carrying = i % 2 == 0;
-            var result = await PlayAsync(1, "es", carrying ? ["tomar pastel"] : [], "inventario");
-            return (Carrying: carrying, Output: result.Output);
+            bool carrying = i % 2 is 0;
+            GameResponse result = await PlayAsync(1, "es", carrying ? ["tomar pastel"] : [], "inventario").ConfigureAwait(true);
+            return (Carrying: carrying, result.Output);
         });
-        var results = await Task.WhenAll(tasks);
+        (bool Carrying, IReadOnlyList<string> Output)[] results = await Task.WhenAll(tasks).ConfigureAwait(true);
 
-        Assert.All(results.Where(r => r.Carrying), r => Assert.Contains("Pastel de cerezas (2)", r.Output));
-        Assert.All(results.Where(r => !r.Carrying), r => Assert.Equal(["Usted no lleva nada consigo."], r.Output));
+        Assert.All(results.Where(static r => r.Carrying), static r => Assert.Contains("Pastel de cerezas (2)", r.Output, StringComparer.Ordinal));
+        Assert.All(results.Where(static r => !r.Carrying), static r => Assert.Equal(["Usted no lleva nada consigo."], r.Output));
+    }
+
+    private static string SavePath(string file)
+    {
+        return Path.Combine(AppContext.BaseDirectory, "saves", file);
+    }
+
+    private async Task<GameResponse> StartAsync(int game, string language)
+    {
+        HttpResponseMessage response = await _client.PostAsJsonAsync("/api/games/start", new StartGameRequest(game, language)).ConfigureAwait(true);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<GameResponse>().ConfigureAwait(true))!;
+    }
+
+    private async Task<GameResponse> PlayAsync(int game, string language, IReadOnlyList<string> track, string command)
+    {
+        HttpResponseMessage response = await _client.PostAsJsonAsync("/api/games/play", new PlayRequest(game, language, track, command)).ConfigureAwait(true);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<GameResponse>().ConfigureAwait(true))!;
+    }
+
+    private async Task<HttpResponseMessage> LoadAsync(int game, string language, byte[] bytes)
+    {
+        using ByteArrayContent content = new(bytes);
+        return await _client.PutAsync(
+            new Uri($"/api/games/load?game={game.ToString(CultureInfo.InvariantCulture)}&language={language}", UriKind.Relative),
+            content).ConfigureAwait(true);
     }
 }

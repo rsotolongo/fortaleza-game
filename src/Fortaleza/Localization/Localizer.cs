@@ -3,45 +3,50 @@ using System.Text.Json;
 
 namespace Fortaleza.Localization;
 
-public enum Language { Spanish, English }
-
-public static class Localizer
+internal static class Localizer
 {
-    private static readonly AsyncLocal<Language> _current = new();
+    private static readonly AsyncLocal<Language> CurrentLanguage = new();
     private static Dictionary<string, string>? _esMessages;
     private static Dictionary<string, string>? _enMessages;
 
     public static Language Current
     {
-        get => _current.Value;
+        get => CurrentLanguage.Value;
         set
         {
-            _current.Value = value;
+            CurrentLanguage.Value = value;
             EnsureLoaded();
         }
     }
 
-    public static string Msg(string key) => Msg(key, _current.Value);
+    public static string Msg(string key)
+    {
+        return Msg(key, CurrentLanguage.Value);
+    }
 
     public static string Msg(string key, Language language)
     {
         EnsureLoaded();
-        var dict = language == Language.English ? _enMessages! : _esMessages!;
-        return dict.TryGetValue(key, out var val) ? val : $"[{key}]";
+        Dictionary<string, string> dict = language is Language.English ? _enMessages! : _esMessages!;
+        return dict.TryGetValue(key, out string? val) ? val : $"[{key}]";
     }
 
     private static void EnsureLoaded()
     {
-        if (_esMessages is not null) return;
+        if (_esMessages is not null)
+        {
+            return;
+        }
+
         _esMessages = LoadResource("messages.es.json");
         _enMessages = LoadResource("messages.en.json");
     }
 
     private static Dictionary<string, string> LoadResource(string filename)
     {
-        var assembly = typeof(Localizer).Assembly;
-        var resourceName = $"Fortaleza.Localization.res.{filename}";
-        using var stream = assembly.GetManifestResourceStream(resourceName)
+        Assembly assembly = typeof(Localizer).Assembly;
+        string resourceName = $"Fortaleza.Localization.res.{filename}";
+        using Stream stream = assembly.GetManifestResourceStream(resourceName)
             ?? throw new InvalidOperationException($"Resource not found: {resourceName}");
         return JsonSerializer.Deserialize<Dictionary<string, string>>(stream)
             ?? throw new InvalidOperationException($"Failed to deserialize {resourceName}");

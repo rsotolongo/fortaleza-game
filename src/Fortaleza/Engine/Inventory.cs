@@ -1,29 +1,44 @@
+using System.Globalization;
 using Fortaleza.Localization;
 
 namespace Fortaleza.Engine;
 
-public class Inventory()
-    : Room(new("maleta", "suitcase"), new("", ""), LWeight + 1)
+internal sealed class Inventory()
+    : Room(new("maleta", "suitcase"), new(string.Empty, string.Empty), LWeight + 1)
 {
     public const int LWeight = 40;
 
-    public bool IsEmpty => Children.Count == 0;
-    public int Heaviness => Children.Sum(t => t.Weight);
-    public bool CanAdd(int weight) => Heaviness + weight <= LWeight;
+    public bool IsEmpty => Children.Count is 0;
+    public int Heaviness => Children.Sum(static t => t.Weight);
+    public bool CanAdd(int weight)
+    {
+        return Heaviness + weight <= LWeight;
+    }
 
     public override void Describe()
     {
-        foreach (var child in Children)
-            Output($"{child.Name.Get()} ({child.Weight})");
+        foreach (Thing child in Children)
+        {
+            Output(string.Create(CultureInfo.InvariantCulture, $"{child.Name.Get()} ({child.Weight})"));
+        }
 
-        if (IsEmpty) return;
+        if (IsEmpty)
+        {
+            return;
+        }
 
-        var remaining = LWeight - Heaviness;
-        if (remaining == 0)
+        int remaining = LWeight - Heaviness;
+        if (remaining is 0)
+        {
             Output(Localizer.Msg("CannotCarryMore"));
-        else if (remaining == 1)
+        }
+        else if (remaining is 1)
+        {
             Output(Localizer.Msg("AlmostFull"));
+        }
         else
-            Output(Localizer.Msg("CouldCarryMore") + remaining + Localizer.Msg("MoreBags"));
+        {
+            Output(Localizer.Msg("CouldCarryMore") + remaining.ToString(CultureInfo.InvariantCulture) + Localizer.Msg("MoreBags"));
+        }
     }
 }

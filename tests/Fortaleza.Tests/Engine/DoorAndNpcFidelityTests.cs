@@ -1,262 +1,257 @@
 using Fortaleza.Engine;
 using Fortaleza.Engine.Links;
 using Fortaleza.Localization;
-using Xunit;
 
 namespace Fortaleza.Tests.Engine;
 
-public class DoorAndNpcFidelityTests
+public sealed class DoorAndNpcFidelityTests
 {
-    private static Room MakeRoom() =>
-        new(new("sala", "room"), new("", ""), Inventory.LWeight + 1);
-
-    private static string Capture(Action action)
-    {
-        var writer = new StringWriter();
-        var original = Console.Out;
-        Console.SetOut(writer);
-        try { action(); }
-        finally { Console.SetOut(original); }
-        return writer.ToString().Replace(Environment.NewLine, " ");
-    }
-
-    private static (Room Room, Link Link) RoomWithDoor(string key, Room? destination = null)
-    {
-        var room = MakeRoom();
-        var link = new Link(new("Puerta azul", "Blue door"), new("", ""), new("", ""), key, destination ?? MakeRoom());
-        room.Children.Add(link);
-        return (room, link);
-    }
-
     [Fact]
-    public void OpenDoor_ClosedLinkWithAnyWord_OpensAndSaysOk()
+    public void OpenDoorClosedLinkWithAnyWordOpensAndSaysOk()
     {
         Localizer.Current = Language.Spanish;
-        var (room, link) = RoomWithDoor("");
+        (Room? room, Link? link) = RoomWithDoor(string.Empty);
 
-        var output = Capture(() => room.OpenDoor("puerta azul", ""));
+        string output = Capture(() => room.OpenDoor("puerta azul", string.Empty));
 
         Assert.True(link.IsOpen);
-        Assert.Contains(Localizer.Msg("Ok"), output);
+        Assert.Contains(Localizer.Msg("Ok"), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void OpenDoor_AlreadyOpen_SaysNotNecessary()
+    public void OpenDoorAlreadyOpenSaysNotNecessary()
     {
         Localizer.Current = Language.Spanish;
-        var (room, _) = RoomWithDoor(Link.OpenDoor);
+        (Room? room, Link _) = RoomWithDoor(Link.OpenDoor);
 
-        var output = Capture(() => room.OpenDoor("puerta azul", ""));
+        string output = Capture(() => room.OpenDoor("puerta azul", string.Empty));
 
-        Assert.Contains(Localizer.Msg("AlreadyOpen"), output);
+        Assert.Contains(Localizer.Msg("AlreadyOpen"), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void OpenDoor_WrongKey_ReportsFailureAndQuotedKey()
+    public void OpenDoorWrongKeyReportsFailureAndQuotedKey()
     {
         Localizer.Current = Language.Spanish;
-        var (room, link) = RoomWithDoor("secreto");
+        (Room? room, Link? link) = RoomWithDoor("secreto");
 
-        var output = Capture(() => room.OpenDoor("puerta azul", "mal"));
+        string output = Capture(() => room.OpenDoor("puerta azul", "mal"));
 
         Assert.False(link.IsOpen);
-        Assert.Contains(Localizer.Msg("TryOpenFail"), output);
-        Assert.Contains("\"mal\"" + Localizer.Msg("WrongPassword"), output);
+        Assert.Contains(Localizer.Msg("TryOpenFail"), output, StringComparison.Ordinal);
+        Assert.Contains("\"mal\"" + Localizer.Msg("WrongPassword"), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void OpenDoor_NoKeyGivenForLockedDoor_AsksForPassword()
+    public void OpenDoorNoKeyGivenForLockedDoorAsksForPassword()
     {
         Localizer.Current = Language.Spanish;
-        var (room, _) = RoomWithDoor("secreto");
+        (Room? room, Link _) = RoomWithDoor("secreto");
 
-        var output = Capture(() => room.OpenDoor("puerta azul", ""));
+        string output = Capture(() => room.OpenDoor("puerta azul", string.Empty));
 
-        Assert.Contains(Localizer.Msg("TryOpenFail"), output);
-        Assert.Contains(Localizer.Msg("NeedPassword"), output);
+        Assert.Contains(Localizer.Msg("TryOpenFail"), output, StringComparison.Ordinal);
+        Assert.Contains(Localizer.Msg("NeedPassword"), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void OpenDoor_TwinDoorInDestination_IsOpenedToo()
+    public void OpenDoorTwinDoorInDestinationIsOpenedToo()
     {
-        var destination = MakeRoom();
-        var twin = new Link(new("Puerta azul", "Blue door"), new("", ""), new("", ""), "", MakeRoom());
+        Room destination = MakeRoom();
+        var twin = new Link(new("Puerta azul", "Blue door"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), string.Empty, MakeRoom());
         destination.Children.Add(twin);
-        var (room, _) = RoomWithDoor("", destination);
+        (Room? room, Link _) = RoomWithDoor(string.Empty, destination);
 
-        room.OpenDoor("puerta azul", "");
+        room.OpenDoor("puerta azul", string.Empty);
 
         Assert.True(twin.IsOpen);
     }
 
     [Fact]
-    public void OpenDoor_NoTwinDoor_WarnsItIsOneWay()
+    public void OpenDoorNoTwinDoorWarnsItIsOneWay()
     {
         Localizer.Current = Language.Spanish;
-        var (room, _) = RoomWithDoor("");
+        (Room? room, Link _) = RoomWithDoor(string.Empty);
 
-        var output = Capture(() => room.OpenDoor("puerta azul", ""));
+        string output = Capture(() => room.OpenDoor("puerta azul", string.Empty));
 
-        Assert.Contains(Localizer.Msg("DoorWarning"), output);
+        Assert.Contains(Localizer.Msg("DoorWarning"), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void OpenDoor_WrongRiddleAnswer_DoesNotAddGenericFailureText()
+    public void OpenDoorWrongRiddleAnswerDoesNotAddGenericFailureText()
     {
         Localizer.Current = Language.Spanish;
-        var room = MakeRoom();
-        room.Children.Add(new RiddleLink(new("Escalera", "Staircase"), new("", ""),
-            new("¿Cuántos?", "How many?"), "treinta", new("", ""), MakeRoom()));
+        Room room = MakeRoom();
+        room.Children.Add(new RiddleLink(
+            new("Escalera", "Staircase"),
+            new(string.Empty, string.Empty),
+            new("¿Cuántos?", "How many?"),
+            "treinta",
+            new(string.Empty, string.Empty),
+            MakeRoom()));
 
-        var output = Capture(() => room.OpenDoor("escalera", "cuarenta"));
+        string output = Capture(() => room.OpenDoor("escalera", "cuarenta"));
 
-        Assert.Contains(Localizer.Msg("WrongAnswer"), output);
-        Assert.DoesNotContain(Localizer.Msg("TryOpenFail"), output);
+        Assert.Contains(Localizer.Msg("WrongAnswer"), output, StringComparison.Ordinal);
+        Assert.DoesNotContain(Localizer.Msg("TryOpenFail"), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void OpenDoor_ThingIsNotALink_SaysCannotDoThat()
+    public void OpenDoorThingIsNotALinkSaysCannotDoThat()
     {
         Localizer.Current = Language.Spanish;
-        var room = MakeRoom();
-        room.Children.Add(new Item(new("Maza", "Mace"), new("", ""), 1));
+        Room room = MakeRoom();
+        room.Children.Add(new Item(new("Maza", "Mace"), new(string.Empty, string.Empty), 1));
 
-        var output = Capture(() => room.OpenDoor("maza", ""));
+        string output = Capture(() => room.OpenDoor("maza", string.Empty));
 
-        Assert.Contains(Localizer.Msg("CantDo"), output);
+        Assert.Contains(Localizer.Msg("CantDo"), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void OpenDoor_NothingByThatName_SaysCannotDoThatAndNoSuchThing()
+    public void OpenDoorNothingByThatNameSaysCannotDoThatAndNoSuchThing()
     {
         Localizer.Current = Language.Spanish;
-        var room = MakeRoom();
+        Room room = MakeRoom();
 
-        var output = Capture(() => room.OpenDoor("puerta", ""));
+        string output = Capture(() => room.OpenDoor("puerta", string.Empty));
 
         Assert.Contains(
             Localizer.Msg("CantDo") + " " + Localizer.Msg("ThereIsNo") + "puerta" + Localizer.Msg("InTheRoom"),
-            output);
+            output,
+            StringComparison.Ordinal);
     }
 
     [Fact]
-    public void PlayerOpenDoor_WithKey_InvokesMagicWordsFirst()
+    public void PlayerOpenDoorWithKeyInvokesMagicWordsFirst()
     {
         Localizer.Current = Language.Spanish;
-        var (room, _) = RoomWithDoor("secreto");
+        (Room? room, Link _) = RoomWithDoor("secreto");
         var player = new Player(room);
 
-        var output = Capture(() => player.OpenDoor("puerta azul", "SECRETO"));
+        string output = Capture(() => player.OpenDoor("puerta azul", "SECRETO"));
 
-        Assert.Contains(Localizer.Msg("MagicWords"), output);
-        Assert.Contains("SECRETO!!!", output);
+        Assert.Contains(Localizer.Msg("MagicWords"), output, StringComparison.Ordinal);
+        Assert.Contains("SECRETO!!!", output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void BreakThing_Success_ShowsCrashAndSurprise()
+    public void BreakThingSuccessShowsCrashAndSurprise()
     {
         Localizer.Current = Language.Spanish;
-        var room = MakeRoom();
-        var inner = new Item(new("Llave", "Key"), new("", ""), 1);
-        room.Children.Add(new Hidden(new("Jarrón", "Vase"), new("", ""), "Maza", inner));
+        Room room = MakeRoom();
+        var inner = new Item(new("Llave", "Key"), new(string.Empty, string.Empty), 1);
+        room.Children.Add(new Hidden(new("Jarrón", "Vase"), new(string.Empty, string.Empty), "Maza", inner));
 
-        var output = Capture(() => room.BreakThing("jarron", "maza"));
+        string output = Capture(() => room.BreakThing("jarron", "maza"));
 
-        Assert.Contains(Localizer.Msg("Crash"), output);
-        Assert.Contains(Localizer.Msg("Surprise"), output);
+        Assert.Contains(Localizer.Msg("Crash"), output, StringComparison.Ordinal);
+        Assert.Contains(Localizer.Msg("Surprise"), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void BreakThing_WrongWeapon_SaysCannotBreak()
+    public void BreakThingWrongWeaponSaysCannotBreak()
     {
         Localizer.Current = Language.Spanish;
-        var room = MakeRoom();
-        var inner = new Item(new("Llave", "Key"), new("", ""), 1);
-        room.Children.Add(new Hidden(new("Jarrón", "Vase"), new("", ""), "Maza", inner));
+        Room room = MakeRoom();
+        var inner = new Item(new("Llave", "Key"), new(string.Empty, string.Empty), 1);
+        room.Children.Add(new Hidden(new("Jarrón", "Vase"), new(string.Empty, string.Empty), "Maza", inner));
 
-        var output = Capture(() => room.BreakThing("jarron", "soga"));
+        string output = Capture(() => room.BreakThing("jarron", "soga"));
 
-        Assert.Contains(Localizer.Msg("CantBreak"), output);
+        Assert.Contains(Localizer.Msg("CantBreak"), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void BreakThing_NothingByThatName_SaysCannotDoThatAndNoSuchThing()
+    public void BreakThingNothingByThatNameSaysCannotDoThatAndNoSuchThing()
     {
         Localizer.Current = Language.Spanish;
-        var room = MakeRoom();
+        Room room = MakeRoom();
 
-        var output = Capture(() => room.BreakThing("jarron", "maza"));
+        string output = Capture(() => room.BreakThing("jarron", "maza"));
 
         Assert.Contains(
             Localizer.Msg("CantDo") + " " + Localizer.Msg("ThereIsNo") + "jarron" + Localizer.Msg("InTheRoom"),
-            output);
+            output,
+            StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Hidden_TryBreak_AcceptsPartialWeaponName()
+    public void HiddenTryBreakAcceptsPartialWeaponName()
     {
-        var hidden = new Hidden(new("Espejo", "Mirror"), new("", ""), "Hueso de gato",
-            new Item(new("a", "a"), new("", ""), 1));
+        var hidden = new Hidden(
+            new("Espejo", "Mirror"),
+            new(string.Empty, string.Empty),
+            "Hueso de gato",
+            new Item(new("a", "a"), new(string.Empty, string.Empty), 1));
 
         Assert.True(hidden.TryBreak("hueso"));
-        Assert.False(hidden.TryBreak(""));
+        Assert.False(hidden.TryBreak(string.Empty));
     }
 
     [Fact]
-    public void Hidden_EmptyBreaker_BreaksWithAnything()
+    public void HiddenEmptyBreakerBreaksWithAnything()
     {
-        var hidden = new Hidden(new("Pared", "Wall"), new("", ""), "",
-            new Item(new("a", "a"), new("", ""), 1));
+        var hidden = new Hidden(
+            new("Pared", "Wall"),
+            new(string.Empty, string.Empty),
+            string.Empty,
+            new Item(new("a", "a"), new(string.Empty, string.Empty), 1));
 
-        Assert.True(hidden.TryBreak(""));
+        Assert.True(hidden.TryBreak(string.Empty));
         Assert.True(hidden.TryBreak("cualquier cosa"));
     }
 
     [Fact]
-    public void Troll_Die_ScreamsAndDies()
+    public void TrollDieScreamsAndDies()
     {
         Localizer.Current = Language.Spanish;
-        var troll = new Troll(new("Bruja", "Witch"), new("", ""), "Escoba", new("", ""), new("", ""));
+        var troll = new Troll(new("Bruja", "Witch"), new(string.Empty, string.Empty), "Escoba", new(string.Empty, string.Empty), new(string.Empty, string.Empty));
 
-        var output = Capture(() => troll.Die(""));
+        string output = Capture(() => troll.Die(string.Empty));
 
         Assert.True(troll.Dead);
-        Assert.Contains(Localizer.Msg("Ahhhh"), output);
+        Assert.Contains(Localizer.Msg("Ahhhh"), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Troll_Accept_WrongGiftAfterRightOne_MakesTrollUnhappyAgain()
+    public void TrollAcceptWrongGiftAfterRightOneMakesTrollUnhappyAgain()
     {
-        var troll = new Troll(new("Bruja", "Witch"), new("", ""), "Escoba", new("", ""), new("", ""));
+        var troll = new Troll(new("Bruja", "Witch"), new(string.Empty, string.Empty), "Escoba", new(string.Empty, string.Empty), new(string.Empty, string.Empty));
 
-        troll.Accept(new Item(new("Escoba", "Broom"), new("", ""), 1));
-        troll.Accept(new Item(new("Maza", "Mace"), new("", ""), 1));
+        troll.Accept(new Item(new("Escoba", "Broom"), new(string.Empty, string.Empty), 1));
+        troll.Accept(new Item(new("Maza", "Mace"), new(string.Empty, string.Empty), 1));
 
         Assert.False(troll.Happy);
     }
 
     [Fact]
-    public void Guard_Die_WrongWeapon_ShowsUselessAndSurvives()
+    public void GuardDieWrongWeaponShowsUselessAndSurvives()
     {
         Localizer.Current = Language.Spanish;
-        var guard = new Guard(new("Lobo", "Wolf"), new("", ""), new("grr", "grr"), "Látigo");
-        var died = true;
+        var guard = new Guard(new("Lobo", "Wolf"), new(string.Empty, string.Empty), new("grr", "grr"), "Látigo");
+        bool died = true;
 
-        var output = Capture(() => died = guard.Die("maza"));
+        string output = Capture(() => died = guard.Die("maza"));
 
         Assert.False(died);
         Assert.False(guard.Dead);
-        Assert.Contains(Localizer.Msg("Useless"), output);
+        Assert.Contains(Localizer.Msg("Useless"), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Daughter_Die_RightWeapon_ConfessesAndDies()
+    public void DaughterDieRightWeaponConfessesAndDies()
     {
-        var killed = false;
-        var daughter = new Daughter(new("Hija", "Daughter"), new("", ""), new("confieso", "I confess"),
-            "Daga", () => killed = true);
+        bool killed = false;
+        var daughter = new Daughter(
+            new("Hija", "Daughter"),
+            new(string.Empty, string.Empty),
+            new("confieso", "I confess"),
+            "Daga",
+            () => killed = true);
 
-        var died = daughter.Die("daga");
+        bool died = daughter.Die("daga");
 
         Assert.True(died);
         Assert.True(daughter.Dead);
@@ -264,16 +259,44 @@ public class DoorAndNpcFidelityTests
     }
 
     [Fact]
-    public void Daughter_Die_WrongWeapon_KillsThePlayerInstead()
+    public void DaughterDieWrongWeaponKillsThePlayerInstead()
     {
-        var killed = false;
-        var daughter = new Daughter(new("Hija", "Daughter"), new("", ""), new("confieso", "I confess"),
-            "Daga", () => killed = true);
+        bool killed = false;
+        var daughter = new Daughter(
+            new("Hija", "Daughter"),
+            new(string.Empty, string.Empty),
+            new("confieso", "I confess"),
+            "Daga",
+            () => killed = true);
 
-        var died = daughter.Die("maza");
+        bool died = daughter.Die("maza");
 
         Assert.False(died);
         Assert.False(daughter.Dead);
         Assert.True(killed);
+    }
+
+    private static Room MakeRoom()
+    {
+        return new(new("sala", "room"), new(string.Empty, string.Empty), Inventory.LWeight + 1);
+    }
+
+    private static string Capture(Action action)
+    {
+        var writer = new StringWriter();
+        TextWriter original = Console.Out;
+        Console.SetOut(writer);
+        try
+        { action(); }
+        finally { Console.SetOut(original); }
+        return writer.ToString().Replace(Environment.NewLine, " ", StringComparison.Ordinal);
+    }
+
+    private static (Room Room, Link Link) RoomWithDoor(string key, Room? destination = null)
+    {
+        Room room = MakeRoom();
+        var link = new Link(new("Puerta azul", "Blue door"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), key, destination ?? MakeRoom());
+        room.Children.Add(link);
+        return (room, link);
     }
 }

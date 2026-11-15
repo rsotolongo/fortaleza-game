@@ -1,115 +1,118 @@
+using System.Globalization;
 using Fortaleza.Engine;
 using Fortaleza.Localization;
-using Xunit;
 
 namespace Fortaleza.Tests.Engine;
 
-public class WeighTests
+public sealed class WeighTests
 {
-    private static Room MakeRoom() =>
-        new(new("sala", "room"), new("", ""), Inventory.LWeight + 1);
-
-    private static string Capture(Action action)
-    {
-        var writer = new StringWriter();
-        var original = Console.Out;
-        Console.SetOut(writer);
-        try { action(); }
-        finally { Console.SetOut(original); }
-        return writer.ToString().Replace(Environment.NewLine, " ");
-    }
-
-    private static Player PlayerWithScale(Room room)
-    {
-        var player = new Player(room);
-        player.Bag.Children.Add(new Item(new("Balanza", "Scale"), new("", ""), 2));
-        return player;
-    }
-
     [Fact]
-    public void Weigh_WithoutScale_SaysSo()
+    public void WeighWithoutScaleSaysSo()
     {
         Localizer.Current = Language.Spanish;
         var player = new Player(MakeRoom());
 
-        var output = Capture(() => player.Weigh("maza"));
+        string output = Capture(() => player.Weigh("maza"));
 
-        Assert.Contains(Localizer.Msg("NoScale"), output);
+        Assert.Contains(Localizer.Msg("NoScale"), output, StringComparison.Ordinal);
     }
 
     [Theory]
     [InlineData(1, "BagUnit")]
     [InlineData(5, "BagUnits")]
-    public void Weigh_ItemInRoom_ShowsWeightWithSingularOrPlural(int weight, string unitKey)
+    public void WeighItemInRoomShowsWeightWithSingularOrPlural(int weight, string unitKey)
     {
         Localizer.Current = Language.Spanish;
-        var room = MakeRoom();
-        room.Children.Add(new Item(new("Maza", "Mace"), new("", ""), weight));
-        var player = PlayerWithScale(room);
+        Room room = MakeRoom();
+        room.Children.Add(new Item(new("Maza", "Mace"), new(string.Empty, string.Empty), weight));
+        Player player = PlayerWithScale(room);
 
-        var output = Capture(() => player.Weigh("maza"));
+        string output = Capture(() => player.Weigh("maza"));
 
-        Assert.Contains(weight + Localizer.Msg(unitKey), output);
+        Assert.Contains(weight.ToString(CultureInfo.InvariantCulture) + Localizer.Msg(unitKey), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Weigh_ItemInBag_IsFoundInBag()
+    public void WeighItemInBagIsFoundInBag()
     {
         Localizer.Current = Language.Spanish;
-        var player = PlayerWithScale(MakeRoom());
-        player.Bag.Children.Add(new Item(new("Maza", "Mace"), new("", ""), 7));
+        Player player = PlayerWithScale(MakeRoom());
+        player.Bag.Children.Add(new Item(new("Maza", "Mace"), new(string.Empty, string.Empty), 7));
 
-        var output = Capture(() => player.Weigh("maza"));
+        string output = Capture(() => player.Weigh("maza"));
 
-        Assert.Contains("7" + Localizer.Msg("BagUnits"), output);
+        Assert.Contains("7" + Localizer.Msg("BagUnits"), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Weigh_TheScaleItself_TriesInVain()
+    public void WeighTheScaleItselfTriesInVain()
     {
         Localizer.Current = Language.Spanish;
-        var player = PlayerWithScale(MakeRoom());
+        Player player = PlayerWithScale(MakeRoom());
 
-        var output = Capture(() => player.Weigh("balanza"));
+        string output = Capture(() => player.Weigh("balanza"));
 
-        Assert.Contains(Localizer.Msg("WeighSelf"), output);
+        Assert.Contains(Localizer.Msg("WeighSelf"), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Weigh_NonItem_CallsPlayerMad()
+    public void WeighNonItemCallsPlayerMad()
     {
         Localizer.Current = Language.Spanish;
-        var room = MakeRoom();
-        room.Children.Add(new Guard(new("Lobo", "Wolf"), new("", ""), new("", ""), "Látigo"));
-        var player = PlayerWithScale(room);
+        Room room = MakeRoom();
+        room.Children.Add(new Guard(new("Lobo", "Wolf"), new(string.Empty, string.Empty), new(string.Empty, string.Empty), "Látigo"));
+        Player player = PlayerWithScale(room);
 
-        var output = Capture(() => player.Weigh("lobo"));
+        string output = Capture(() => player.Weigh("lobo"));
 
-        Assert.Contains(Localizer.Msg("WeighCrazy"), output);
+        Assert.Contains(Localizer.Msg("WeighCrazy"), output, StringComparison.Ordinal);
     }
 
     [Theory]
     [InlineData("", "Complete")]
     [InlineData("yunque", "WeighNotHere")]
-    public void Weigh_NothingFound_ExplainsWhy(string what, string messageKey)
+    public void WeighNothingFoundExplainsWhy(string what, string messageKey)
     {
         Localizer.Current = Language.Spanish;
-        var player = PlayerWithScale(MakeRoom());
+        Player player = PlayerWithScale(MakeRoom());
 
-        var output = Capture(() => player.Weigh(what));
+        string output = Capture(() => player.Weigh(what));
 
-        Assert.Contains(Localizer.Msg(messageKey), output);
+        Assert.Contains(Localizer.Msg(messageKey), output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void LeaveAll_EmptyBag_SaysNothingIsCarried()
+    public void LeaveAllEmptyBagSaysNothingIsCarried()
     {
         Localizer.Current = Language.Spanish;
         var player = new Player(MakeRoom());
 
-        var output = Capture(player.LeaveAll);
+        string output = Capture(player.LeaveAll);
 
-        Assert.Contains(Localizer.Msg("BagEmpty"), output);
-        Assert.DoesNotContain(Localizer.Msg("DropAll"), output);
+        Assert.Contains(Localizer.Msg("BagEmpty"), output, StringComparison.Ordinal);
+        Assert.DoesNotContain(Localizer.Msg("DropAll"), output, StringComparison.Ordinal);
+    }
+
+    private static Room MakeRoom()
+    {
+        return new(new("sala", "room"), new(string.Empty, string.Empty), Inventory.LWeight + 1);
+    }
+
+    private static string Capture(Action action)
+    {
+        var writer = new StringWriter();
+        TextWriter original = Console.Out;
+        Console.SetOut(writer);
+        try
+        { action(); }
+        finally { Console.SetOut(original); }
+        return writer.ToString().Replace(Environment.NewLine, " ", StringComparison.Ordinal);
+    }
+
+    private static Player PlayerWithScale(Room room)
+    {
+        var player = new Player(room);
+        player.Bag.Children.Add(new Item(new("Balanza", "Scale"), new(string.Empty, string.Empty), 2));
+        return player;
     }
 }

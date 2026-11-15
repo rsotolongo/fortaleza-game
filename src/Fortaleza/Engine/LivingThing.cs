@@ -2,7 +2,7 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Engine;
 
-public abstract class LivingThing(LocalizedText name, LocalizedText description, int weight)
+internal abstract class LivingThing(LocalizedText name, LocalizedText description, int weight)
     : Thing(name, description, weight)
 {
     public bool Dead { get; protected set; }
@@ -13,7 +13,10 @@ public abstract class LivingThing(LocalizedText name, LocalizedText description,
         return true;
     }
 
-    public virtual void Speak() => Output(Localizer.Msg("Silence"));
+    public virtual void Speak()
+    {
+        Output(Localizer.Msg("Silence"));
+    }
 
     public virtual void Accept(Item gift) { }
 }

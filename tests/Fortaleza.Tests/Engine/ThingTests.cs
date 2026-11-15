@@ -1,13 +1,12 @@
 using Fortaleza.Engine;
 using Fortaleza.Localization;
-using Xunit;
 
 namespace Fortaleza.Tests.Engine;
 
-public class ThingTests
+public sealed class ThingTests
 {
     [Fact]
-    public void Thing_Name_ReturnsLocalizedName()
+    public void ThingNameReturnsLocalizedName()
     {
         Localizer.Current = Language.English;
         var item = new Item(new("Maza", "Mace"), new("Es muy pesada.", "It is very heavy."), 39);
@@ -15,29 +14,29 @@ public class ThingTests
     }
 
     [Fact]
-    public void Item_Weight_StoresCorrectly()
+    public void ItemWeightStoresCorrectly()
     {
         var item = new Item(new("Maza", "Mace"), new("desc", "desc"), 39);
         Assert.Equal(39, item.Weight);
     }
 
     [Fact]
-    public void LivingThing_Die_SetsDead()
+    public void LivingThingDieSetsDead()
     {
         var npc = new TestLivingThing();
-        npc.Die("");
+        npc.Die(string.Empty);
         Assert.True(npc.Dead);
     }
 
     [Fact]
-    public void Thing_Children_StartsEmpty()
+    public void ThingChildrenStartsEmpty()
     {
-        var item = new Item(new("A", "A"), new("", ""), 1);
+        var item = new Item(new("A", "A"), new(string.Empty, string.Empty), 1);
         Assert.Empty(item.Children);
     }
 
     [Fact]
-    public void Thing_Image_ReturnsDescription()
+    public void ThingImageReturnsDescription()
     {
         Localizer.Current = Language.English;
         var item = new Item(new("Maza", "Mace"), new("Pesada", "Heavy"), 1);
@@ -46,6 +45,4 @@ public class ThingTests
 }
 
 file sealed class TestLivingThing()
-    : LivingThing(new("Test", "Test"), new("", ""), 0)
-{
-}
+    : LivingThing(new("Test", "Test"), new(string.Empty, string.Empty), 0);

@@ -3,42 +3,48 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Engine;
 
-public class Room(LocalizedText name, LocalizedText description, int weight)
+internal class Room(LocalizedText name, LocalizedText description, int weight)
     : Thing(name, description, weight)
 {
     public bool Visited { get; set; }
 
     public Thing? Get(string name)
     {
-        var query = StringHelper.Normalize(name);
-        return Children.FirstOrDefault(
+        string query = StringHelper.Normalize(name);
+        return Children.Find(
                 t => StringHelper.Normalize(t.Name.Es) == query
                   || StringHelper.Normalize(t.Name.En) == query)
-            ?? Children.FirstOrDefault(
+            ?? Children.Find(
                 t => StringHelper.ContainsAllWords(StringHelper.Normalize(t.Name.Es), query)
                   || StringHelper.ContainsAllWords(StringHelper.Normalize(t.Name.En), query));
     }
 
     public Thing? Take(string name)
     {
-        var thing = Get(name);
-        if (thing is null) return null;
+        Thing? thing = Get(name);
+        if (thing is null)
+        {
+            return null;
+        }
+
         Children.Remove(thing);
         return thing;
     }
 
     public virtual void Describe()
     {
-        foreach (var child in Children)
+        foreach (Thing child in Children)
+        {
             Output(child.Name.Get());
+        }
     }
 
     public virtual void OpenDoor(string name, string key)
     {
-        var thing = Get(name);
+        Thing? thing = Get(name);
         if (thing is null)
         {
-            Output(name != ""
+            Output(!string.IsNullOrEmpty(name)
                 ? Localizer.Msg("CantDo") + " " + Localizer.Msg("ThereIsNo") + name + Localizer.Msg("InTheRoom")
                 : Localizer.Msg("Complete"));
             return;
@@ -53,33 +59,34 @@ public class Room(LocalizedText name, LocalizedText description, int weight)
             Output(Localizer.Msg("AlreadyOpen"));
             return;
         }
-        if (link.TryOpen(key))
+        if (!link.TryOpen(key))
         {
-            if (link.Destination.GetType() == typeof(Room))
+            ReportFailedOpen(link, key);
+            return;
+        }
+
+        if (link.Destination.GetType() == typeof(Room))
+        {
+            Thing? twin = link.Destination.Get(name);
+            if (twin is null)
             {
-                var twin = link.Destination.Get(name);
-                if (twin is null)
-                    Output(Localizer.Msg("DoorWarning"));
-                else if (twin is Link twinLink)
-                    twinLink.TryOpen(key);
+                Output(Localizer.Msg("DoorWarning"));
             }
-            Output(Localizer.Msg("Ok"));
+            else
+            {
+                (twin as Link)?.TryOpen(key);
+            }
         }
-        else if (link is not RiddleLink)
-        {
-            Output(Localizer.Msg("TryOpenFail"));
-            Output(key == ""
-                ? Localizer.Msg("NeedPassword")
-                : "\"" + key + "\"" + Localizer.Msg("WrongPassword"));
-        }
+
+        Output(Localizer.Msg("Ok"));
     }
 
     public virtual void BreakThing(string name, string weapon)
     {
-        var thing = Get(name);
+        Thing? thing = Get(name);
         if (thing is null)
         {
-            Output(name != ""
+            Output(!string.IsNullOrEmpty(name)
                 ? Localizer.Msg("CantDo") + " " + Localizer.Msg("ThereIsNo") + name + Localizer.Msg("InTheRoom")
                 : Localizer.Msg("Complete"));
             return;
@@ -94,11 +101,27 @@ public class Room(LocalizedText name, LocalizedText description, int weight)
             Output(Localizer.Msg("CantBreak"));
             return;
         }
-        var idx = Children.IndexOf(hidden);
+        int idx = Children.IndexOf(hidden);
         Children.RemoveAt(idx);
         if (hidden.HiddenChild is not null)
+        {
             Children.Insert(idx, hidden.HiddenChild);
+        }
+
         Output(Localizer.Msg("Crash"));
         Output(Localizer.Msg("Surprise"));
+    }
+
+    private static void ReportFailedOpen(Link link, string key)
+    {
+        if (link is RiddleLink)
+        {
+            return;
+        }
+
+        Output(Localizer.Msg("TryOpenFail"));
+        Output(string.IsNullOrEmpty(key)
+            ? Localizer.Msg("NeedPassword")
+            : "\"" + key + "\"" + Localizer.Msg("WrongPassword"));
     }
 }

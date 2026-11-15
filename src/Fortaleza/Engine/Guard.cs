@@ -2,9 +2,11 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Engine;
 
-public class Guard(
-    LocalizedText name, LocalizedText description,
-    LocalizedText confession, LocalizedText lethalWeapon)
+internal class Guard(
+    LocalizedText name,
+    LocalizedText description,
+    LocalizedText confession,
+    LocalizedText lethalWeapon)
     : LivingThing(name, description, Inventory.LWeight + 1)
 {
     public LocalizedText Confession { get; } = confession;
@@ -20,27 +22,6 @@ public class Guard(
         else
         {
             Output(Localizer.Msg("Useless"));
-        }
-        return Dead;
-    }
-}
-
-public class Daughter(
-    LocalizedText name, LocalizedText description,
-    LocalizedText confession, LocalizedText weapon, Action killPlayer)
-    : Guard(name, description, confession, weapon)
-{
-    public override bool Die(string weapon)
-    {
-        if (StringHelper.EqualsName(LethalWeapon, weapon))
-        {
-            Output(Confession.Get());
-            Dead = true;
-        }
-        else
-        {
-            Output(Localizer.Msg("DaughterFail"));
-            killPlayer();
         }
         return Dead;
     }

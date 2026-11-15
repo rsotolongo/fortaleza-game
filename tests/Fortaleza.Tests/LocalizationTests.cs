@@ -1,12 +1,11 @@
 using Fortaleza.Localization;
-using Xunit;
 
 namespace Fortaleza.Tests;
 
-public class LocalizationTests
+public sealed class LocalizationTests
 {
     [Fact]
-    public void LocalizedText_Get_ReturnsSpanishWhenCurrentIsSpanish()
+    public void LocalizedTextGetReturnsSpanishWhenCurrentIsSpanish()
     {
         Localizer.Current = Language.Spanish;
         var t = new LocalizedText("Hola", "Hello");
@@ -14,7 +13,7 @@ public class LocalizationTests
     }
 
     [Fact]
-    public void LocalizedText_Get_ReturnsEnglishWhenCurrentIsEnglish()
+    public void LocalizedTextGetReturnsEnglishWhenCurrentIsEnglish()
     {
         Localizer.Current = Language.English;
         var t = new LocalizedText("Hola", "Hello");
@@ -22,28 +21,28 @@ public class LocalizationTests
     }
 
     [Fact]
-    public void Localizer_Msg_ReturnsCorrectSpanishString()
+    public void LocalizerMsgReturnsCorrectSpanishString()
     {
         Localizer.Current = Language.Spanish;
         Assert.Equal("Ok.", Localizer.Msg("Ok"));
     }
 
     [Fact]
-    public void Localizer_Msg_ReturnsCorrectEnglishString()
+    public void LocalizerMsgReturnsCorrectEnglishString()
     {
         Localizer.Current = Language.English;
         Assert.Equal("Ok.", Localizer.Msg("Ok"));
     }
 
     [Fact]
-    public void Localizer_Msg_ReturnsSpanishMessageForKnownKey()
+    public void LocalizerMsgReturnsSpanishMessageForKnownKey()
     {
         Localizer.Current = Language.Spanish;
         Assert.Equal("Usted ve:", Localizer.Msg("RoomContains"));
     }
 
     [Fact]
-    public void Localizer_Msg_ReturnsEnglishMessageForKnownKey()
+    public void LocalizerMsgReturnsEnglishMessageForKnownKey()
     {
         Localizer.Current = Language.English;
         Assert.Equal("You see:", Localizer.Msg("RoomContains"));

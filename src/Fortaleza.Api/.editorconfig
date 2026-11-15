@@ -1,0 +1,11 @@
+# Place as .editorconfig in each ASP.NET Core web project (controllers must stay public)
+[*.cs]
+dotnet_diagnostic.CA2007.severity = none
+dotnet_diagnostic.CA1515.severity = none
+dotnet_diagnostic.CS1591.severity = none
+
+# Internal types keep their members public: the visibility only matters across assemblies
+dotnet_diagnostic.S3059.severity = none
+
+# The byte[] overload is the only caller-facing shape this internal helper needs
+dotnet_diagnostic.MA0109.severity = none
