@@ -1,7 +1,9 @@
-.remember/
-.superpowers/
-.vs/
 bin/
 node_modules/
 obj/
 wwwroot/
+*.user
+.claude/
+.remember/
+.vs/
+docs/superpowers/
