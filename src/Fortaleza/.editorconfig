@@ -11,6 +11,9 @@ dotnet_diagnostic.MA0045.severity = none
 dotnet_diagnostic.IDE0072.severity = none
 dotnet_diagnostic.IDE0010.severity = none
 
+# Newer SDKs suggest a collection expression for HashSet initializers that pass a comparer, which needs C# 15
+dotnet_diagnostic.IDE0028.severity = none
+
 # Internal types keep their members public: the visibility only matters across assemblies
 dotnet_diagnostic.S3059.severity = none
 
