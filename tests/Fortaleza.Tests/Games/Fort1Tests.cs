@@ -5,8 +5,14 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Tests.Games;
 
+/// <summary>
+/// Tests for fort1.
+/// </summary>
 public sealed class Fort1Tests
 {
+    /// <summary>
+    /// Build registers thirty three rooms starting at the exterior.
+    /// </summary>
     [Fact]
     public void BuildRegistersThirtyThreeRoomsStartingAtTheExterior()
     {
@@ -20,6 +26,9 @@ public sealed class Fort1Tests
         Assert.Throws<ArgumentOutOfRangeException>(() => game.GetRoom(33));
     }
 
+    /// <summary>
+    /// Build all fifty rooms are reachable from the start.
+    /// </summary>
     [Fact]
     public void BuildAllFiftyRoomsAreReachableFromTheStart()
     {
@@ -30,6 +39,9 @@ public sealed class Fort1Tests
         Assert.Equal(50, reachable.Count);
     }
 
+    /// <summary>
+    /// Check goal at start is false.
+    /// </summary>
     [Fact]
     public void CheckGoalAtStartIsFalse()
     {
@@ -38,6 +50,9 @@ public sealed class Fort1Tests
         Assert.False(game.CheckGoal());
     }
 
+    /// <summary>
+    /// Check goal after the five foes are gone is true.
+    /// </summary>
     [Fact]
     public void CheckGoalAfterTheFiveFoesAreGoneIsTrue()
     {
@@ -51,6 +66,9 @@ public sealed class Fort1Tests
         Assert.True(game.CheckGoal());
     }
 
+    /// <summary>
+    /// Check goal with one foe left is false.
+    /// </summary>
     [Theory]
     [InlineData(21)]
     [InlineData(20)]
@@ -73,6 +91,9 @@ public sealed class Fort1Tests
         Assert.False(game.CheckGoal());
     }
 
+    /// <summary>
+    /// Build every hidden and guard weapon matches an item of the same english name.
+    /// </summary>
     [Fact]
     public void BuildEveryHiddenAndGuardWeaponMatchesAnItemOfTheSameEnglishName()
     {

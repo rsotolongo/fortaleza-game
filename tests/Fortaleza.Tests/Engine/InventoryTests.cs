@@ -2,8 +2,14 @@ using Fortaleza.Engine;
 
 namespace Fortaleza.Tests.Engine;
 
+/// <summary>
+/// Tests for inventory.
+/// </summary>
 public sealed class InventoryTests
 {
+    /// <summary>
+    /// Inventory heaviness sums weights.
+    /// </summary>
     [Fact]
     public void InventoryHeavinessSumsWeights()
     {
@@ -13,6 +19,9 @@ public sealed class InventoryTests
         Assert.Equal(25, inv.Heaviness);
     }
 
+    /// <summary>
+    /// Inventory can add false when over limit.
+    /// </summary>
     [Fact]
     public void InventoryCanAddFalseWhenOverLimit()
     {
@@ -21,6 +30,9 @@ public sealed class InventoryTests
         Assert.False(inv.CanAdd(6));
     }
 
+    /// <summary>
+    /// Inventory can add true at exact limit.
+    /// </summary>
     [Fact]
     public void InventoryCanAddTrueAtExactLimit()
     {
@@ -29,6 +41,9 @@ public sealed class InventoryTests
         Assert.True(inv.CanAdd(5));
     }
 
+    /// <summary>
+    /// Inventory is empty true when no children.
+    /// </summary>
     [Fact]
     public void InventoryIsEmptyTrueWhenNoChildren()
     {
@@ -36,6 +51,9 @@ public sealed class InventoryTests
         Assert.True(inv.IsEmpty);
     }
 
+    /// <summary>
+    /// Inventory is empty false when has children.
+    /// </summary>
     [Fact]
     public void InventoryIsEmptyFalseWhenHasChildren()
     {
@@ -44,6 +62,9 @@ public sealed class InventoryTests
         Assert.False(inv.IsEmpty);
     }
 
+    /// <summary>
+    /// Inventory l weight is40.
+    /// </summary>
     [Fact]
     public void InventoryLWeightIs40()
     {

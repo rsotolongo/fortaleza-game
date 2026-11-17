@@ -5,7 +5,7 @@ Rules for AI coding agents working in this repository. Humans: see [README.md](R
 
 ## 1. What this is
 
-La Fortaleza: a bilingual (Spanish/English) .NET 10 port of Miguel Cepero's Turbo Pascal text adventure
+La Fortaleza: a bilingual (Spanish/English) .NET 11 port of Miguel Cepero's Turbo Pascal text adventure
 (GPLv3+), plus a stateless ASP.NET Core API, a Vue 3 web app, and Terraform for Google Cloud
 (Cloud Run + Firebase Hosting).
 
@@ -14,7 +14,7 @@ La Fortaleza: a bilingual (Spanish/English) .NET 10 port of Miguel Cepero's Turb
 | `src/Fortaleza` | Engine + console app (`Engine/`, `Games/` Fort1/Fort2 data, `Parser/`, `Localization/`) |
 | `src/Fortaleza.Api` | Minimal API: `POST /api/games/start`, `POST /api/games/play`, `PUT /api/games/load` |
 | `src/Fortaleza.Web` | Vue 3 + Vite SPA (plain JavaScript, no TypeScript) |
-| `tests/Fortaleza.Tests`, `tests/Fortaleza.Api.Tests` | xUnit v2 tests |
+| `tests/Fortaleza.Tests`, `tests/Fortaleza.Api.Tests` | xUnit v3 tests |
 | `saves/` | Minimal winning tracks (`FORT{1,2}_{ES,EN}.TRK`), used as regression oracles |
 | `terraform/` | Cloud infrastructure, `deploy.sh` / `deploy.ps1`, one-time `bootstrap/` stack |
 | `original/`, `modern/`, `games/`, `build.bat` | Original Pascal sources, FreePascal copy, Windows executables. **Read-only reference: never edit.** |
@@ -92,7 +92,7 @@ adds StyleCop, Roslynator, Sonar, Meziantou and SecurityCodeScan, `TreatWarnings
 
 ## 5. Testing conventions
 
-- xUnit v2, NSubstitute is not used; assertions are plain `Assert.*`. Tests are `public sealed class`.
+- xUnit v3 (Microsoft.Testing.Platform runner, enabled in `global.json`), NSubstitute is not used; assertions are plain `Assert.*`. Tests are `public sealed class`.
 - Test method names are PascalCase **without underscores** (CA1707): `GuardDieAcceptsWeaponNameInEitherLanguage`.
   Async tests end in `Async` and use `.ConfigureAwait(true)`.
 - `[Theory]` + `[InlineData]` over duplicated `[Fact]`s. Theory parameters cannot be internal enums: pass the name
@@ -146,8 +146,8 @@ adds StyleCop, Roslynator, Sonar, Meziantou and SecurityCodeScan, `TreatWarnings
 
 ## 9. Dependencies
 
-- NuGet: latest **stable** that supports `net10.0` (check with `dotnet list Fortaleza.slnx package --outdated`).
-  `Microsoft.AspNetCore.Mvc.Testing` 11.x supports only `net11.0`, so it stays on 10.0.x. Analyzer packages
+- NuGet: latest **stable** that supports `net11.0` (check with `dotnet list Fortaleza.slnx package --outdated`).
+  Test async calls pass `TestContext.Current.CancellationToken` (xUnit1051). Analyzer packages
   are versioned in `Directory.Build.props`; there is no central package management.
 - npm: keep `package-lock.json` in sync; install with `npm ci`.
 - After any package change run the full build and tests; analyzer upgrades can introduce new errors.

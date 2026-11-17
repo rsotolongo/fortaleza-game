@@ -4,8 +4,14 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Tests.Games;
 
+/// <summary>
+/// Tests for minimal path.
+/// </summary>
 public sealed class MinimalPathTests
 {
+    /// <summary>
+    /// Track played from the start reaches the ending on its last command.
+    /// </summary>
     [Theory]
     [InlineData(1, nameof(Language.Spanish), "FORT1_ES.TRK")]
     [InlineData(1, nameof(Language.English), "FORT1_EN.TRK")]

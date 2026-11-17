@@ -4,8 +4,14 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Tests.Engine;
 
+/// <summary>
+/// Tests for door and npc fidelity.
+/// </summary>
 public sealed class DoorAndNpcFidelityTests
 {
+    /// <summary>
+    /// Open door closed link with any word opens and says ok.
+    /// </summary>
     [Fact]
     public void OpenDoorClosedLinkWithAnyWordOpensAndSaysOk()
     {
@@ -18,6 +24,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.Contains(Localizer.Msg("Ok"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Open door already open says not necessary.
+    /// </summary>
     [Fact]
     public void OpenDoorAlreadyOpenSaysNotNecessary()
     {
@@ -29,6 +38,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.Contains(Localizer.Msg("AlreadyOpen"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Open door wrong key reports failure and quoted key.
+    /// </summary>
     [Fact]
     public void OpenDoorWrongKeyReportsFailureAndQuotedKey()
     {
@@ -42,6 +54,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.Contains("\"mal\"" + Localizer.Msg("WrongPassword"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Open door no key given for locked door asks for password.
+    /// </summary>
     [Fact]
     public void OpenDoorNoKeyGivenForLockedDoorAsksForPassword()
     {
@@ -54,6 +69,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.Contains(Localizer.Msg("NeedPassword"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Open door twin door in destination is opened too.
+    /// </summary>
     [Fact]
     public void OpenDoorTwinDoorInDestinationIsOpenedToo()
     {
@@ -67,6 +85,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.True(twin.IsOpen);
     }
 
+    /// <summary>
+    /// Open door no twin door warns it is one way.
+    /// </summary>
     [Fact]
     public void OpenDoorNoTwinDoorWarnsItIsOneWay()
     {
@@ -78,6 +99,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.Contains(Localizer.Msg("DoorWarning"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Open door wrong riddle answer does not add generic failure text.
+    /// </summary>
     [Fact]
     public void OpenDoorWrongRiddleAnswerDoesNotAddGenericFailureText()
     {
@@ -97,6 +121,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.DoesNotContain(Localizer.Msg("TryOpenFail"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Open door thing is not a link says cannot do that.
+    /// </summary>
     [Fact]
     public void OpenDoorThingIsNotALinkSaysCannotDoThat()
     {
@@ -109,6 +136,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.Contains(Localizer.Msg("CantDo"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Open door nothing by that name says cannot do that and no such thing.
+    /// </summary>
     [Fact]
     public void OpenDoorNothingByThatNameSaysCannotDoThatAndNoSuchThing()
     {
@@ -123,6 +153,9 @@ public sealed class DoorAndNpcFidelityTests
             StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Player open door with key invokes magic words first.
+    /// </summary>
     [Fact]
     public void PlayerOpenDoorWithKeyInvokesMagicWordsFirst()
     {
@@ -136,6 +169,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.Contains("SECRETO!!!", output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Break thing success shows crash and surprise.
+    /// </summary>
     [Fact]
     public void BreakThingSuccessShowsCrashAndSurprise()
     {
@@ -150,6 +186,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.Contains(Localizer.Msg("Surprise"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Break thing wrong weapon says cannot break.
+    /// </summary>
     [Fact]
     public void BreakThingWrongWeaponSaysCannotBreak()
     {
@@ -163,6 +202,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.Contains(Localizer.Msg("CantBreak"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Break thing nothing by that name says cannot do that and no such thing.
+    /// </summary>
     [Fact]
     public void BreakThingNothingByThatNameSaysCannotDoThatAndNoSuchThing()
     {
@@ -177,6 +219,9 @@ public sealed class DoorAndNpcFidelityTests
             StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Hidden try break accepts partial weapon name.
+    /// </summary>
     [Fact]
     public void HiddenTryBreakAcceptsPartialWeaponName()
     {
@@ -190,6 +235,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.False(hidden.TryBreak(string.Empty));
     }
 
+    /// <summary>
+    /// Hidden empty breaker breaks with anything.
+    /// </summary>
     [Fact]
     public void HiddenEmptyBreakerBreaksWithAnything()
     {
@@ -203,6 +251,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.True(hidden.TryBreak("cualquier cosa"));
     }
 
+    /// <summary>
+    /// Troll die screams and dies.
+    /// </summary>
     [Fact]
     public void TrollDieScreamsAndDies()
     {
@@ -215,6 +266,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.Contains(Localizer.Msg("Ahhhh"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Troll accept wrong gift after right one makes troll unhappy again.
+    /// </summary>
     [Fact]
     public void TrollAcceptWrongGiftAfterRightOneMakesTrollUnhappyAgain()
     {
@@ -226,6 +280,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.False(troll.Happy);
     }
 
+    /// <summary>
+    /// Guard die wrong weapon shows useless and survives.
+    /// </summary>
     [Fact]
     public void GuardDieWrongWeaponShowsUselessAndSurvives()
     {
@@ -240,6 +297,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.Contains(Localizer.Msg("Useless"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Daughter die right weapon confesses and dies.
+    /// </summary>
     [Fact]
     public void DaughterDieRightWeaponConfessesAndDies()
     {
@@ -258,6 +318,9 @@ public sealed class DoorAndNpcFidelityTests
         Assert.False(killed);
     }
 
+    /// <summary>
+    /// Daughter die wrong weapon kills the player instead.
+    /// </summary>
     [Fact]
     public void DaughterDieWrongWeaponKillsThePlayerInstead()
     {

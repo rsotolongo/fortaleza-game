@@ -1,6 +1,8 @@
 using System.Globalization;
+using System.Text;
 using Fortaleza.Localization;
 using Fortaleza.Parser;
+using Microsoft.Win32.SafeHandles;
 
 namespace Fortaleza.Engine;
 
@@ -17,6 +19,38 @@ internal abstract class GameEngine(Room startRoom)
     public string Wish { get; private set; } = string.Empty;
     public bool IsOver { get => field || Player.Dead; private set; }
     public IReadOnlyList<string> Track => _track;
+
+    private Dictionary<CommandType, Action<ParsedCommand>> RecordedHandlers => field ??= new()
+    {
+        [CommandType.Go] = c =>
+        {
+            OpenSilently(c.Arg1);
+            Player.Walk(c.Arg1);
+        },
+        [CommandType.Take] = c => Player.Take(c.Arg1),
+        [CommandType.TakeAll] = static _ => Thing.Output(Localizer.Msg("TakeOneAtATime")),
+        [CommandType.Leave] = c => Player.LeaveItem(c.Arg1),
+        [CommandType.LeaveAll] = _ => Player.LeaveAll(),
+        [CommandType.Open] = c => Player.OpenDoor(c.Arg1, c.Arg2),
+        [CommandType.Kill] = c => Player.Kill(c.Arg1, c.Arg2),
+        [CommandType.Look] = _ => Player.Look(),
+        [CommandType.See] = c => Player.See(c.Arg1),
+        [CommandType.Break] = c => Player.Break(c.Arg1, c.Arg2),
+        [CommandType.Ask] = c => Player.Ask(c.Arg1),
+        [CommandType.Give] = c => Player.Give(c.Arg1, c.Arg2),
+        [CommandType.Piss] = static _ => Thing.Output(Localizer.Msg("Piss")),
+        [CommandType.Clear] = static _ => Thing.Output(Localizer.Msg("Cls")),
+    };
+
+    private Dictionary<CommandType, Action<ParsedCommand>> UnrecordedHandlers => field ??= new()
+    {
+        [CommandType.Inventory] = _ => Player.Inventory(),
+        [CommandType.Quit] = _ => Player.Die(string.Empty),
+        [CommandType.Weigh] = c => Player.Weigh(c.Arg1),
+        [CommandType.Exec] = _ => LoadTrackInteractive(),
+        [CommandType.Save] = _ => SaveTrackInteractive(),
+        [CommandType.Percent] = _ => ShowPercent(),
+    };
 
     public abstract bool CheckGoal();
 
@@ -57,147 +91,7 @@ internal abstract class GameEngine(Room startRoom)
     public void ProcessWish()
     {
         ParsedCommand cmd = CommandParser.Parse(Wish);
-        bool relevant = true;
-        switch (cmd.Type)
-        {
-            case CommandType.Go:
-                {
-                    OpenSilently(cmd.Arg1);
-                    Player.Walk(cmd.Arg1);
-                    break;
-                }
-
-            case CommandType.Take:
-                {
-                    Player.Take(cmd.Arg1);
-                    break;
-                }
-
-            case CommandType.TakeAll:
-                {
-                    Thing.Output(Localizer.Msg("TakeOneAtATime"));
-                    break;
-                }
-
-            case CommandType.Leave:
-                {
-                    Player.LeaveItem(cmd.Arg1);
-                    break;
-                }
-
-            case CommandType.LeaveAll:
-                {
-                    Player.LeaveAll();
-                    break;
-                }
-
-            case CommandType.Open:
-                {
-                    Player.OpenDoor(cmd.Arg1, cmd.Arg2);
-                    break;
-                }
-
-            case CommandType.Kill:
-                {
-                    Player.Kill(cmd.Arg1, cmd.Arg2);
-                    break;
-                }
-
-            case CommandType.Look:
-                {
-                    Player.Look();
-                    break;
-                }
-
-            case CommandType.See:
-                {
-                    Player.See(cmd.Arg1);
-                    break;
-                }
-
-            case CommandType.Break:
-                {
-                    Player.Break(cmd.Arg1, cmd.Arg2);
-                    break;
-                }
-
-            case CommandType.Ask:
-                {
-                    Player.Ask(cmd.Arg1);
-                    break;
-                }
-
-            case CommandType.Give:
-                {
-                    Player.Give(cmd.Arg1, cmd.Arg2);
-                    break;
-                }
-
-            case CommandType.Piss:
-                {
-                    Thing.Output(Localizer.Msg("Piss"));
-                    break;
-                }
-
-            case CommandType.Clear:
-                {
-                    Thing.Output(Localizer.Msg("Cls"));
-                    break;
-                }
-
-            case CommandType.Inventory:
-                {
-                    Player.Inventory();
-                    relevant = false;
-                    break;
-                }
-
-            case CommandType.Quit:
-                {
-                    Player.Die(string.Empty);
-                    relevant = false;
-                    break;
-                }
-
-            case CommandType.Weigh:
-                {
-                    Player.Weigh(cmd.Arg1);
-                    relevant = false;
-                    break;
-                }
-
-            case CommandType.Exec:
-                {
-                    LoadTrackInteractive();
-                    relevant = false;
-                    break;
-                }
-
-            case CommandType.Save:
-                {
-                    SaveTrackInteractive();
-                    relevant = false;
-                    break;
-                }
-
-            case CommandType.Percent:
-                {
-                    ShowPercent();
-                    relevant = false;
-                    break;
-                }
-
-            default:
-                {
-                    if (!string.IsNullOrEmpty(Wish.Trim()))
-                    {
-                        Thing.Output(Localizer.Msg("DontUnderstand"));
-                    }
-
-                    relevant = false;
-                    break;
-                }
-        }
+        bool relevant = ExecuteCommand(cmd);
 
         if (!relevant || string.IsNullOrEmpty(_wishBack) || _executing)
         {
@@ -221,7 +115,8 @@ internal abstract class GameEngine(Room startRoom)
         }
         try
         {
-            File.WriteAllLines(path, _track);
+            using SafeFileHandle handle = File.OpenHandle(path, FileMode.Create, FileAccess.Write);
+            RandomAccess.Write(handle, Encoding.UTF8.GetBytes(string.Join(Environment.NewLine, _track) + Environment.NewLine), 0);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
@@ -356,5 +251,22 @@ internal abstract class GameEngine(Room startRoom)
     {
         Thing.Output(Localizer.Msg("EnterFileName"));
         LoadTrack((ReadLine() ?? string.Empty).Trim());
+    }
+
+    private bool ExecuteCommand(ParsedCommand cmd)
+    {
+        bool recorded = RecordedHandlers.TryGetValue(cmd.Type, out Action<ParsedCommand>? handler);
+        if (!recorded)
+        {
+            _ = UnrecordedHandlers.TryGetValue(cmd.Type, out handler);
+        }
+
+        if (handler is null && !string.IsNullOrEmpty(Wish.Trim()))
+        {
+            Thing.Output(Localizer.Msg("DontUnderstand"));
+        }
+
+        handler?.Invoke(cmd);
+        return recorded;
     }
 }

@@ -1,3 +1,4 @@
+using System.Text;
 using Fortaleza.Engine;
 using Fortaleza.Games;
 using Fortaleza.Localization;
@@ -78,24 +79,24 @@ internal static class GameRunner
     private static GameResponse Run(int game, Language language, Action<GameEngine> action)
     {
         GameEngine engine = game is 2 ? Fort2Builder.Build() : Fort1Builder.Build();
-        var writer = new StringWriter();
+        var buffer = new StringBuilder();
         Language previousLanguage = Localizer.Current;
-        TextWriter? previousWriter = Thing.OutputWriter;
+        Action<string>? previousSink = Thing.OutputSink;
         bool previousVisible = Thing.Visible;
         int previousWidth = Thing.LineWidth;
         Localizer.Current = language;
-        Thing.OutputWriter = writer;
+        Thing.OutputSink = line => buffer.AppendLine(line);
         Thing.Visible = true;
         Thing.LineWidth = int.MaxValue - 1;
         try
         {
             action(engine);
-            return new GameResponse(game, LanguageCode(language), StatusOf(engine), SplitLines(writer.ToString()), [.. engine.Track]);
+            return new GameResponse(game, LanguageCode(language), StatusOf(engine), SplitLines(buffer.ToString()), [.. engine.Track]);
         }
         finally
         {
             Localizer.Current = previousLanguage;
-            Thing.OutputWriter = previousWriter;
+            Thing.OutputSink = previousSink;
             Thing.Visible = previousVisible;
             Thing.LineWidth = previousWidth;
         }
@@ -103,15 +104,15 @@ internal static class GameRunner
 
     private static void Silently(Action action)
     {
-        TextWriter? captured = Thing.OutputWriter;
-        Thing.OutputWriter = TextWriter.Null;
+        Action<string>? captured = Thing.OutputSink;
+        Thing.OutputSink = static _ => { };
         try
         {
             action();
         }
         finally
         {
-            Thing.OutputWriter = captured;
+            Thing.OutputSink = captured;
         }
     }
 
@@ -134,8 +135,8 @@ internal static class GameRunner
 
     private static string StatusOf(GameEngine engine)
     {
-        TextWriter? previous = Thing.OutputWriter;
-        Thing.OutputWriter = TextWriter.Null;
+        Action<string>? previous = Thing.OutputSink;
+        Thing.OutputSink = static _ => { };
         try
         {
             if (engine.CheckGoal())
@@ -147,7 +148,7 @@ internal static class GameRunner
         }
         finally
         {
-            Thing.OutputWriter = previous;
+            Thing.OutputSink = previous;
         }
     }
 

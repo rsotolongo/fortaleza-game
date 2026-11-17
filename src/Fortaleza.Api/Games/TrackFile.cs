@@ -2,7 +2,7 @@ using System.Text;
 
 namespace Fortaleza.Api.Games;
 
-public static class TrackFile
+internal static class TrackFile
 {
     public const int MaxBytes = 64 * 1024;
     public const int MaxLines = 1000;
@@ -15,7 +15,7 @@ public static class TrackFile
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
-    public static bool TryParse(byte[] bytes, out IReadOnlyList<string> commands, out string error)
+    public static bool TryParse(ReadOnlySpan<byte> bytes, out IReadOnlyList<string> commands, out string error)
     {
         var lines = Decode(bytes)
             .Split(['\r', '\n', '\x1a'], StringSplitOptions.RemoveEmptyEntries)
@@ -48,7 +48,7 @@ public static class TrackFile
         return string.Empty;
     }
 
-    private static string Decode(byte[] bytes)
+    private static string Decode(ReadOnlySpan<byte> bytes)
     {
         try
         {

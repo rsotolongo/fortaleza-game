@@ -4,8 +4,14 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Tests.Engine;
 
+/// <summary>
+/// Tests for bilingual puzzle.
+/// </summary>
 public sealed class BilingualPuzzleTests
 {
+    /// <summary>
+    /// Guard die accepts weapon name in either language.
+    /// </summary>
     [Theory]
     [InlineData("látigo")]
     [InlineData("whip")]
@@ -18,6 +24,9 @@ public sealed class BilingualPuzzleTests
         Assert.True(died);
     }
 
+    /// <summary>
+    /// Hidden try break accepts breaker name in either language.
+    /// </summary>
     [Theory]
     [InlineData("hueso")]
     [InlineData("cat bone")]
@@ -32,6 +41,9 @@ public sealed class BilingualPuzzleTests
         Assert.True(hidden.TryBreak(weapon));
     }
 
+    /// <summary>
+    /// Daughter die accepts weapon name in either language.
+    /// </summary>
     [Theory]
     [InlineData("daga")]
     [InlineData("dagger")]
@@ -51,6 +63,9 @@ public sealed class BilingualPuzzleTests
         Assert.False(killed);
     }
 
+    /// <summary>
+    /// Link try open accepts alternative key.
+    /// </summary>
     [Theory]
     [InlineData("Abrete Sesamo")]
     [InlineData("open sesame")]
@@ -64,6 +79,9 @@ public sealed class BilingualPuzzleTests
         Assert.True(link.TryOpen(typed));
     }
 
+    /// <summary>
+    /// Link try open alternative key does not open wrong word.
+    /// </summary>
     [Fact]
     public void LinkTryOpenAlternativeKeyDoesNotOpenWrongWord()
     {
@@ -75,6 +93,9 @@ public sealed class BilingualPuzzleTests
         Assert.False(link.TryOpen("sesame"));
     }
 
+    /// <summary>
+    /// Riddle link try open accepts alternative answer.
+    /// </summary>
     [Theory]
     [InlineData("seis")]
     [InlineData("SIX")]

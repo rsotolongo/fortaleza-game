@@ -1,6 +1,6 @@
 namespace Fortaleza.Api.Games;
 
-public static class GameStatus
+internal static class GameStatus
 {
     public const string Playing = "playing";
     public const string Won = "won";

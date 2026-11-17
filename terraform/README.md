@@ -4,7 +4,7 @@ Serverless and (almost) free at hobby traffic:
 
 ```
 browser ──► Firebase Hosting (CDN) ──┬─ /*       ──► static files            Vue site
-                                     └─ /api/**  ──► Cloud Run (.NET 10)     Fortaleza.Api
+                                     └─ /api/**  ──► Cloud Run (.NET 11)     Fortaleza.Api
 ```
 
 * The API keeps **no server state**. Every request carries the player's track (the commands so far),
@@ -29,7 +29,7 @@ files. The scripts generate `build/firebase.json` (the `/api/**` rewrite and cac
 
 ## Prerequisites
 
-* Terraform >= 1.6, .NET 10 SDK, Node 20+, Docker, and the [gcloud CLI](https://cloud.google.com/sdk/docs/install).
+* Terraform >= 1.6, .NET 11 SDK, Node 20+, Docker, and the [gcloud CLI](https://cloud.google.com/sdk/docs/install).
 * A Google Cloud project **linked to a billing account** (Cloud Run requires it; on Firebase this is the Blaze
   plan, and the free quotas still apply).
 

@@ -5,7 +5,7 @@ namespace Fortaleza.Engine;
 internal abstract class Thing(LocalizedText name, LocalizedText description, int weight)
 {
     private static readonly AsyncLocal<bool> Muted = new();
-    private static readonly AsyncLocal<TextWriter?> Sink = new();
+    private static readonly AsyncLocal<Action<string>?> Sink = new();
     private static readonly AsyncLocal<int> Width = new();
 
     public static bool Visible
@@ -20,7 +20,7 @@ internal abstract class Thing(LocalizedText name, LocalizedText description, int
         set => Width.Value = value;
     }
 
-    public static TextWriter? OutputWriter
+    public static Action<string>? OutputSink
     {
         get => Sink.Value;
         set => Sink.Value = value;
@@ -38,23 +38,23 @@ internal abstract class Thing(LocalizedText name, LocalizedText description, int
             return;
         }
 
-        TextWriter writer = OutputWriter ?? Console.Out;
+        Action<string> write = OutputSink ?? Console.WriteLine;
         int width = LineWidth;
         foreach (string line in s.Split('\n'))
         {
             string remaining = line;
             while (remaining.Length > width)
             {
-                int split = remaining.LastIndexOf(' ', width);
+                int split = remaining.LastIndexOf(' ', width, StringComparison.Ordinal);
                 if (split <= 0)
                 {
                     split = width;
                 }
 
-                writer.WriteLine(remaining[..split]);
+                write(remaining[..split]);
                 remaining = remaining[split..].TrimStart();
             }
-            writer.WriteLine(remaining);
+            write(remaining);
         }
     }
 

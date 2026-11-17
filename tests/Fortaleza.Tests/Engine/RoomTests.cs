@@ -3,8 +3,14 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Tests.Engine;
 
+/// <summary>
+/// Tests for room.
+/// </summary>
 public sealed class RoomTests
 {
+    /// <summary>
+    /// Room get finds item by normalized name.
+    /// </summary>
     [Fact]
     public void RoomGetFindsItemByNormalizedName()
     {
@@ -14,6 +20,9 @@ public sealed class RoomTests
         Assert.NotNull(room.Get("ANTORCHA"));
     }
 
+    /// <summary>
+    /// Room get matches without diacritics.
+    /// </summary>
     [Fact]
     public void RoomGetMatchesWithoutDiacritics()
     {
@@ -22,6 +31,9 @@ public sealed class RoomTests
         Assert.NotNull(room.Get("Trebol"));
     }
 
+    /// <summary>
+    /// Room get returns null when not found.
+    /// </summary>
     [Fact]
     public void RoomGetReturnsNullWhenNotFound()
     {
@@ -29,6 +41,9 @@ public sealed class RoomTests
         Assert.Null(room.Get("Fantasma"));
     }
 
+    /// <summary>
+    /// Room take removes item from room.
+    /// </summary>
     [Fact]
     public void RoomTakeRemovesItemFromRoom()
     {
@@ -40,6 +55,9 @@ public sealed class RoomTests
         Assert.Empty(room.Children);
     }
 
+    /// <summary>
+    /// Room take returns null when not found.
+    /// </summary>
     [Fact]
     public void RoomTakeReturnsNullWhenNotFound()
     {
@@ -47,6 +65,9 @@ public sealed class RoomTests
         Assert.Null(room.Take("Fantasma"));
     }
 
+    /// <summary>
+    /// Room visited defaults false.
+    /// </summary>
     [Fact]
     public void RoomVisitedDefaultsFalse()
     {

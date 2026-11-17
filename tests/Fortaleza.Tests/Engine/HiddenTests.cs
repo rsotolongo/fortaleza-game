@@ -3,8 +3,14 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Tests.Engine;
 
+/// <summary>
+/// Tests for hidden.
+/// </summary>
 public sealed class HiddenTests
 {
+    /// <summary>
+    /// Troll accept sets happy on correct gift.
+    /// </summary>
     [Fact]
     public void TrollAcceptSetsHappyOnCorrectGift()
     {
@@ -18,6 +24,9 @@ public sealed class HiddenTests
         Assert.True(troll.Happy);
     }
 
+    /// <summary>
+    /// Troll accept ignores wrong gift.
+    /// </summary>
     [Fact]
     public void TrollAcceptIgnoresWrongGift()
     {
@@ -26,6 +35,9 @@ public sealed class HiddenTests
         Assert.False(troll.Happy);
     }
 
+    /// <summary>
+    /// Guard die returns true with correct weapon.
+    /// </summary>
     [Fact]
     public void GuardDieReturnsTrueWithCorrectWeapon()
     {
@@ -37,6 +49,9 @@ public sealed class HiddenTests
         Assert.True(guard.Die("Maza"));
     }
 
+    /// <summary>
+    /// Guard die returns false with wrong weapon.
+    /// </summary>
     [Fact]
     public void GuardDieReturnsFalseWithWrongWeapon()
     {
@@ -48,6 +63,9 @@ public sealed class HiddenTests
         Assert.False(guard.Die("Espada"));
     }
 
+    /// <summary>
+    /// Guard die sets dead on correct weapon.
+    /// </summary>
     [Fact]
     public void GuardDieSetsDeadOnCorrectWeapon()
     {
@@ -60,6 +78,9 @@ public sealed class HiddenTests
         Assert.True(guard.Dead);
     }
 
+    /// <summary>
+    /// Guard die does not set dead on wrong weapon.
+    /// </summary>
     [Fact]
     public void GuardDieDoesNotSetDeadOnWrongWeapon()
     {
@@ -72,6 +93,9 @@ public sealed class HiddenTests
         Assert.False(guard.Dead);
     }
 
+    /// <summary>
+    /// Hidden try break returns true on match.
+    /// </summary>
     [Fact]
     public void HiddenTryBreakReturnsTrueOnMatch()
     {
@@ -80,6 +104,9 @@ public sealed class HiddenTests
         Assert.True(hidden.TryBreak("Hueso de gato"));
     }
 
+    /// <summary>
+    /// Hidden try break returns false on mismatch.
+    /// </summary>
     [Fact]
     public void HiddenTryBreakReturnsFalseOnMismatch()
     {
@@ -88,6 +115,9 @@ public sealed class HiddenTests
         Assert.False(hidden.TryBreak("Espada"));
     }
 
+    /// <summary>
+    /// Room break insert hidden child at same index.
+    /// </summary>
     [Fact]
     public void RoomBreakInsertHiddenChildAtSameIndex()
     {
@@ -101,6 +131,9 @@ public sealed class HiddenTests
         Assert.Equal(1, room.Children.IndexOf(hiddenChild));
     }
 
+    /// <summary>
+    /// Room break removes hidden container on success.
+    /// </summary>
     [Fact]
     public void RoomBreakRemovesHiddenContainerOnSuccess()
     {

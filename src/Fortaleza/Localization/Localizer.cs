@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
 
@@ -46,9 +47,11 @@ internal static class Localizer
     {
         Assembly assembly = typeof(Localizer).Assembly;
         string resourceName = $"Fortaleza.Localization.res.{filename}";
-        using Stream stream = assembly.GetManifestResourceStream(resourceName)
+        Stream stream = assembly.GetManifestResourceStream(resourceName)
             ?? throw new InvalidOperationException($"Resource not found: {resourceName}");
-        return JsonSerializer.Deserialize<Dictionary<string, string>>(stream)
+        using var reader = new BinaryReader(stream);
+        byte[] bytes = reader.ReadBytes(Convert.ToInt32(stream.Length, CultureInfo.InvariantCulture));
+        return JsonSerializer.Deserialize<Dictionary<string, string>>(bytes)
             ?? throw new InvalidOperationException($"Failed to deserialize {resourceName}");
     }
 }

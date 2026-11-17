@@ -1,10 +1,15 @@
 using System.Reflection;
-using Xunit.Abstractions;
 
 namespace Fortaleza.Tests;
 
+/// <summary>
+/// Resource debug tests.
+/// </summary>
 public sealed class ResourceDebugTests(ITestOutputHelper output)
 {
+    /// <summary>
+    /// List embedded resources.
+    /// </summary>
     [Fact]
     public void ListEmbeddedResources()
     {

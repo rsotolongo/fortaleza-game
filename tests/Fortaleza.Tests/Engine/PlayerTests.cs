@@ -3,8 +3,14 @@ using Fortaleza.Engine.Links;
 
 namespace Fortaleza.Tests.Engine;
 
+/// <summary>
+/// Tests for player.
+/// </summary>
 public sealed class PlayerTests
 {
+    /// <summary>
+    /// Take item in room adds item to bag.
+    /// </summary>
     [Fact]
     public void TakeItemInRoomAddsItemToBag()
     {
@@ -17,6 +23,9 @@ public sealed class PlayerTests
         Assert.Empty(room.Children);
     }
 
+    /// <summary>
+    /// Take item too heavy leaves item in room.
+    /// </summary>
     [Fact]
     public void TakeItemTooHeavyLeavesItemInRoom()
     {
@@ -29,6 +38,9 @@ public sealed class PlayerTests
         Assert.Single(room.Children);
     }
 
+    /// <summary>
+    /// Take bag would overflow leaves item in room.
+    /// </summary>
     [Fact]
     public void TakeBagWouldOverflowLeavesItemInRoom()
     {
@@ -42,6 +54,9 @@ public sealed class PlayerTests
         Assert.Single(room.Children);
     }
 
+    /// <summary>
+    /// Leave item in bag moves item to room.
+    /// </summary>
     [Fact]
     public void LeaveItemItemInBagMovesItemToRoom()
     {
@@ -54,6 +69,9 @@ public sealed class PlayerTests
         Assert.Empty(player.Bag.Children);
     }
 
+    /// <summary>
+    /// Leave all bag with items moves everything to room.
+    /// </summary>
     [Fact]
     public void LeaveAllBagWithItemsMovesEverythingToRoom()
     {
@@ -67,6 +85,9 @@ public sealed class PlayerTests
         Assert.Empty(player.Bag.Children);
     }
 
+    /// <summary>
+    /// Kill guard with correct weapon removes guard from room.
+    /// </summary>
     [Fact]
     public void KillGuardWithCorrectWeaponRemovesGuardFromRoom()
     {
@@ -80,6 +101,9 @@ public sealed class PlayerTests
         Assert.DoesNotContain(guard, room.Children);
     }
 
+    /// <summary>
+    /// Kill guard with wrong weapon keeps guard in room.
+    /// </summary>
     [Fact]
     public void KillGuardWithWrongWeaponKeepsGuardInRoom()
     {
@@ -93,6 +117,9 @@ public sealed class PlayerTests
         Assert.Contains(guard, room.Children);
     }
 
+    /// <summary>
+    /// Kill weapon not in bag keeps guard in room.
+    /// </summary>
     [Fact]
     public void KillWeaponNotInBagKeepsGuardInRoom()
     {
@@ -106,6 +133,9 @@ public sealed class PlayerTests
         Assert.False(guard.Dead);
     }
 
+    /// <summary>
+    /// Give to troll removes item from bag and makes troll happy.
+    /// </summary>
     [Fact]
     public void GiveToTrollRemovesItemFromBagAndMakesTrollHappy()
     {
@@ -125,6 +155,9 @@ public sealed class PlayerTests
         Assert.True(troll.Happy);
     }
 
+    /// <summary>
+    /// Walk open link moves player to destination.
+    /// </summary>
     [Fact]
     public void WalkOpenLinkMovesPlayerToDestination()
     {
@@ -137,6 +170,9 @@ public sealed class PlayerTests
         Assert.Same(next, player.CurrentRoom);
     }
 
+    /// <summary>
+    /// Walk closed link keeps player in room.
+    /// </summary>
     [Fact]
     public void WalkClosedLinkKeepsPlayerInRoom()
     {
@@ -148,6 +184,9 @@ public sealed class PlayerTests
         Assert.Same(room, player.CurrentRoom);
     }
 
+    /// <summary>
+    /// Walk danger link without talisman kills player.
+    /// </summary>
     [Fact]
     public void WalkDangerLinkWithoutTalismanKillsPlayer()
     {
@@ -166,6 +205,9 @@ public sealed class PlayerTests
         Assert.True(player.Dead);
     }
 
+    /// <summary>
+    /// Open door correct key opens link so player can walk.
+    /// </summary>
     [Fact]
     public void OpenDoorCorrectKeyOpensLinkSoPlayerCanWalk()
     {
@@ -179,6 +221,9 @@ public sealed class PlayerTests
         Assert.Same(next, player.CurrentRoom);
     }
 
+    /// <summary>
+    /// Go first visit only increments visit count.
+    /// </summary>
     [Fact]
     public void GoFirstVisitOnlyIncrementsVisitCount()
     {
@@ -191,6 +236,9 @@ public sealed class PlayerTests
         Assert.Equal(1, player.VisitCount);
     }
 
+    /// <summary>
+    /// Die player sets dead and blocks further actions.
+    /// </summary>
     [Fact]
     public void DiePlayerSetsDeadAndBlocksFurtherActions()
     {
@@ -204,6 +252,9 @@ public sealed class PlayerTests
         Assert.Empty(player.Bag.Children);
     }
 
+    /// <summary>
+    /// Break without weapon in bag does not break hidden.
+    /// </summary>
     [Fact]
     public void BreakWithoutWeaponInBagDoesNotBreakHidden()
     {
@@ -217,6 +268,9 @@ public sealed class PlayerTests
         Assert.Contains(hidden, room.Children);
     }
 
+    /// <summary>
+    /// Break with weapon in bag replaces hidden with child.
+    /// </summary>
     [Fact]
     public void BreakWithWeaponInBagReplacesHiddenWithChild()
     {

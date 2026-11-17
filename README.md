@@ -9,7 +9,7 @@ Fortaleza (game II).
 
 This repository contains:
 
-* a faithful **.NET 10 port of the game engine** (console game, 50 + 55 rooms, ES/EN),
+* a faithful **.NET 11 port of the game engine** (console game, 50 + 55 rooms, ES/EN),
 * a **web version**: a stateless ASP.NET Core API plus a mobile-friendly Vue 3 app,
 * **Terraform** to run the web version on Google Cloud (Cloud Run + Firebase Hosting) for about $0,
 * the **original Pascal sources**, a FreePascal-compatible copy and compiled executables used to verify that
@@ -66,7 +66,7 @@ This repository contains:
 
 ## Prerequisites
 
-* [.NET 10 SDK](https://dotnet.microsoft.com/download)
+* [.NET 11 SDK](https://dotnet.microsoft.com/download)
 * Node 20+ and npm (web version only)
 * Terraform >= 1.6, Docker and the gcloud CLI (deployment only)
 * FreePascal `fpc` (only to rebuild the original executables with `build.bat`)

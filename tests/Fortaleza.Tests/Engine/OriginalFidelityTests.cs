@@ -4,8 +4,14 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Tests.Engine;
 
+/// <summary>
+/// Tests for original fidelity.
+/// </summary>
 public sealed class OriginalFidelityTests
 {
+    /// <summary>
+    /// Weights npcs hidden and links match original.
+    /// </summary>
     [Fact]
     public void WeightsNpcsHiddenAndLinksMatchOriginal()
     {
@@ -20,6 +26,9 @@ public sealed class OriginalFidelityTests
         Assert.Equal(Inventory.LWeight + 1, link.Weight);
     }
 
+    /// <summary>
+    /// Take guard cannot be carried.
+    /// </summary>
     [Fact]
     public void TakeGuardCannotBeCarried()
     {
@@ -34,6 +43,9 @@ public sealed class OriginalFidelityTests
         Assert.Contains(guard, room.Children);
     }
 
+    /// <summary>
+    /// Get partial words of name finds thing.
+    /// </summary>
     [Fact]
     public void GetPartialWordsOfNameFindsThing()
     {
@@ -45,6 +57,9 @@ public sealed class OriginalFidelityTests
         Assert.Same(door, room.Get("PUERTA HIERRO"));
     }
 
+    /// <summary>
+    /// Get exact name wins over earlier partial match.
+    /// </summary>
     [Fact]
     public void GetExactNameWinsOverEarlierPartialMatch()
     {
@@ -57,6 +72,9 @@ public sealed class OriginalFidelityTests
         Assert.Same(exact, room.Get("espejo"));
     }
 
+    /// <summary>
+    /// Get query word not in name returns null.
+    /// </summary>
     [Theory]
     [InlineData("la maza")]
     [InlineData("maza roja")]
@@ -69,6 +87,9 @@ public sealed class OriginalFidelityTests
         Assert.Null(room.Get(query));
     }
 
+    /// <summary>
+    /// Link empty key starts closed and opens with any word.
+    /// </summary>
     [Fact]
     public void LinkEmptyKeyStartsClosedAndOpensWithAnyWord()
     {
@@ -82,6 +103,9 @@ public sealed class OriginalFidelityTests
         Assert.NotNull(link.GetDest());
     }
 
+    /// <summary>
+    /// Link open door sentinel starts open.
+    /// </summary>
     [Fact]
     public void LinkOpenDoorSentinelStartsOpen()
     {
@@ -91,6 +115,9 @@ public sealed class OriginalFidelityTests
         Assert.Same(dest, link.GetDest());
     }
 
+    /// <summary>
+    /// Inventory nearly full uses original thresholds.
+    /// </summary>
     [Theory]
     [InlineData(1, "AlmostFull")]
     [InlineData(0, "CannotCarryMore")]
@@ -105,6 +132,9 @@ public sealed class OriginalFidelityTests
         Assert.Contains(Localizer.Msg(messageKey), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Inventory plenty of room reports remaining bags.
+    /// </summary>
     [Fact]
     public void InventoryPlentyOfRoomReportsRemainingBags()
     {
@@ -117,6 +147,9 @@ public sealed class OriginalFidelityTests
         Assert.Contains(Localizer.Msg("CouldCarryMore") + "35" + Localizer.Msg("MoreBags"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Inventory empty bag reports nothing carried.
+    /// </summary>
     [Fact]
     public void InventoryEmptyBagReportsNothingCarried()
     {

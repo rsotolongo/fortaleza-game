@@ -157,6 +157,50 @@ internal static class Fort1Builder
             r[i] = new Room(Name, Description, Inventory.LWeight + 1);
         }
 
+        AddAllRooms(r, kill);
+
+        var game = new Fort1(r[1]);
+        for (int i = 1; i <= RoomData.Length; i++)
+        {
+            game.AddRoom(r[i]);
+        }
+
+        player = game.Player;
+        return game;
+    }
+
+    private static void AddAllRooms(Room[] r, Action kill)
+    {
+        AddRooms01(r);
+        AddRooms02(r, kill);
+        AddRooms03(r);
+        AddRooms04(r);
+        AddRooms05(r);
+        AddRooms06(r);
+        AddRooms07(r, kill);
+        AddRooms08(r);
+        AddRooms09(r);
+        AddRooms10(r);
+        AddRooms11(r);
+        AddRooms12(r, kill);
+        AddRooms13(r, kill);
+        AddRooms14(r);
+        AddRooms15(r, kill);
+        AddRooms16(r, kill);
+        AddRooms17(r, kill);
+        AddRooms18(r);
+        AddRooms19(r);
+        AddRooms20(r);
+        AddRooms21(r);
+        AddRooms22(r);
+        AddRooms23(r);
+        AddRooms24(r);
+        AddRooms25(r);
+        AddRooms26(r);
+    }
+
+    private static void AddRooms01(Room[] r)
+    {
         r[1].Children.Add(new Item(
                 new("Roble", "Oak"),
                 new(
@@ -191,6 +235,10 @@ internal static class Fort1Builder
                 new("Parece muy largo.", "It looks very long."),
                 new("El olor de la carne descompuesta lo golpea. Usted siente ganas de vomitar.", "The smell of rotting flesh hits you. You feel like vomiting."),
                 r[4]));
+    }
+
+    private static void AddRooms02(Room[] r, Action kill)
+    {
         r[1].Children.Add(new Hidden(
                 new("Pared solitaria", "Lonely wall"),
                 new("Usted no puede imaginar con qué motivo fue colocada ahí.", "You cannot imagine for what reason it was placed there."),
@@ -238,6 +286,10 @@ internal static class Fort1Builder
                 new("Escoba", "Broom"),
                 new("Es una escoba voladora.", "It is a flying broom."),
                 1));
+    }
+
+    private static void AddRooms03(Room[] r)
+    {
         r[3].Children.Add(new RiddleLink(
                 new("Escalera", "Staircase"),
                 new(
@@ -285,6 +337,10 @@ internal static class Fort1Builder
                 new(_ustedAtraviesaLaPuertaSin, _youGoThroughTheDoor),
                 string.Empty,
                 r[6]));
+    }
+
+    private static void AddRooms04(Room[] r)
+    {
         r[4].Children.Add(new Troll(
                 new("Estatua de Atenea", "Statue of Athena"),
                 new("Fue hecha por Fidias, siete años después de su muerte. Le falta la lanza.", "It was made by Phidias, seven years after his death. It is missing the spear."),
@@ -317,6 +373,10 @@ internal static class Fort1Builder
                 "treinta y nueve",
                 r[3])
         { AltKey = "thirty nine" });
+    }
+
+    private static void AddRooms05(Room[] r)
+    {
         r[5].Children.Add(new Hidden(
                 new("Espejo opaco", "Opaque mirror"),
                 new(
@@ -366,6 +426,10 @@ internal static class Fort1Builder
                 new("Antorcha", "Torch"),
                 new("La llama parece bailar en su propia luz.", "The flame seems to dance in its own light."),
                 1));
+    }
+
+    private static void AddRooms06(Room[] r)
+    {
         r[7].Children.Add(new Link(
                 new(_puerta4, "Door"),
                 new("Es una puerta para gigantes.", "It is a door for giants."),
@@ -412,6 +476,10 @@ internal static class Fort1Builder
                 new("Poción para crecer", "Growth potion"),
                 new("Tiene un olor muy repugnante.", "It has a very repugnant smell."),
                 5));
+    }
+
+    private static void AddRooms07(Room[] r, Action kill)
+    {
         r[8].Children.Add(new DangerLink(
                 new("Escaparate", "Display cabinet"),
                 new("Tiene las puertas llenas de arañazos.", "Its doors are covered with scratches."),
@@ -459,6 +527,10 @@ internal static class Fort1Builder
                 GameKeys.K15.Es,
                 r[7])
         { AltKey = GameKeys.K15.En });
+    }
+
+    private static void AddRooms08(Room[] r)
+    {
         r[10].Children.Add(new Troll(
                 new("Homúnculo", "Homunculus"),
                 new(
@@ -500,6 +572,10 @@ internal static class Fort1Builder
                 new("Látigo", "Whip"),
                 new("Parece una culebra.", "It looks like a snake."),
                 2));
+    }
+
+    private static void AddRooms09(Room[] r)
+    {
         r[11].Children.Add(new Link(
                 new(_puerta4, "Door"),
                 new("Está en el techo.", "It is on the ceiling."),
@@ -548,6 +624,10 @@ internal static class Fort1Builder
                 new(_ustedSaleDelJardin, _youLeaveTheGarden),
                 string.Empty,
                 r[12]));
+    }
+
+    private static void AddRooms10(Room[] r)
+    {
         r[13].Children.Add(new Link(
                 new(_puertaAzul, _blueDoor),
                 new("Debe haber algo hemoso detrás de esta puerta.", "There must be something beautiful behind this door."),
@@ -593,6 +673,10 @@ internal static class Fort1Builder
                 new("Corazón de unicornio", "Unicorn heart"),
                 new("Aún late.", "It still beats."),
                 1));
+    }
+
+    private static void AddRooms11(Room[] r)
+    {
         r[14].Children.Add(new Link(
                 new("Escaparate", "Display cabinet"),
                 new("Las puertas son doradas.", "The doors are golden."),
@@ -642,6 +726,10 @@ internal static class Fort1Builder
                 new("Paraguas", "Umbrella"),
                 new("Está cerrado.", "It is closed."),
                 2));
+    }
+
+    private static void AddRooms12(Room[] r, Action kill)
+    {
         r[16].Children.Add(new Item(
                 new("Talismán de aire", "Air talisman"),
                 new("Está hecho de cinco vientos amarrados con un cordón negro.", "It is made of five winds tied with a black cord."),
@@ -691,6 +779,10 @@ internal static class Fort1Builder
                 GameKeys.K31.Es,
                 r[20],
                 kill));
+    }
+
+    private static void AddRooms13(Room[] r, Action kill)
+    {
         r[18].Children.Add(new DangerLink(
                 new("Arteria principal", "Main artery"),
                 new("Conduce al corazón seguramente.", "It surely leads to the heart."),
@@ -740,6 +832,10 @@ internal static class Fort1Builder
                 new(_inscripcion, _inscription2),
                 GameKeys.K39,
                 10));
+    }
+
+    private static void AddRooms14(Room[] r)
+    {
         r[22].Children.Add(new Guard(
                 new("Centro del cerebro", "Center of the brain"),
                 new("¡Usa la antorcha!", "Use the torch!"),
@@ -784,6 +880,10 @@ internal static class Fort1Builder
                 GameKeys.K42.Es,
                 r[25])
         { AltKey = GameKeys.K42.En });
+    }
+
+    private static void AddRooms15(Room[] r, Action kill)
+    {
         r[24].Children.Add(new OpenLink(
                 new("Pozo", "Well"),
                 new("Es muy profundo.", "It is very deep."),
@@ -827,6 +927,10 @@ internal static class Fort1Builder
                 GameKeys.K23.Es,
                 new("Usted entra a la boca de la Bestia.", "You enter the mouth of the Beast."),
                 r[17]));
+    }
+
+    private static void AddRooms16(Room[] r, Action kill)
+    {
         r[25].Children.Add(new Troll(
                 new("Bailarina", "Dancer"),
                 new("Es muy joven.", "She is very young."),
@@ -867,6 +971,10 @@ internal static class Fort1Builder
                     new(_ustedAtraviesaLaPuerta, _youGoThroughTheDoor2),
                     string.Empty,
                     r[28])));
+    }
+
+    private static void AddRooms17(Room[] r, Action kill)
+    {
         r[27].Children.Add(new DangerLink2(
                 new(_puerta4, "Door"),
                 new("Conduce a la antesala del Laberinto.", "It leads to the antechamber of the Labyrinth."),
@@ -907,6 +1015,10 @@ internal static class Fort1Builder
                 new("Conduce al Laberinto.", "It leads to the Labyrinth."),
                 new(_ustedAtraviesaLaPuerta, _youGoThroughTheDoor2),
                 r[31]));
+    }
+
+    private static void AddRooms18(Room[] r)
+    {
         r[28].Children.Add(new Troll(
                 new("Dédalo", "Daedalus"),
                 new("Parece haber sido herido por el cuerno de un toro gigante.", "He seems to have been wounded by the horn of a giant bull."),
@@ -947,6 +1059,10 @@ internal static class Fort1Builder
                 new("Antorcha 7", "Torch 7"),
                 new(_esMuyBrillante, _itIsVeryBright),
                 2));
+    }
+
+    private static void AddRooms19(Room[] r)
+    {
         r[29].Children.Add(new Guard(
                 new("Minotauro", "Minotaur"),
                 new("Está sentado en un enorme trono de rocas.", "He is sitting on an enormous throne of rocks."),
@@ -989,6 +1105,10 @@ internal static class Fort1Builder
                 new(_esIdenticaALasOtras, _itIsIdenticalToThe),
                 new(_ustedAtraviesaLaPuerta, _youGoThroughTheDoor2),
                 r[33]));
+    }
+
+    private static void AddRooms20(Room[] r)
+    {
         r[32].Children.Add(new OpenLink(
                 new(_puerta3, _door3),
                 new(_esIdenticaALasOtras, _itIsIdenticalToThe),
@@ -1037,6 +1157,10 @@ internal static class Fort1Builder
                 new(_esIdenticaALasOtras, _itIsIdenticalToThe),
                 new(_ustedAtraviesaLaPuerta, _youGoThroughTheDoor2),
                 r[36]));
+    }
+
+    private static void AddRooms21(Room[] r)
+    {
         r[35].Children.Add(new OpenLink(
                 new(_puerta3, _door3),
                 new(_esIdenticaALasOtras, _itIsIdenticalToThe),
@@ -1085,6 +1209,10 @@ internal static class Fort1Builder
                 new(_esIdenticaALasOtras, _itIsIdenticalToThe),
                 new(_ustedAtraviesaLaPuerta, _youGoThroughTheDoor2),
                 r[39]));
+    }
+
+    private static void AddRooms22(Room[] r)
+    {
         r[38].Children.Add(new OpenLink(
                 new(_puerta3, _door3),
                 new(_esIdenticaALasOtras, _itIsIdenticalToThe),
@@ -1133,6 +1261,10 @@ internal static class Fort1Builder
                 new(_esIdenticaALasOtras, _itIsIdenticalToThe),
                 new(_ustedAtraviesaLaPuerta, _youGoThroughTheDoor2),
                 r[34]));
+    }
+
+    private static void AddRooms23(Room[] r)
+    {
         r[41].Children.Add(new OpenLink(
                 new(_puerta3, _door3),
                 new(_esIdenticaALasOtras, _itIsIdenticalToThe),
@@ -1181,6 +1313,10 @@ internal static class Fort1Builder
                 new(_esIdenticaALasOtras, _itIsIdenticalToThe),
                 new(_ustedAtraviesaLaPuerta, _youGoThroughTheDoor2),
                 r[32]));
+    }
+
+    private static void AddRooms24(Room[] r)
+    {
         r[44].Children.Add(new OpenLink(
                 new(_puerta3, _door3),
                 new(_esIdenticaALasOtras, _itIsIdenticalToThe),
@@ -1229,6 +1365,10 @@ internal static class Fort1Builder
                 new(_esIdenticaALasOtras, _itIsIdenticalToThe),
                 new(_ustedAtraviesaLaPuerta, _youGoThroughTheDoor2),
                 r[34]));
+    }
+
+    private static void AddRooms25(Room[] r)
+    {
         r[47].Children.Add(new OpenLink(
                 new(_puerta3, _door3),
                 new(_esIdenticaALasOtras, _itIsIdenticalToThe),
@@ -1275,6 +1415,10 @@ internal static class Fort1Builder
                 new("Debe haber algo hemoso detrás de esta puerta.", "There must be something beautiful behind this door."),
                 new(_ustedSaleDelJardin, _youLeaveTheGarden),
                 r[26]));
+    }
+
+    private static void AddRooms26(Room[] r)
+    {
         r[50].Children.Add(new OpenLink(
                 new("Puerta amarilla", "Yellow door"),
                 new("Conduce a la sala de infusiones.", "It leads to the infusion room."),
@@ -1293,15 +1437,6 @@ internal static class Fort1Builder
                 new("Conduce al almacén.", "It leads to the storehouse."),
                 new(_ustedSaleDelJardin, _youLeaveTheGarden),
                 r[26]));
-
-        var game = new Fort1(r[1]);
-        for (int i = 1; i <= RoomData.Length; i++)
-        {
-            game.AddRoom(r[i]);
-        }
-
-        player = game.Player;
-        return game;
     }
 
     private static int RoomDataIndex(int room)

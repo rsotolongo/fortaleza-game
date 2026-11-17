@@ -52,7 +52,7 @@ if [ "$skip_build" = false ]; then
 
   echo "==> Build the API container (linux-x64)"
   dotnet publish "$root/src/Fortaleza.Api" -c Release -r linux-x64 -t:PublishContainer \
-    -p:PublishReadyToRun=true -p:ExcludeWwwroot=true -p:ContainerFamily=noble-chiseled \
+    -p:PublishReadyToRun=true -p:ExcludeWwwroot=true -p:ContainerFamily=resolute-chiseled \
     -p:ContainerRepository=fortaleza-api -p:ContainerImageTag=build \
     -p:ContainerArchiveOutputPath="$build/api-image.tar.gz"
 fi

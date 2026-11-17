@@ -5,8 +5,14 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Tests.Games;
 
+/// <summary>
+/// Tests for fort2.
+/// </summary>
 public sealed class Fort2Tests
 {
+    /// <summary>
+    /// Build registers fifty five rooms starting at the guest room.
+    /// </summary>
     [Fact]
     public void BuildRegistersFiftyFiveRoomsStartingAtTheGuestRoom()
     {
@@ -19,6 +25,9 @@ public sealed class Fort2Tests
         Assert.Throws<ArgumentOutOfRangeException>(() => game.GetRoom(55));
     }
 
+    /// <summary>
+    /// Build every room has an english name and description.
+    /// </summary>
     [Fact]
     public void BuildEveryRoomHasAnEnglishNameAndDescription()
     {
@@ -31,6 +40,9 @@ public sealed class Fort2Tests
         }
     }
 
+    /// <summary>
+    /// Build rooms reachable from the start are all but the originals unused room.
+    /// </summary>
     [Fact]
     public void BuildRoomsReachableFromTheStartAreAllButTheOriginalsUnusedRoom()
     {
@@ -42,6 +54,9 @@ public sealed class Fort2Tests
         Assert.DoesNotContain(game.GetRoom(29), reachable);
     }
 
+    /// <summary>
+    /// Check goal at start is false.
+    /// </summary>
     [Fact]
     public void CheckGoalAtStartIsFalse()
     {
@@ -50,6 +65,9 @@ public sealed class Fort2Tests
         Assert.False(game.CheckGoal());
     }
 
+    /// <summary>
+    /// Check goal when the daughter is gone leaves a chalice in her room.
+    /// </summary>
     [Fact]
     public void CheckGoalWhenTheDaughterIsGoneLeavesAChaliceInHerRoom()
     {
@@ -63,6 +81,9 @@ public sealed class Fort2Tests
         Assert.Single(game.GetRoom(45).Children, static t => t.Name.Es is "Cáliz");
     }
 
+    /// <summary>
+    /// Check goal with the handkerchief left in the kitchen kills the player.
+    /// </summary>
     [Fact]
     public void CheckGoalWithTheHandkerchiefLeftInTheKitchenKillsThePlayer()
     {

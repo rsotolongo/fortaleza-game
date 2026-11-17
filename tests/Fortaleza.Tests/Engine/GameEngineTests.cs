@@ -4,8 +4,14 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Tests.Engine;
 
+/// <summary>
+/// Tests for game engine.
+/// </summary>
 public sealed class GameEngineTests
 {
+    /// <summary>
+    /// Process command take and leave round trips.
+    /// </summary>
     [Fact]
     public void ProcessCommandTakeAndLeaveRoundTrips()
     {
@@ -19,6 +25,9 @@ public sealed class GameEngineTests
         Assert.Empty(engine.Player.Bag.Children);
     }
 
+    /// <summary>
+    /// Process command leave all empties bag.
+    /// </summary>
     [Fact]
     public void ProcessCommandLeaveAllEmptiesBag()
     {
@@ -30,6 +39,9 @@ public sealed class GameEngineTests
         Assert.Empty(engine.Player.Bag.Children);
     }
 
+    /// <summary>
+    /// Process command take all asks to take one thing at a time.
+    /// </summary>
     [Fact]
     public void ProcessCommandTakeAllAsksToTakeOneThingAtATime()
     {
@@ -42,6 +54,9 @@ public sealed class GameEngineTests
         Assert.Contains(Localizer.Msg("TakeOneAtATime"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Process command quit kills player and ends game.
+    /// </summary>
     [Fact]
     public void ProcessCommandQuitKillsPlayerAndEndsGame()
     {
@@ -53,6 +68,9 @@ public sealed class GameEngineTests
         Assert.True(engine.Player.Dead);
     }
 
+    /// <summary>
+    /// Is over player dies returns true.
+    /// </summary>
     [Fact]
     public void IsOverPlayerDiesReturnsTrue()
     {
@@ -63,6 +81,9 @@ public sealed class GameEngineTests
         Assert.True(engine.IsOver);
     }
 
+    /// <summary>
+    /// Ask player end of input ends game.
+    /// </summary>
     [Fact]
     public void AskPlayerEndOfInputEndsGame()
     {
@@ -73,6 +94,9 @@ public sealed class GameEngineTests
         Assert.True(engine.IsOver);
     }
 
+    /// <summary>
+    /// Process command look with object shows its description.
+    /// </summary>
     [Fact]
     public void ProcessCommandLookWithObjectShowsItsDescription()
     {
@@ -84,6 +108,9 @@ public sealed class GameEngineTests
         Assert.Contains("una maza", output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Process command go through closed unlocked door opens it silently then walks.
+    /// </summary>
     [Fact]
     public void ProcessCommandGoThroughClosedUnlockedDoorOpensItSilentlyThenWalks()
     {
@@ -100,6 +127,9 @@ public sealed class GameEngineTests
         Assert.True(Thing.Visible);
     }
 
+    /// <summary>
+    /// Process command go through locked door bumps nose.
+    /// </summary>
     [Fact]
     public void ProcessCommandGoThroughLockedDoorBumpsNose()
     {
@@ -114,6 +144,9 @@ public sealed class GameEngineTests
         Assert.Contains(Localizer.Msg("Ouch"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Process command joke and unknown commands show their messages.
+    /// </summary>
     [Theory]
     [InlineData("cls", "Cls")]
     [InlineData("orinar", "Piss")]
@@ -128,6 +161,9 @@ public sealed class GameEngineTests
         Assert.Contains(Localizer.Msg(messageKey), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Process command empty input says nothing.
+    /// </summary>
     [Fact]
     public void ProcessCommandEmptyInputSaysNothing()
     {
@@ -138,6 +174,9 @@ public sealed class GameEngineTests
         Assert.Equal(string.Empty, output);
     }
 
+    /// <summary>
+    /// Track only relevant commands are logged.
+    /// </summary>
     [Fact]
     public void TrackOnlyRelevantCommandsAreLogged()
     {
@@ -154,6 +193,9 @@ public sealed class GameEngineTests
         Assert.Equal(["mirar", "coger maza", "ver maza"], engine.Track);
     }
 
+    /// <summary>
+    /// Track stores the original typed text.
+    /// </summary>
     [Fact]
     public void TrackStoresTheOriginalTypedText()
     {
@@ -164,6 +206,9 @@ public sealed class GameEngineTests
         Assert.Equal(["Coger la MAZA"], engine.Track);
     }
 
+    /// <summary>
+    /// Save track single command says nothing to save and writes no file.
+    /// </summary>
     [Fact]
     public void SaveTrackSingleCommandSaysNothingToSaveAndWritesNoFile()
     {
@@ -178,6 +223,9 @@ public sealed class GameEngineTests
         Assert.Contains(Localizer.Msg("NothingToSave"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Save track then load track replays commands.
+    /// </summary>
     [Fact]
     public void SaveTrackThenLoadTrackReplaysCommands()
     {
@@ -197,6 +245,9 @@ public sealed class GameEngineTests
         Assert.Equal(["coger maza", "mirar"], target.Track);
     }
 
+    /// <summary>
+    /// Load track verbose echoes each command.
+    /// </summary>
     [Fact]
     public void LoadTrackVerboseEchoesEachCommand()
     {
@@ -212,6 +263,9 @@ public sealed class GameEngineTests
         Assert.Contains(" coger maza", output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Load track silent hides command output but restores visibility.
+    /// </summary>
     [Fact]
     public void LoadTrackSilentHidesCommandOutputButRestoresVisibility()
     {
@@ -228,6 +282,9 @@ public sealed class GameEngineTests
         Assert.True(Thing.Visible);
     }
 
+    /// <summary>
+    /// Load track stops when player dies.
+    /// </summary>
     [Fact]
     public void LoadTrackStopsWhenPlayerDies()
     {
@@ -241,6 +298,9 @@ public sealed class GameEngineTests
         Assert.Empty(engine.Player.Bag.Children);
     }
 
+    /// <summary>
+    /// Load track missing file reports it and returns false.
+    /// </summary>
     [Fact]
     public void LoadTrackMissingFileReportsItAndReturnsFalse()
     {
@@ -255,6 +315,9 @@ public sealed class GameEngineTests
         Assert.True(Thing.Visible);
     }
 
+    /// <summary>
+    /// Process command execute without file name does nothing more.
+    /// </summary>
     [Fact]
     public void ProcessCommandExecuteWithoutFileNameDoesNothingMore()
     {
@@ -266,6 +329,9 @@ public sealed class GameEngineTests
         Assert.Empty(engine.Track);
     }
 
+    /// <summary>
+    /// Show percent visited over rooms minus one is rounded.
+    /// </summary>
     [Theory]
     [InlineData(0, 2, "50%")]
     [InlineData(1, 2, "100%")]
@@ -284,6 +350,9 @@ public sealed class GameEngineTests
         Assert.Contains(expected, output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Show percent uses advanced message.
+    /// </summary>
     [Fact]
     public void ShowPercentUsesAdvancedMessage()
     {
@@ -295,6 +364,9 @@ public sealed class GameEngineTests
         Assert.Contains(Localizer.Msg("Advanced") + "50%", output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Process command walk through open link updates current room.
+    /// </summary>
     [Fact]
     public void ProcessCommandWalkThroughOpenLinkUpdatesCurrentRoom()
     {

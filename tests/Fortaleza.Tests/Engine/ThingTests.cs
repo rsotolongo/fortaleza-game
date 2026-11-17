@@ -3,8 +3,14 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Tests.Engine;
 
+/// <summary>
+/// Tests for thing.
+/// </summary>
 public sealed class ThingTests
 {
+    /// <summary>
+    /// Thing name returns localized name.
+    /// </summary>
     [Fact]
     public void ThingNameReturnsLocalizedName()
     {
@@ -13,6 +19,9 @@ public sealed class ThingTests
         Assert.Equal("Mace", item.Name.Get());
     }
 
+    /// <summary>
+    /// Item weight stores correctly.
+    /// </summary>
     [Fact]
     public void ItemWeightStoresCorrectly()
     {
@@ -20,6 +29,9 @@ public sealed class ThingTests
         Assert.Equal(39, item.Weight);
     }
 
+    /// <summary>
+    /// Living thing die sets dead.
+    /// </summary>
     [Fact]
     public void LivingThingDieSetsDead()
     {
@@ -28,6 +40,9 @@ public sealed class ThingTests
         Assert.True(npc.Dead);
     }
 
+    /// <summary>
+    /// Thing children starts empty.
+    /// </summary>
     [Fact]
     public void ThingChildrenStartsEmpty()
     {
@@ -35,6 +50,9 @@ public sealed class ThingTests
         Assert.Empty(item.Children);
     }
 
+    /// <summary>
+    /// Thing image returns description.
+    /// </summary>
     [Fact]
     public void ThingImageReturnsDescription()
     {

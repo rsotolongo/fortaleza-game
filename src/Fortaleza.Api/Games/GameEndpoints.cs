@@ -1,8 +1,9 @@
+using System.Runtime.CompilerServices;
 using Fortaleza.Localization;
 
 namespace Fortaleza.Api.Games;
 
-public static class GameEndpoints
+internal static class GameEndpoints
 {
     private const int _maxCommandLength = 200;
 
@@ -59,8 +60,9 @@ public static class GameEndpoints
             return Results.Problem("The track file is too large.", statusCode: StatusCodes.Status413PayloadTooLarge);
         }
 
-        await using var buffer = new MemoryStream();
-        await request.Body.CopyToAsync(buffer, cancellationToken);
+        var buffer = new MemoryStream();
+        await using ConfiguredAsyncDisposable lease = buffer.ConfigureAwait(false);
+        await request.Body.CopyToAsync(buffer, cancellationToken).ConfigureAwait(false);
         if (buffer.Length > TrackFile.MaxBytes)
         {
             return Results.Problem("The track file is too large.", statusCode: StatusCodes.Status413PayloadTooLarge);

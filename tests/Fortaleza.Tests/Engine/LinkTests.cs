@@ -4,8 +4,14 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Tests.Engine;
 
+/// <summary>
+/// Tests for link.
+/// </summary>
 public sealed class LinkTests
 {
+    /// <summary>
+    /// Link try open succeeds with empty key.
+    /// </summary>
     [Fact]
     public void LinkTryOpenSucceedsWithEmptyKey()
     {
@@ -13,6 +19,9 @@ public sealed class LinkTests
         Assert.True(link.TryOpen(string.Empty));
     }
 
+    /// <summary>
+    /// Link try open succeeds with correct key.
+    /// </summary>
     [Fact]
     public void LinkTryOpenSucceedsWithCorrectKey()
     {
@@ -21,6 +30,9 @@ public sealed class LinkTests
         Assert.True(link.TryOpen("FORTALEZA"));
     }
 
+    /// <summary>
+    /// Link try open fails with wrong key.
+    /// </summary>
     [Fact]
     public void LinkTryOpenFailsWithWrongKey()
     {
@@ -28,6 +40,9 @@ public sealed class LinkTests
         Assert.False(link.TryOpen("wrong"));
     }
 
+    /// <summary>
+    /// Link get dest returns null when closed.
+    /// </summary>
     [Fact]
     public void LinkGetDestReturnsNullWhenClosed()
     {
@@ -36,6 +51,9 @@ public sealed class LinkTests
         Assert.Null(link.GetDest());
     }
 
+    /// <summary>
+    /// Link get dest returns room when open.
+    /// </summary>
     [Fact]
     public void LinkGetDestReturnsRoomWhenOpen()
     {
@@ -44,6 +62,9 @@ public sealed class LinkTests
         Assert.Same(dest, link.GetDest());
     }
 
+    /// <summary>
+    /// Open link is always open.
+    /// </summary>
     [Fact]
     public void OpenLinkIsAlwaysOpen()
     {
@@ -54,6 +75,9 @@ public sealed class LinkTests
     }
 
     // Review Focus: RiddleLink diacritic-insensitive match
+    /// <summary>
+    /// Riddle link try open ignores diacritics and case.
+    /// </summary>
     [Fact]
     public void RiddleLinkTryOpenIgnoresDiacriticsAndCase()
     {
@@ -69,6 +93,9 @@ public sealed class LinkTests
         Assert.True(link.TryOpen("Treinta Y Nueve"));
     }
 
+    /// <summary>
+    /// Riddle link try open returns false on wrong answer.
+    /// </summary>
     [Fact]
     public void RiddleLinkTryOpenReturnsFalseOnWrongAnswer()
     {
@@ -82,6 +109,9 @@ public sealed class LinkTests
         Assert.False(link.TryOpen("cuarenta"));
     }
 
+    /// <summary>
+    /// Riddle link get dest returns null until solved.
+    /// </summary>
     [Fact]
     public void RiddleLinkGetDestReturnsNullUntilSolved()
     {
@@ -99,6 +129,9 @@ public sealed class LinkTests
     }
 
     // Review Focus: DangerLink kills without talisman
+    /// <summary>
+    /// Danger link pass kills player without talisman.
+    /// </summary>
     [Fact]
     public void DangerLinkPassKillsPlayerWithoutTalisman()
     {
@@ -116,6 +149,9 @@ public sealed class LinkTests
         Assert.True(killed);
     }
 
+    /// <summary>
+    /// Danger link pass succeeds with talisman.
+    /// </summary>
     [Fact]
     public void DangerLinkPassSucceedsWithTalisman()
     {
@@ -135,6 +171,9 @@ public sealed class LinkTests
     }
 
     // Review Focus: DangerLink2 item-must-be-absent
+    /// <summary>
+    /// Danger link2 pass kills player with forbidden item.
+    /// </summary>
     [Fact]
     public void DangerLink2PassKillsPlayerWithForbiddenItem()
     {
@@ -153,6 +192,9 @@ public sealed class LinkTests
         Assert.True(killed);
     }
 
+    /// <summary>
+    /// Danger link2 pass succeeds without forbidden item.
+    /// </summary>
     [Fact]
     public void DangerLink2PassSucceedsWithoutForbiddenItem()
     {

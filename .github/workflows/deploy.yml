@@ -29,7 +29,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
       - run: dotnet test Fortaleza.slnx --configuration Release
 
   # Runs npm and NuGet install scripts, so this job has no Google Cloud credentials at all.
@@ -43,7 +43,7 @@ jobs:
 
       - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -56,7 +56,7 @@ jobs:
           npm ci --prefix src/Fortaleza.Web
           npm run build --prefix src/Fortaleza.Web -- --outDir "$GITHUB_WORKSPACE/terraform/build/site" --emptyOutDir
           dotnet publish src/Fortaleza.Api -c Release -r linux-x64 -t:PublishContainer \
-            -p:PublishReadyToRun=true -p:ExcludeWwwroot=true -p:ContainerFamily=noble-chiseled \
+            -p:PublishReadyToRun=true -p:ExcludeWwwroot=true -p:ContainerFamily=resolute-chiseled \
             -p:ContainerRepository=fortaleza-api -p:ContainerImageTag=build \
             -p:ContainerArchiveOutputPath="$GITHUB_WORKSPACE/terraform/build/api-image.tar.gz"
 

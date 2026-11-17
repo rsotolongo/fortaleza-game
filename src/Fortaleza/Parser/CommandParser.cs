@@ -78,21 +78,33 @@ internal static class CommandParser
         ["MIAR"] = CommandType.Piss,
     };
 
-    private static readonly HashSet<string> Articles = new(StringComparer.Ordinal)
+    private static readonly HashSet<string> Articles = new(
+        ["LA", "EL", "POR", "AL", "THE", "AN", "BY", "INTO", "THROUGH"],
+        StringComparer.Ordinal);
+
+    private static readonly HashSet<string> WithWords = new(
+        ["CON", "WITH"],
+        StringComparer.Ordinal);
+
+    private static readonly HashSet<string> OpenWords = new(
+        ["CON", "WITH", "RESPONDIENDO", "ANSWERING", "DICIENDO", "SAYING"],
+        StringComparer.Ordinal);
+
+    private static readonly HashSet<string> ToWords = new(
+        ["A", "TO"],
+        StringComparer.Ordinal);
+
+    private static readonly Dictionary<CommandType, HashSet<string>> Separators = new()
     {
-        "LA", "EL", "POR", "AL", "THE", "AN", "BY", "INTO", "THROUGH",
+        [CommandType.Open] = OpenWords,
+        [CommandType.Kill] = WithWords,
+        [CommandType.Break] = WithWords,
+        [CommandType.Give] = ToWords,
     };
 
-    private static readonly HashSet<string> WithWords = new(StringComparer.Ordinal) { "CON", "WITH" };
-
-    private static readonly HashSet<string> OpenWords = new(StringComparer.Ordinal)
-    {
-        "CON", "WITH", "RESPONDIENDO", "ANSWERING", "DICIENDO", "SAYING",
-    };
-
-    private static readonly HashSet<string> ToWords = new(StringComparer.Ordinal) { "A", "TO" };
-
-    private static readonly HashSet<string> AllWords = new(StringComparer.Ordinal) { "TODO", "ALL" };
+    private static readonly HashSet<string> AllWords = new(
+        ["TODO", "ALL"],
+        StringComparer.Ordinal);
 
     public static ParsedCommand Parse(string input)
     {
@@ -107,13 +119,7 @@ internal static class CommandParser
         }
 
         var rest = tokens.Skip(1).ToList();
-        HashSet<string>? separators = type switch
-        {
-            CommandType.Open => OpenWords,
-            CommandType.Kill or CommandType.Break => WithWords,
-            CommandType.Give => ToWords,
-            _ => null,
-        };
+        HashSet<string>? separators = Separators.GetValueOrDefault(type);
 
         if (type is not CommandType.Give)
         {
@@ -124,14 +130,19 @@ internal static class CommandParser
         string arg1 = string.Join(' ', cut < 0 ? rest : rest.Take(cut));
         string arg2 = cut < 0 ? string.Empty : string.Join(' ', rest.Skip(cut + 1));
 
-        type = type switch
-        {
-            CommandType.Look when !string.IsNullOrEmpty(arg1) => CommandType.See,
-            CommandType.Take when AllWords.Contains(arg1) => CommandType.TakeAll,
-            CommandType.Leave when AllWords.Contains(arg1) => CommandType.LeaveAll,
-            _ => type,
-        };
+        type = Refine(type, arg1);
 
         return new ParsedCommand(type, arg1, arg2);
+    }
+
+    private static CommandType Refine(CommandType type, string arg1)
+    {
+        return (type, string.IsNullOrEmpty(arg1), AllWords.Contains(arg1)) switch
+        {
+            (CommandType.Look, false, _) => CommandType.See,
+            (CommandType.Take, _, true) => CommandType.TakeAll,
+            (CommandType.Leave, _, true) => CommandType.LeaveAll,
+            _ => type,
+        };
     }
 }

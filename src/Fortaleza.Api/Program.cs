@@ -12,4 +12,4 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 app.MapGameEndpoints();
 app.MapFallbackToFile("index.html");
-await app.RunAsync();
+await app.RunAsync().ConfigureAwait(false);

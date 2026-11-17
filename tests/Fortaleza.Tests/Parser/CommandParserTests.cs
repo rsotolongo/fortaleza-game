@@ -2,8 +2,14 @@ using Fortaleza.Parser;
 
 namespace Fortaleza.Tests.Parser;
 
+/// <summary>
+/// Tests for command parser.
+/// </summary>
 public sealed class CommandParserTests
 {
+    /// <summary>
+    /// Parse spanish articles are stripped.
+    /// </summary>
     [Fact]
     public void ParseSpanishArticlesAreStripped()
     {
@@ -13,6 +19,9 @@ public sealed class CommandParserTests
         Assert.Equal("PUERTA PRINCIPAL", cmd.Arg1);
     }
 
+    /// <summary>
+    /// Parse english articles are stripped.
+    /// </summary>
     [Fact]
     public void ParseEnglishArticlesAreStripped()
     {
@@ -22,6 +31,9 @@ public sealed class CommandParserTests
         Assert.Equal("MAIN DOOR", cmd.Arg1);
     }
 
+    /// <summary>
+    /// Parse los and las are not stripped like the original.
+    /// </summary>
     [Fact]
     public void ParseLosAndLasAreNotStrippedLikeTheOriginal()
     {
@@ -30,6 +42,9 @@ public sealed class CommandParserTests
         Assert.Equal("LAS LLAVES", cmd.Arg1);
     }
 
+    /// <summary>
+    /// Parse verb returns expected type.
+    /// </summary>
     [Theory]
     [InlineData("coger maza", nameof(CommandType.Take))]
     [InlineData("tomar maza", nameof(CommandType.Take))]
@@ -69,6 +84,9 @@ public sealed class CommandParserTests
         Assert.Equal(Enum.Parse<CommandType>(expected), CommandParser.Parse(input).Type);
     }
 
+    /// <summary>
+    /// Parse look with object becomes see of that object.
+    /// </summary>
     [Fact]
     public void ParseLookWithObjectBecomesSeeOfThatObject()
     {
@@ -78,6 +96,9 @@ public sealed class CommandParserTests
         Assert.Equal("ESPEJO GRANDE", cmd.Arg1);
     }
 
+    /// <summary>
+    /// Parse give splits on preposition.
+    /// </summary>
     [Theory]
     [InlineData("dar escoba a la bruja", "ESCOBA", "BRUJA")]
     [InlineData("regalar escoba a bruja", "ESCOBA", "BRUJA")]
@@ -91,6 +112,9 @@ public sealed class CommandParserTests
         Assert.Equal(arg2, cmd.Arg2);
     }
 
+    /// <summary>
+    /// Parse kill and break split on with.
+    /// </summary>
     [Theory]
     [InlineData("romper espejo con hueso de gato", nameof(CommandType.Break), "ESPEJO", "HUESO DE GATO")]
     [InlineData("matar lobo con latigo", nameof(CommandType.Kill), "LOBO", "LATIGO")]
@@ -105,6 +129,9 @@ public sealed class CommandParserTests
         Assert.Equal(arg2, cmd.Arg2);
     }
 
+    /// <summary>
+    /// Parse open splits on answer word.
+    /// </summary>
     [Theory]
     [InlineData("abrir escalera respondiendo treinta y nueve", "ESCALERA", "TREINTA Y NUEVE")]
     [InlineData("abrir puerta diciendo fortaleza", "PUERTA", "FORTALEZA")]
@@ -121,6 +148,9 @@ public sealed class CommandParserTests
         Assert.Equal(arg2, cmd.Arg2);
     }
 
+    /// <summary>
+    /// Parse with only applies to kill break and open not to take.
+    /// </summary>
     [Fact]
     public void ParseWithOnlyAppliesToKillBreakAndOpenNotToTake()
     {
@@ -130,6 +160,9 @@ public sealed class CommandParserTests
         Assert.Equal(string.Empty, cmd.Arg2);
     }
 
+    /// <summary>
+    /// Parse diacritics in input are normalized.
+    /// </summary>
     [Fact]
     public void ParseDiacriticsInInputAreNormalized()
     {

@@ -4,8 +4,14 @@ using Fortaleza.Localization;
 
 namespace Fortaleza.Tests.Engine;
 
+/// <summary>
+/// Tests for weigh.
+/// </summary>
 public sealed class WeighTests
 {
+    /// <summary>
+    /// Weigh without scale says so.
+    /// </summary>
     [Fact]
     public void WeighWithoutScaleSaysSo()
     {
@@ -17,6 +23,9 @@ public sealed class WeighTests
         Assert.Contains(Localizer.Msg("NoScale"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Weigh item in room shows weight with singular or plural.
+    /// </summary>
     [Theory]
     [InlineData(1, "BagUnit")]
     [InlineData(5, "BagUnits")]
@@ -32,6 +41,9 @@ public sealed class WeighTests
         Assert.Contains(weight.ToString(CultureInfo.InvariantCulture) + Localizer.Msg(unitKey), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Weigh item in bag is found in bag.
+    /// </summary>
     [Fact]
     public void WeighItemInBagIsFoundInBag()
     {
@@ -44,6 +56,9 @@ public sealed class WeighTests
         Assert.Contains("7" + Localizer.Msg("BagUnits"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Weigh the scale itself tries in vain.
+    /// </summary>
     [Fact]
     public void WeighTheScaleItselfTriesInVain()
     {
@@ -55,6 +70,9 @@ public sealed class WeighTests
         Assert.Contains(Localizer.Msg("WeighSelf"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Weigh non item calls player mad.
+    /// </summary>
     [Fact]
     public void WeighNonItemCallsPlayerMad()
     {
@@ -68,6 +86,9 @@ public sealed class WeighTests
         Assert.Contains(Localizer.Msg("WeighCrazy"), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Weigh nothing found explains why.
+    /// </summary>
     [Theory]
     [InlineData("", "Complete")]
     [InlineData("yunque", "WeighNotHere")]
@@ -81,6 +102,9 @@ public sealed class WeighTests
         Assert.Contains(Localizer.Msg(messageKey), output, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Leave all empty bag says nothing is carried.
+    /// </summary>
     [Fact]
     public void LeaveAllEmptyBagSaysNothingIsCarried()
     {

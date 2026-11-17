@@ -293,6 +293,57 @@ internal static class Fort2Builder
             r[i] = new Room(Name, Description, Inventory.LWeight + 1);
         }
 
+        AddAllRooms(r, kill);
+
+        var game = new Fort2(r[1]);
+        for (int i = 1; i <= 55; i++)
+        {
+            game.AddRoom(r[i]);
+        }
+
+        player = game.Player;
+        return game;
+    }
+
+    private static void AddAllRooms(Room[] r, Action kill)
+    {
+        AddRooms01(r, kill);
+        AddRooms02(r);
+        AddRooms03(r);
+        AddRooms04(r, kill);
+        AddRooms05(r);
+        AddRooms06(r);
+        AddRooms07(r);
+        AddRooms08(r);
+        AddRooms09(r, kill);
+        AddRooms10(r);
+        AddRooms11(r);
+        AddRooms12(r);
+        AddRooms13(r);
+        AddRooms14(r);
+        AddRooms15(r, kill);
+        AddRooms16(r, kill);
+        AddRooms17(r, kill);
+        AddRooms18(r, kill);
+        AddRooms19(r, kill);
+        AddRooms20(r, kill);
+        AddRooms21(r);
+        AddRooms22(r, kill);
+        AddRooms23(r);
+        AddRooms24(r);
+        AddRooms25(r, kill);
+        AddRooms26(r);
+        AddRooms27(r, kill);
+        AddRooms28(r);
+        AddRooms29(r, kill);
+        AddRooms30(r, kill);
+        AddRooms31(r, kill);
+        AddRooms32(r, kill);
+        AddRooms33(r);
+    }
+
+    private static void AddRooms01(Room[] r, Action kill)
+    {
         r[1].Children.Add(new Link(
                 new(_puerta2, "Door"),
                 new(
@@ -339,6 +390,10 @@ internal static class Fort2Builder
                 "Aura",
                 new("Usted entra a la alcoba de la hija del Hechicero.", "You enter the Sorcerer's daughter's bedroom."),
                 r[4]));
+    }
+
+    private static void AddRooms02(Room[] r)
+    {
         r[2].Children.Add(new Link(
                 new("Puerta de oro", "Gold door"),
                 new("Usted nunca había visto tanto oro fundido en una misma pieza.", "You had never seen so much molten gold in a single piece."),
@@ -388,6 +443,10 @@ internal static class Fort2Builder
                 new("Usted sale al pasillo.", "You go out into the corridor."),
                 string.Empty,
                 r[2]));
+    }
+
+    private static void AddRooms03(Room[] r)
+    {
         r[4].Children.Add(new Item(
                 new("Pañuelo", "Handkerchief"),
                 new("Tiene bordadas una A y una S.", "It has an A and an S embroidered on it."),
@@ -438,6 +497,10 @@ internal static class Fort2Builder
                 new("Usted sale lentamente, tratando de no rozar la puerta.", "You leave slowly, trying not to brush against the door."),
                 string.Empty,
                 r[2]));
+    }
+
+    private static void AddRooms04(Room[] r, Action kill)
+    {
         r[6].Children.Add(new Item(
                 new("Daga", "Dagger"),
                 new("La empuñadura tiene forma de dragón.", "The hilt is shaped like a dragon."),
@@ -488,6 +551,10 @@ internal static class Fort2Builder
                 new("Usted regresa al pasillo. El resplandor del oro lo ciega por un momento.", "You return to the corridor. The glare of the gold blinds you for a moment."),
                 string.Empty,
                 r[2]));
+    }
+
+    private static void AddRooms05(Room[] r)
+    {
         r[8].Children.Add(new OpenLink(
                 new("Escalera de caracol", _spiralStaircase),
                 new("Parece la bajada a un oído gigante.", "It looks like the descent into a giant ear."),
@@ -519,6 +586,10 @@ internal static class Fort2Builder
                 new(_inscripcion, _inscription2),
                 new("La inscripción dice:\n\"No alimente al monstruo.\"", "The inscription says:\\n\"Do not feed the monster.\""),
                 1));
+    }
+
+    private static void AddRooms06(Room[] r)
+    {
         r[9].Children.Add(new Troll(
                 new("Monstruo", "Monster"),
                 new(
@@ -566,6 +637,10 @@ internal static class Fort2Builder
                 "Reloj de arena",
                 new("Dentro del blanco está la llave de la muralla.", "Inside the white one is the key to the wall."),
                 new("Tráeme el reloj de arena, pero víralo antes de entregármelo. ", "Bring me the hourglass, but turn it upside down before handing it to me. ")));
+    }
+
+    private static void AddRooms07(Room[] r)
+    {
         r[11].Children.Add(new Item(
                 new("Bote", "Boat"),
                 new("Es el célebre bote de Caronte.", "It is Charon's famous boat."),
@@ -616,6 +691,10 @@ internal static class Fort2Builder
                 new("Usted entra al comedor.", "You enter the dining room."),
                 string.Empty,
                 r[14]));
+    }
+
+    private static void AddRooms08(Room[] r)
+    {
         r[13].Children.Add(new Link(
                 new("Puerta amarilla", "Yellow door"),
                 new("Conduce al cuarto del tesoro.", "It leads to the treasure room."),
@@ -648,6 +727,10 @@ internal static class Fort2Builder
                     "Es una piedra común. Usted se pregunta qué hace en la Fortaleza, donde todo es tan exótico.",
                     "It is an ordinary stone. You wonder what it is doing in La Fortaleza, where everything is so exotic."),
                 5));
+    }
+
+    private static void AddRooms09(Room[] r, Action kill)
+    {
         r[13].Children.Add(new Troll(
                 new("Jardinero", "Gardener"),
                 new("Es un anciano pequeño y encorvado.", "He is a small, hunched old man."),
@@ -681,6 +764,10 @@ internal static class Fort2Builder
                 "Arco",
                 r[49],
                 kill));
+    }
+
+    private static void AddRooms10(Room[] r)
+    {
         r[14].Children.Add(new Hidden(
                 new("Huevo", "Egg"),
                 new("Por el tamaño debe ser el huevo de un dinosaurio. Y de uno grande.", "By its size it must be a dinosaur egg. And a big one."),
@@ -723,6 +810,10 @@ internal static class Fort2Builder
                 new("Corta-cristales", "Glass cutter"),
                 new("Tiene un diamante en la punta.", "It has a diamond at the tip."),
                 3));
+    }
+
+    private static void AddRooms11(Room[] r)
+    {
         r[16].Children.Add(new Item(
                 new("Sombrero", "Hat"),
                 new("Es muy grande. Al jardinero no debe servirle.", "It is very big. It cannot be of use to the gardener."),
@@ -768,6 +859,10 @@ internal static class Fort2Builder
                 new("Baja hasta el cuarto del Inmortal.", "It goes down to the Immortal's room."),
                 new("Usted desciende las escaleras y entra al cuarto del Inmortal.", "You go down the stairs and enter the Immortal's room."),
                 r[19]));
+    }
+
+    private static void AddRooms12(Room[] r)
+    {
         r[18].Children.Add(new Troll(
                 new("Dragon", "Dragon"),
                 new(
@@ -818,6 +913,10 @@ internal static class Fort2Builder
                 new("Sonajero", "Rattle"),
                 new("Es un jugete para recién nacidos.", "It is a toy for newborns."),
                 2));
+    }
+
+    private static void AddRooms13(Room[] r)
+    {
         r[20].Children.Add(new Item(
                 new(_talismanDeNieve, "Snow Talisman"),
                 new("Hay una pequeña tormenta de nieve encerrada en el cristal", "There is a small snowstorm trapped in the crystal"),
@@ -868,6 +967,10 @@ internal static class Fort2Builder
                 new(_ustedSaleAlPatio, _youGoOutIntoThe),
                 string.Empty,
                 r[24]));
+    }
+
+    private static void AddRooms14(Room[] r)
+    {
         r[22].Children.Add(new Item(
                 new("Anillo de bronce", "Bronze ring"),
                 new("Es más pesado que los demás anillos.", "It is heavier than the other rings."),
@@ -910,6 +1013,10 @@ internal static class Fort2Builder
                 new("Usted entra al cuarto del juglar.", "You enter the minstrel's room."),
                 string.Empty,
                 r[25]));
+    }
+
+    private static void AddRooms15(Room[] r, Action kill)
+    {
         r[24].Children.Add(new Link(
                 new("Puerta negra", _blackDoor),
                 new("Conduce a la alcoba del Ogro.", "It leads to the Ogre's bedroom."),
@@ -959,6 +1066,10 @@ internal static class Fort2Builder
                 new(_inscripcion, _inscription2),
                 new("¡BUUUU!", "BOOO!"),
                 1));
+    }
+
+    private static void AddRooms16(Room[] r, Action kill)
+    {
         r[26].Children.Add(new Guard(
                 new("Ogro", "Ogre"),
                 new("Es una repugnante mezcla de hombre, cerdo y buitre. Parece dormido.", "It is a repugnant mix of man, pig and vulture. It seems to be asleep."),
@@ -1005,6 +1116,10 @@ internal static class Fort2Builder
                 _escudoDeAquiles,
                 r[27],
                 kill));
+    }
+
+    private static void AddRooms17(Room[] r, Action kill)
+    {
         r[28].Children.Add(new DangerLink(
                 new(_escalera2, _stairs2),
                 new("Conduce a una de las habitaciones de la casa del Ogro.", "It leads to one of the rooms of the Ogre's house."),
@@ -1051,6 +1166,10 @@ internal static class Fort2Builder
                 _talismanDeNieve,
                 r[32],
                 kill));
+    }
+
+    private static void AddRooms18(Room[] r, Action kill)
+    {
         r[31].Children.Add(new Hidden(
                 new("Reja", "Gate"),
                 new("Los barrotes de la reja son muy gruesos. Al otro lado se divisa una escalera.", "The bars of the grating are very thick. On the other side a staircase can be seen."),
@@ -1093,6 +1212,10 @@ internal static class Fort2Builder
                 new("Es la salida de la Cueva de Cristal.", "It is the exit from the Crystal Cave."),
                 new("Usted sale de la Cueva de Cristal.", "You leave the Crystal Cave."),
                 r[31]));
+    }
+
+    private static void AddRooms19(Room[] r, Action kill)
+    {
         r[32].Children.Add(new Item(
                 new(_marmidosa2, _marmidosa2),
                 new(
@@ -1142,6 +1265,10 @@ internal static class Fort2Builder
                 new("Cubo de agua", "Bucket of water"),
                 new("Es un balde de madera, lleno de agua hasta el tope.", "It is a wooden bucket, filled to the brim with water."),
                 4));
+    }
+
+    private static void AddRooms20(Room[] r, Action kill)
+    {
         r[34].Children.Add(new Troll(
                 new("Pordiosero", "Beggar"),
                 new(
@@ -1191,6 +1318,10 @@ internal static class Fort2Builder
                 _talismanDeNieve,
                 r[33],
                 kill));
+    }
+
+    private static void AddRooms21(Room[] r)
+    {
         r[36].Children.Add(new Link(
                 new(_puerta2, "Door"),
                 new("Es la puerta de salida de la Catedral.", "It is the exit door of the Cathedral."),
@@ -1233,6 +1364,10 @@ internal static class Fort2Builder
                 "Botella de vino",
                 new("Las dos últimas letras del segundo nombre de la Hija del Hechicero son \"KA\".", "The last two letters of the Sorcerer's daughter's second name are \"KA\"."),
                 new("¡Dame más!", "Give me more!")));
+    }
+
+    private static void AddRooms22(Room[] r, Action kill)
+    {
         r[37].Children.Add(new Item(
                 new("Bolsa de semillas", "Bag of seeds"),
                 new("La bolsa está llena de semillas de los árboles que crecen en el valle.", "The bag is full of seeds from the trees that grow in the valley."),
@@ -1272,6 +1407,10 @@ internal static class Fort2Builder
                 new("Usted sale de la choza del Monje.", "You leave the Monk's hut."),
                 string.Empty,
                 r[38]));
+    }
+
+    private static void AddRooms23(Room[] r)
+    {
         r[39].Children.Add(new Troll(
                 new("Monje", "Monk"),
                 new("Parece ser bastante joven.", "He seems to be quite young."),
@@ -1303,6 +1442,10 @@ internal static class Fort2Builder
                 new("Usted ha entrado a la casa del sabio.", "You have entered the sage's house."),
                 string.Empty,
                 r[41]));
+    }
+
+    private static void AddRooms24(Room[] r)
+    {
         r[40].Children.Add(new Hidden(
                 new("Estatua de Cristal", "Crystal statue"),
                 new("Usted no logra descubrir qué representa.", "You cannot make out what it represents."),
@@ -1346,6 +1489,10 @@ internal static class Fort2Builder
                 new("Es por dónde único se puede subir al Pico Negro de este lado de la cordillera.", "It is the only way up the Black Peak on this side of the mountain range."),
                 new("Usted asciende el Pico Negro.", "You climb the Black Peak."),
                 r[38]));
+    }
+
+    private static void AddRooms25(Room[] r, Action kill)
+    {
         r[42].Children.Add(new DangerLink(
                 new("Río", "River"),
                 new("La corriente es tan fuerte que arrastraría hasta la embarcación más pesada.", "The current is so strong that it would carry away even the heaviest vessel."),
@@ -1392,6 +1539,10 @@ internal static class Fort2Builder
                 new("Usted entra a los calabozos.", "You enter the dungeons."),
                 string.Empty,
                 r[47]));
+    }
+
+    private static void AddRooms26(Room[] r)
+    {
         r[43].Children.Add(new OpenLink(
                 new("Escalera de Caracol", _spiralStaircase),
                 new("Sube hasta el tope de la la Torre de Cristal.", "It climbs to the top of the Crystal Tower."),
@@ -1431,6 +1582,10 @@ internal static class Fort2Builder
                 new("Usted sale de la alcoba.", "You leave the bedroom."),
                 string.Empty,
                 r[44]));
+    }
+
+    private static void AddRooms27(Room[] r, Action kill)
+    {
         r[45].Children.Add(new Hidden(
                 new("Carta", "Letter"),
                 new(
@@ -1481,6 +1636,10 @@ internal static class Fort2Builder
                 new("Usted regresa al río.", "You return to the river."),
                 string.Empty,
                 r[43]));
+    }
+
+    private static void AddRooms28(Room[] r)
+    {
         r[47].Children.Add(new Link(
                 new("Reja", "Gate"),
                 new(
@@ -1513,6 +1672,10 @@ internal static class Fort2Builder
                 "Grifo",
                 r[47])
         { AltKey = "Griffin" });
+    }
+
+    private static void AddRooms29(Room[] r, Action kill)
+    {
         r[48].Children.Add(new Troll(
                 new("Encapuchado", "Hooded figure"),
                 new(
@@ -1552,6 +1715,10 @@ internal static class Fort2Builder
                 "Arco",
                 r[14],
                 kill));
+    }
+
+    private static void AddRooms30(Room[] r, Action kill)
+    {
         r[49].Children.Add(new DangerLink2(
                 new("Puerta Verde", _greenDoor),
                 new("Es la primera puerta de la prueba. ", "It is the first door of the trial. "),
@@ -1590,6 +1757,10 @@ internal static class Fort2Builder
                 "Anillo de plata",
                 r[50],
                 kill));
+    }
+
+    private static void AddRooms31(Room[] r, Action kill)
+    {
         r[51].Children.Add(new DangerLink2(
                 new("Puerta Blanca", _whiteDoor),
                 new("Es la tercera puerta de la prueba.", "It is the third door of the trial."),
@@ -1638,6 +1809,10 @@ internal static class Fort2Builder
                 "Grabado",
                 r[54],
                 kill));
+    }
+
+    private static void AddRooms32(Room[] r, Action kill)
+    {
         r[53].Children.Add(new Hidden(
                 new("Muralla", "Wall"),
                 new(
@@ -1685,6 +1860,10 @@ internal static class Fort2Builder
                 new("Usted sale de las habitaciones del Hechicero.", "You leave the Sorcerer's rooms."),
                 string.Empty,
                 r[54]));
+    }
+
+    private static void AddRooms33(Room[] r)
+    {
         r[55].Children.Add(new Troll(
                 new("Hechicero", "Sorcerer"),
                 new(
@@ -1698,15 +1877,6 @@ internal static class Fort2Builder
                         "diabolical plan to eliminate us. Tear up the letter she left you in the Crystal Tower and a miracle will " +
                         "happen.\""),
                 new(Localizer.Msg(_silence2, Language.Spanish), Localizer.Msg(_silence2, Language.English))));
-
-        var game = new Fort2(r[1]);
-        for (int i = 1; i <= 55; i++)
-        {
-            game.AddRoom(r[i]);
-        }
-
-        player = game.Player;
-        return game;
     }
 
     private static int RoomDataIndex(int room)
